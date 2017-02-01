@@ -1,0 +1,50 @@
+package mig.resources;
+
+public class BILL_PRINT_INFO {
+	private String ACCOUNT_ID;
+	private String PREVIOUS_BALANCE;
+	private String PAID_AMOUNT;	
+	private String TOTAL_CURRENT_CHARGES;
+	private String OUTSTANDING_BALANCE;
+	public BILL_PRINT_INFO(String aCCOUNT_ID, String pREVIOUS_BALANCE,
+			String pAID_AMOUNT, String tOTAL_CURRENT_CHARGES,
+			String oUTSTANDING_BALANCE) {
+		super();
+		ACCOUNT_ID = aCCOUNT_ID;
+		PREVIOUS_BALANCE = pREVIOUS_BALANCE;
+		PAID_AMOUNT = pAID_AMOUNT;
+		TOTAL_CURRENT_CHARGES = tOTAL_CURRENT_CHARGES;
+		OUTSTANDING_BALANCE = oUTSTANDING_BALANCE;
+	}
+	public String getACCOUNT_ID() {
+		return ACCOUNT_ID;
+	}
+	public void setACCOUNT_ID(String aCCOUNT_ID) {
+		ACCOUNT_ID = aCCOUNT_ID;
+	}
+	public String getPREVIOUS_BALANCE() {
+		return PREVIOUS_BALANCE;
+	}
+	public void setPREVIOUS_BALANCE(String pREVIOUS_BALANCE) {
+		PREVIOUS_BALANCE = pREVIOUS_BALANCE;
+	}
+	public String getPAID_AMOUNT() {
+		return PAID_AMOUNT;
+	}
+	public void setPAID_AMOUNT(String pAID_AMOUNT) {
+		PAID_AMOUNT = pAID_AMOUNT;
+	}
+	public String getTOTAL_CURRENT_CHARGES() {
+		return TOTAL_CURRENT_CHARGES;
+	}
+	public void setTOTAL_CURRENT_CHARGES(String tOTAL_CURRENT_CHARGES) {
+		TOTAL_CURRENT_CHARGES = tOTAL_CURRENT_CHARGES;
+	}
+	public String getOUTSTANDING_BALANCE() {
+		return OUTSTANDING_BALANCE;
+	}
+	public void setOUTSTANDING_BALANCE(String oUTSTANDING_BALANCE) {
+		OUTSTANDING_BALANCE = oUTSTANDING_BALANCE;
+	} 
+	
+}

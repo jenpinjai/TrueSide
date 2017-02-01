@@ -1,0 +1,19 @@
+javac -d "classMIG" -classpath ./lib/ojdbc14.jar:./lib/commons-codec-1.10.jar:./lib/commons-logging-1.2.jar:./lib/log4j-1.2.8.jar:./lib/poi-3.14-20160307.jar:./lib/poi-excelant-3.14-20160307.jar:./lib/poi-ooxml-3.14-20160307.jar:./lib/poi-ooxml-schemas-3.14-20160307.jar:./lib/poi-scratchpad-3.14-20160307.jar:./lib/xmlbeans-2.6.0.jar ./mig/resources/*.java
+
+javac -d "classMIG" -classpath ./lib/ojdbc14.jar:./lib/commons-codec-1.10.jar:./lib/commons-logging-1.2.jar:./lib/log4j-1.2.8.jar:./lib/poi-3.14-20160307.jar:./lib/poi-excelant-3.14-20160307.jar:./lib/poi-ooxml-3.14-20160307.jar:./lib/poi-ooxml-schemas-3.14-20160307.jar:./lib/poi-scratchpad-3.14-20160307.jar:./lib/xmlbeans-2.6.0.jar ./mig/connnection/*.java
+
+javac -d "classMIG" -classpath ./lib/ojdbc14.jar:./lib/commons-codec-1.10.jar:./lib/commons-logging-1.2.jar:./lib/log4j-1.2.8.jar:./lib/poi-3.14-20160307.jar:./lib/poi-excelant-3.14-20160307.jar:./lib/poi-ooxml-3.14-20160307.jar:./lib/poi-ooxml-schemas-3.14-20160307.jar:./lib/poi-scratchpad-3.14-20160307.jar:./lib/xmlbeans-2.6.0.jar:./classMIG:. ./mig/oracle8i/*.java
+
+javac -d "classMIG" -classpath ./lib/ojdbc14.jar:./lib/TOTBillSystem.jar:./lib/commons-codec-1.10.jar:./lib/commons-logging-1.2.jar:./lib/log4j-1.2.8.jar:./lib/poi-3.14-20160307.jar:./lib/poi-excelant-3.14-20160307.jar:./lib/poi-ooxml-3.14-20160307.jar:./lib/poi-ooxml-schemas-3.14-20160307.jar:./lib/poi-scratchpad-3.14-20160307.jar:./lib/xmlbeans-2.6.0.jar:./classMIG:. ./mig/process/*.java
+
+
+
+
+cd classMIG
+
+
+#/data/webserver/jdk1.8.0_101/bin/jar -cf MIG.jar *
+jar -cf MIG.jar *
+
+
+
