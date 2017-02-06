@@ -169,6 +169,48 @@ public class SetGnValue {
 		}
         return 0;
     }
+    public static int CalPointFont58Single(PTX ptx,String number,int f5_x,int f5_y)throws  IOException {
+		int cal_start_point=0;
+		int check_minus=0;
+		afpCreateTag.setFontID(ptx,58);
+		
+		 cal_start_point=0;
+			check_minus=0;
+			if(number.contains("-")){
+				//cal_start_point=cal_start_point+23;
+				number=number.substring(1, number.length());
+				
+				check_minus=1;
+			}
+			if(number.length()==5){
+				cal_start_point=cal_start_point+30;
+			}else if(number.length()==6){
+				cal_start_point=cal_start_point+(30*2);
+			}else if(number.length()==8){
+				cal_start_point=cal_start_point+(30*3)+15;
+			}else if(number.length()==9){
+				cal_start_point=cal_start_point+(30*4)+15;
+			}else if(number.length()==10){
+				cal_start_point=cal_start_point+(30*5)+15;
+			}else if(number.length()==12){
+				cal_start_point=cal_start_point+(30*6)+(15*2);
+			}else if(number.length()==13){
+				cal_start_point=cal_start_point+(30*7)+(15*2);
+			}else if(number.length()==14){
+				cal_start_point=cal_start_point+(30*8)+(15*2);
+			}
+			
+			
+			//System.out.println((f5_x-cal_start_point)+" "+(f5_y+(106*i)));
+			afpCreateTag.setPTXxy(ptx,f5_x-cal_start_point,f5_y);
+			afpCreateTag.setPTX_TRN(ptx,number);
+			if(check_minus==1){
+				afpCreateTag.setPTXxy(ptx,f5_x-cal_start_point-23,f5_y);
+				afpCreateTag.setPTX_TRN(ptx,"-");
+			}
+		
+        return 0;
+    }
 	
 
 }

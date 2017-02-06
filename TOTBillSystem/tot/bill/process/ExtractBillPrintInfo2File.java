@@ -92,6 +92,7 @@ public class ExtractBillPrintInfo2File {
     	DecimalFormat decimalFormat = new DecimalFormat("#,##0.00", decimalFormatSymbols);
     	String changeFormatVal="";
         for(int i=0;i<idBILL_PRINT_INFO.size();i++){
+             try{
         	changeFormatVal="";
         	String phoneNumber=stBILL_PRINT_INFO.get(i).getPRODUCT_NO().substring(0, 1)+"-"+stBILL_PRINT_INFO.get(i).getPRODUCT_NO().substring(1, 5)+"-"+stBILL_PRINT_INFO.get(i).getPRODUCT_NO().substring(5, 9);       	
         	String accountNo=stBILL_PRINT_INFO.get(i).getACCOUNT_ID().substring(0, 2)+"-"+stBILL_PRINT_INFO.get(i).getACCOUNT_ID().substring(2, 7)+"-"+stBILL_PRINT_INFO.get(i).getACCOUNT_ID().substring(7, 12);
@@ -144,29 +145,34 @@ public class ExtractBillPrintInfo2File {
         		stBILL_PRINT_INFO.get(i).setOUTSTANDING_BALANCE(changeFormatVal);
         	}
         	
-
-        	stAccountIDExtract.add(new AccountIDExtract(
-        			stBILL_PRINT_INFO.get(i).getACCOUNT_ID(), //	accountID, 
-        			stBILL_PRINT_INFO.get(i).getMAX_PAGE(),//maxPage,
-        			stBILL_PRINT_INFO.get(i).getNAME(), //inputName, 
-        			stBILL_PRINT_INFO.get(i).getADDRESS1(), //aDDRESS_BILLING1, 
-        			stBILL_PRINT_INFO.get(i).getADDRESS2(), //aDDRESS_BILLING2, 
-        			stBILL_PRINT_INFO.get(i).getADDRESS3(), //aDDRESS_BILLING3, 
-        			stBILL_PRINT_INFO.get(i).getADDRESS4(), //aDDRESS_BILLING4, 
-        			phoneNumber, //phoneNumber, 
-        			accountNo, //accountNo, 
-        			invoiceNo, //invoiceNo, 
-        			ChangeDateEnglishToThai.YYYYMMDD2DDMMYYY(stCYCLE_CONTROL.get(0).getCYCLE_END_DATE()), //billDate, 
-        			stBILL_PRINT_INFO.get(i).getPYM_MTD(), //groupNo, 
-        			stBILL_PRINT_INFO.get(i).getPREVIOUS_BALANCE(), //previousBalance, 
-        			stBILL_PRINT_INFO.get(i).getPAID_AMOUNT(), //paidAmount, 
-        			stBILL_PRINT_INFO.get(i).getPOST_BILL_ADJUSTMENT(), //postBillAdjustment, 
-        			stBILL_PRINT_INFO.get(i).getTOTAL_CURRENT_CHARGES(), //totalCurrentCharges, 
-        			stBILL_PRINT_INFO.get(i).getOUTSTANDING_BALANCE(), //outstandingBalance, 
-        			ChangeDateEnglishToThai.YYYYMMDD2DDMMYYY(stBILL_PRINT_INFO.get(i).getDUE_DATE()), //dueDate
-        			stBILL_PRINT_INFO.get(i).getBANK_NAME(),
-        			stBILL_PRINT_INFO.get(i).getCREDIT_CARD_NO()
-        			));
+               
+                    stAccountIDExtract.add(new AccountIDExtract(
+                                    stBILL_PRINT_INFO.get(i).getACCOUNT_ID(), //	accountID, 
+                                    stBILL_PRINT_INFO.get(i).getMAX_PAGE(),//maxPage,
+                                    stBILL_PRINT_INFO.get(i).getNAME(), //inputName, 
+                                    stBILL_PRINT_INFO.get(i).getADDRESS1(), //aDDRESS_BILLING1, 
+                                    stBILL_PRINT_INFO.get(i).getADDRESS2(), //aDDRESS_BILLING2, 
+                                    stBILL_PRINT_INFO.get(i).getADDRESS3(), //aDDRESS_BILLING3, 
+                                    stBILL_PRINT_INFO.get(i).getADDRESS4(), //aDDRESS_BILLING4, 
+                                    phoneNumber, //phoneNumber, 
+                                    accountNo, //accountNo, 
+                                    invoiceNo, //invoiceNo, 
+                                    ChangeDateEnglishToThai.YYYYMMDD2DDMMYYY(stCYCLE_CONTROL.get(0).getCYCLE_END_DATE()), //billDate, 
+                                    stBILL_PRINT_INFO.get(i).getPYM_MTD(), //groupNo, 
+                                    stBILL_PRINT_INFO.get(i).getPREVIOUS_BALANCE(), //previousBalance, 
+                                    stBILL_PRINT_INFO.get(i).getPAID_AMOUNT(), //paidAmount, 
+                                    stBILL_PRINT_INFO.get(i).getPOST_BILL_ADJUSTMENT(), //postBillAdjustment, 
+                                    stBILL_PRINT_INFO.get(i).getTOTAL_CURRENT_CHARGES(), //totalCurrentCharges, 
+                                    stBILL_PRINT_INFO.get(i).getOUTSTANDING_BALANCE(), //outstandingBalance, 
+                                    ChangeDateEnglishToThai.YYYYMMDD2DDMMYYY(stBILL_PRINT_INFO.get(i).getDUE_DATE()), //dueDate
+                                    stBILL_PRINT_INFO.get(i).getBANK_NAME(),
+                                    stBILL_PRINT_INFO.get(i).getCREDIT_CARD_NO()
+                                    ));
+            }catch(Exception ex){
+                
+                    System.out.println("Acc id error :"+stBILL_PRINT_INFO.get(i).getACCOUNT_ID() );
+                    
+            }
         	
         }
         

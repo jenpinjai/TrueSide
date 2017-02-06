@@ -48,6 +48,10 @@ public class setEnv {
 	// ExtractCharge
 	public static String Charge_file_gen=System.getenv("HOME")+"/var/tea/Charge/";
 	public static String folderCharge_file_gen="/"; 
+        
+        //ExtractUsage
+        public static String Usage_file_gen=System.getenv("HOME")+"/var/tea/Usage/";
+	public static String folderUsage_file_gen="/"; 
 	
 	// AFP OUT Regular
 	public static String AFP_Regular_file_gen=System.getenv("HOME")+"/var/tea/AFP/Regular/";

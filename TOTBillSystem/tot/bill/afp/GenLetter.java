@@ -47,9 +47,9 @@ public class GenLetter {
         System.out.println("Oracle JDBC Driver Registered!");
         Connection conn = null;
         try {
-               // conn = DriverManager.getConnection(
-               //                 "jdbc:oracle:thin:@172.19.208.69:1555:SBLDEV", "SBLAPPC",
-               //                 "SBLAPPC_DEV");
+//                conn = DriverManager.getConnection(
+//                                "jdbc:oracle:thin:@172.19.208.69:1555:SBLDEV", "SBLAPPC",
+//                                "SBLAPPC_DEV");
         		conn = DriverManager.getConnection(
                                  "jdbc:oracle:thin:@172.19.194.177:1541:PRMDEV", "prmuatapp",
                                  "prmdb#01");

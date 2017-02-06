@@ -15,8 +15,11 @@ public class CreatePathCMY {
 				System.out.println("Create PATH "+homePath+result);
 				new File(homePath+result).mkdir();
 			}else{
-				System.out.println("Can't create PATH");
-				return -1;
+//				System.out.println("Can't create PATH");
+//				return -1;
+                                System.out.println("Create PATH "+homePath);
+				new File(homePath).mkdir();
+                                new File(homePath+result).mkdir();
 			}
 			
 		} catch (Exception ex) {

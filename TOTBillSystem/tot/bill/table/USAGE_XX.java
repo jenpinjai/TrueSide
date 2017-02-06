@@ -20,6 +20,7 @@ public class USAGE_XX {
 	private String CALL_ADJUSTMENT_IND;
 	private String DESTINATION_ON_BILL;
 	private String BILL_STATUS;
+        public USAGE_XX(){}
 	public USAGE_XX(String cYCLE_CODE, String cYCLE_YEAR, String cYCLE_MONTH,
 			String aCCOUNT_ID, String oRIG_TN, String cONNECT_DATE,
 			String cALL_DURATION, String sYS_CREATION_DATE,

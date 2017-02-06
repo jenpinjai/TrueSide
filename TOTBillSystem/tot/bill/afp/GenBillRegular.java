@@ -15,6 +15,9 @@ import java.text.DecimalFormatSymbols;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 import org.afplib.afplib.*;
 import org.afplib.io.AfpOutputStream;
@@ -23,8 +26,10 @@ import tot.bill.dao.SelectDB;
 import tot.bill.dao.createConnectionDB;
 import tot.bill.model.SumChargeOnBill;
 import tot.bill.resources.setEnv;
+import tot.bill.service.ChangeDateEnglishToThai;
 import tot.bill.service.CreatePathCMY;
 import tot.bill.table.CYCLE_CONTROL;
+import tot.bill.table.USAGE_XX;
 
 public class GenBillRegular {
 	public static void main(String[] args) throws IllegalArgumentException, IllegalAccessException, FileNotFoundException, IOException, SQLException {
@@ -61,6 +66,10 @@ public class GenBillRegular {
 
 		ArrayList<AccountIDExtract> exBan=new ArrayList<AccountIDExtract>();
 		ArrayList<SumChargeOnBill> stCharge=new ArrayList<SumChargeOnBill>();
+                Map<String,ArrayList<SumChargeOnBill>> stChargeMap = new HashMap<String, ArrayList<SumChargeOnBill>>();
+                Map<String,ArrayList<USAGE_XX>> stUsageMap = new HashMap<String, ArrayList<USAGE_XX>>();
+                Map<String,String> featureMap = new HashMap<String,String>();
+                ArrayList<String>  idUsages = new ArrayList<String>();
 		
 		 ArrayList<String> AFPConfig = new ArrayList<String>();
 		//read configAFP.txt
@@ -122,7 +131,72 @@ public class GenBillRegular {
 		    	stCharge.add(new SumChargeOnBill(array[0], array[1], array[2],
 		    			array[3],array[4],array[5],array[6],array[7]));
 		    	
-		    	
+		    	if(stChargeMap.containsKey(array[0])){
+                        
+                                ArrayList<SumChargeOnBill>  chargeList = stChargeMap.get(array[0]);
+                                
+                                chargeList.add(new SumChargeOnBill(array[0], array[1], array[2],
+		    			array[3],array[4],array[5],array[6],array[7]));
+                            
+                        
+                        }else{
+                                 ArrayList<SumChargeOnBill> chargeList = new ArrayList<SumChargeOnBill>();
+                                 stChargeMap.put(array[0], chargeList);
+                                 chargeList = stChargeMap.get(array[0]);
+                                 
+                                 chargeList.add(new SumChargeOnBill(array[0], array[1], array[2],
+		    			array[3],array[4],array[5],array[6],array[7]));
+                        
+                        }
+		    }
+		}finally {
+		    inputFile.close();
+		}
+                //Create feature map 
+                for(structFeature feature:stFeature){
+                
+                        featureMap.put(feature.getCATEGORY_CODE(), feature.getFEATURE_DESC());
+                }
+                
+                
+                
+                //read Usage
+		
+	    String PathOutputUsage=CreatePathCMY.byCMYString(setEnv.Usage_file_gen, CYCLE_CODE, CYCLE_MONTH, CYCLE_YEAR)+setEnv.folderUsage_file_gen;
+	    
+		System.out.println(PathOutputUsage);
+	    FileReader inputUsageFile=new FileReader(PathOutputUsage+"exBan.txt");
+		
+		try (BufferedReader br = new BufferedReader(inputUsageFile)) {
+		    String line;
+		    while ((line = br.readLine()) != null) {
+		       // process the line.
+		    	//System.out.println(line);
+		    	String[] array = line.split("\\|"); 
+                        
+                        ArrayList<USAGE_XX>  usageList;
+                        if(stUsageMap.containsKey(array[0])){
+                            
+                            usageList = stUsageMap.get(array[0]);
+                            
+                        
+                        }else{
+                            usageList = new ArrayList<USAGE_XX>();
+                            stUsageMap.put(array[0], usageList);
+                            usageList = stUsageMap.get(array[0]);
+                            idUsages.add(array[0]);
+                        }
+                        USAGE_XX  usage = new USAGE_XX();
+                            
+                            usage.setACCOUNT_ID(array[0]);
+                            usage.setDIALED_TN(array[1]);
+                            usage.setCONNECT_DATE(array[2]);
+                            usage.setDESTINATION_ON_BILL(array[3]);
+                            usage.setCALL_VOL_ROUNDED(array[4]);
+                            usage.setCHARGE_AMT(array[5]);
+                            
+                        usageList.add(usage);
+                      		    	
 		    }
 		}finally {
 		    inputFile.close();
@@ -146,17 +220,17 @@ public class GenBillRegular {
 			//Start Header=============================================
 			afpCreateTag.createTagBDT(aout);
 			afpCreateTag.createTagIMM(aout,"F20101PA");
-			//End Header
+			//End 
 			//=========================================================
 			
 			int page_now=1;
-			for(int countDoc=0;countDoc<exBan.size();countDoc++){
-				
+			for(int countDoc=0;countDoc<5;countDoc++){
+			//for(int countDoc=0;countDoc<exBan.size();countDoc++){	
 			page_now=1;
 			
 			//Start Doc
 			afpCreateTag.createTagBPG(aout);
-			SetGnValue.setGNofBAG(aout);			
+			SetGnValue.setGNofBAG(aout);	//TOT head banner		
 			
 			afpCreateTag.createTagBPT(aout);
 			PTX ptx = AfplibFactory.eINSTANCE.createPTX(); 
@@ -844,7 +918,7 @@ public class GenBillRegular {
 			
 			afpCreateTag.setPTXxy(ptx,3960,829);
 			afpCreateTag.setFontID(ptx,58);
-			afpCreateTag.setPTX_TRN(ptx,"รหัสลูกค้า : 17-00251-11117");
+			afpCreateTag.setPTX_TRN(ptx,"รหัสลูกค้า : "+exBan.get(countDoc).getAccountNo());
 			
 			//box1
 			int inc_point=0;
@@ -899,151 +973,414 @@ public class GenBillRegular {
 			afpCreateTag.createTagBPT(aout);
 			ptx = AfplibFactory.eINSTANCE.createPTX(); 
 			
-			afpCreateTag.setPTXxy(ptx,360,1329);
-			afpCreateTag.setFontID(ptx,79);
-			afpCreateTag.setPTX_TRN(ptx,"    1. หมายเลข 0-2711-2726");
 			
-			f2=new String[]{"ค่าเช่าเลขหมาย","ค่าใช่โทรศัพท์","ค่าใช้ทางไกล/เคลื่อนที่","ส่วนลดค่าใช้","ส่วนลดค่าทางไกล"};
-			f2_x=420;
-			f2_y=1440;
-			afpCreateTag.setFontID(ptx,58);
-			for(int i=0;i<f2.length;i++){
-				afpCreateTag.setPTXxy(ptx,f2_x,f2_y+(106*i));				
-				afpCreateTag.setPTX_TRN(ptx,f2[i]);
-			}
+			int rowCharge=0;
+                        if(stChargeMap.containsKey(exBan.get(countDoc).getAccountID())){
+                                afpCreateTag.setPTXxy(ptx,360,1329);
+                                afpCreateTag.setFontID(ptx,79);
+                                afpCreateTag.setPTX_TRN(ptx,"    1. หมายเลข "+exBan.get(countDoc).getPhoneNumber());
+                                ArrayList<SumChargeOnBill> chargeList = stChargeMap.get(exBan.get(countDoc).getAccountID());
+                                afpCreateTag.setFontID(ptx,58);
+                                double sumChargeAmt=0;
+                                for(SumChargeOnBill charge :chargeList){
+
+                                        f2_x=420;
+                                        f2_y=1440+(106*rowCharge);
+                                        afpCreateTag.setPTXxy(ptx,f2_x,f2_y);				
+                                        afpCreateTag.setPTX_TRN(ptx,featureMap.get(charge.getCATEGORY_CODE()));
+                                        
+                                        f2_x=2413;
+                                        afpCreateTag.setPTXxy(ptx,f2_x,f2_y);	
+                                        double chargeAmt = Double.valueOf(charge.getSUM_SC_ACTV_AMT())-Double.valueOf(charge.getSUM_DC_ACTV_AMT());
+                                        sumChargeAmt = sumChargeAmt + chargeAmt;
+                                        
+                                        //afpCreateTag.setPTX_TRN(ptx,String.format("%,.2f", chargeAmt));
+                                        SetGnValue.CalPointFont58Single(ptx, String.format("%,.2f", chargeAmt), f2_x, f2_y);
+                                        rowCharge++;
+
+                                }
+                                f2_x=420;
+                                f2_y=1440+(106*rowCharge);
+                                afpCreateTag.setFontID(ptx,78);
+                                afpCreateTag.setPTXxy(ptx,f2_x,f2_y);				
+                                afpCreateTag.setPTX_TRN(ptx,"รวม");
+                                        
+                                f2_x=2413;
+                                afpCreateTag.setPTXxy(ptx,f2_x,f2_y);	
+                                //afpCreateTag.setPTX_TRN(ptx,String.format("%,.2f", sumChargeAmt));
+                                SetGnValue.CalPointFont58Single(ptx, String.format("%,.2f", sumChargeAmt), f2_x, f2_y);
+                                rowCharge++;
+                                
+                        }
+                        
+                        
+//			f2=new String[]{"ค่าเช่าเลขหมาย","ค่าใช่โทรศัพท์","ค่าใช้ทางไกล/เคลื่อนที่","ส่วนลดค่าใช้","ส่วนลดค่าทางไกล"};
+//			f2_x=420;
+//			f2_y=1440;
+//			afpCreateTag.setFontID(ptx,58);
+//			for(int i=0;i<f2.length;i++){
+//				afpCreateTag.setPTXxy(ptx,f2_x,f2_y+(106*i));				
+//				afpCreateTag.setPTX_TRN(ptx,f2[i]);
+//			}
+//			
+//			f5=new String[]{"100.00","12.00","1,641.00","-1.45","-198.55"};
+//			f5_x=2413;//start 0.00
+//			f5_y=1440;
+//			SetGnValue.CalPointFont58(ptx,f5,f5_x,f5_y);
 			
-			f5=new String[]{"100.00","12.00","1,641.00","-1.45","-198.55"};
-			f5_x=2413;//start 0.00
-			f5_y=1440;
-			SetGnValue.CalPointFont58(ptx,f5,f5_x,f5_y);
+	
 			
-			afpCreateTag.setPTXxy(ptx,420,2073);
-			afpCreateTag.setFontID(ptx,78);
-			afpCreateTag.setPTX_TRN(ptx,"รายละเอียดค่าใช้ทางไกล/เคลื่อนที่  0-2711-2726");
-			
-			f2=new String[]{"0949938870","0949938870","0949938871","0949938871","0949938876"};
-			f2_x=397;
-			f2_y=2179;
-			afpCreateTag.setFontID(ptx,58);
-			for(int i=0;i<f2.length;i++){
-				afpCreateTag.setPTXxy(ptx,f2_x,f2_y+(105*i));				
-				afpCreateTag.setPTX_TRN(ptx,f2[i]);
-			}
-			
-			f2=new String[]{"22/07/59","22/07/59","22/07/59","22/07/59","22/07/59"};
-			f2_x=875;
-			f2_y=2179;
-			afpCreateTag.setFontID(ptx,58);
-			for(int i=0;i<f2.length;i++){
-				afpCreateTag.setPTXxy(ptx,f2_x,f2_y+(105*i));				
-				afpCreateTag.setPTX_TRN(ptx,f2[i]);
-			}
-			
-			f2=new String[]{"094941","094941","094941","094941","094941"};
-			f2_x=1110;
-			f2_y=2179;
-			afpCreateTag.setFontID(ptx,58);
-			for(int i=0;i<f2.length;i++){
-				afpCreateTag.setPTXxy(ptx,f2_x,f2_y+(105*i));				
-				afpCreateTag.setPTX_TRN(ptx,f2[i]);
-			}
-			
-			f2=new String[]{"Mobile in BKK. Area","Mobile in BKK. Area","MobileArea","Mobile in BKK. Area","Mobile in BKK. Area"};
-			f2_x=1322;
-			f2_y=2179;
-			afpCreateTag.setFontID(ptx,58);
-			for(int i=0;i<f2.length;i++){
-				afpCreateTag.setPTXxy(ptx,f2_x,f2_y+(105*i));				
-				afpCreateTag.setPTX_TRN(ptx,f2[i]);
-			}
-			
-			f2=new String[]{" 0:03:00"," 0:03:00"," 0:03:00"," 0:03:00"," 0:03:00"};
-			f2_x=2021;
-			f2_y=2179;
-			afpCreateTag.setFontID(ptx,58);
-			for(int i=0;i<f2.length;i++){
-				afpCreateTag.setPTXxy(ptx,f2_x,f2_y+(105*i));				
-				afpCreateTag.setPTX_TRN(ptx,f2[i]);
-			}
-			
-			f5=new String[]{"9.00","12.00","3.00","1.00","124.00"};
-			f5_x=2401;//start 0.00
-			f5_y=2179;
-			SetGnValue.CalPointFont58(ptx,f5,f5_x,f5_y);
-			
-			
-			///row 2
-			
-			
-			f2=new String[]{"0949938870","0949938870","0949938871","0949938871","0949938876"};
-			f2_x=397+2190;
-			f2_y=1314;
-			afpCreateTag.setFontID(ptx,58);
-			for(int i=0;i<f2.length;i++){
-				afpCreateTag.setPTXxy(ptx,f2_x,f2_y+(105*i));				
-				afpCreateTag.setPTX_TRN(ptx,f2[i]);
-			}
-			
-			f2=new String[]{"22/07/59","22/07/59","22/07/59","22/07/59","22/07/59"};
-			f2_x=875+2190;
-			f2_y=1314;
-			afpCreateTag.setFontID(ptx,58);
-			for(int i=0;i<f2.length;i++){
-				afpCreateTag.setPTXxy(ptx,f2_x,f2_y+(105*i));				
-				afpCreateTag.setPTX_TRN(ptx,f2[i]);
-			}
-			
-			f2=new String[]{"094941","094941","094941","094941","094941"};
-			f2_x=1110+2190;
-			f2_y=1314;
-			afpCreateTag.setFontID(ptx,58);
-			for(int i=0;i<f2.length;i++){
-				afpCreateTag.setPTXxy(ptx,f2_x,f2_y+(105*i));				
-				afpCreateTag.setPTX_TRN(ptx,f2[i]);
-			}
-			
-			f2=new String[]{"Mobile in BKK. Area","Mobile in BKK. Area","MobileArea","Mobile in BKK. Area","Mobile in BKK. Area"};
-			f2_x=1322+2190;
-			f2_y=1314;
-			afpCreateTag.setFontID(ptx,58);
-			for(int i=0;i<f2.length;i++){
-				afpCreateTag.setPTXxy(ptx,f2_x,f2_y+(105*i));				
-				afpCreateTag.setPTX_TRN(ptx,f2[i]);
-			}
-			
-			f2=new String[]{" 0:03:00"," 0:03:00"," 0:03:00"," 0:03:00"," 0:03:00"};
-			f2_x=2021+2190;
-			f2_y=1314;
-			afpCreateTag.setFontID(ptx,58);
-			for(int i=0;i<f2.length;i++){
-				afpCreateTag.setPTXxy(ptx,f2_x,f2_y+(105*i));				
-				afpCreateTag.setPTX_TRN(ptx,f2[i]);
-			}
-			
-			f5=new String[]{"9.00","12.00","3.00","1.00","124.00"};
-			f5_x=2401+2190;//start 0.00
-			f5_y=1314;
-			SetGnValue.CalPointFont58(ptx,f5,f5_x,f5_y);
+                        //Split list to balance row
+                        if(stUsageMap.containsKey(exBan.get(countDoc).getAccountID())){
+                                int numCharge =rowCharge+1;
+                                int numRowCol1=0+numCharge;
+                                int numRowCol2=0;
+                                int numsplit  =0;
+                                int numUsage  = stUsageMap.get(exBan.get(countDoc).getAccountID()).size();
+
+                                if((numCharge+numUsage)%2==0){
+
+                                    numsplit = (numCharge+numUsage)/2;
+                                    numRowCol1 = numsplit;
+                                    numRowCol2 = numsplit;
+
+                                }else if((numCharge+numUsage)%2==1){
+
+                                    numsplit = (numCharge+numUsage)/2;
+                                    numRowCol1 = numsplit+1;
+                                    numRowCol2 = numsplit;
+
+                                }
+
+                                ArrayList<USAGE_XX> usageList = stUsageMap.get(exBan.get(countDoc).getAccountID());
+                                
+                                int shiftTitle = 22;
+                                int shiftDown = (106*numCharge);
+                                if(usageList.size()>numCharge){
+                                	afpCreateTag.setPTXxy(ptx,420+30,1404+shiftDown);
+                                        afpCreateTag.setFontID(ptx,78);
+                                        afpCreateTag.setPTX_TRN(ptx,"รายละเอียดค่าใช้ทางไกล/เคลื่อนที่  "+exBan.get(countDoc).getPhoneNumber());
+                                
+                                
+                                }else{
+                                        afpCreateTag.setPTXxy(ptx,397+2260,1314);
+                                        afpCreateTag.setFontID(ptx,78);
+                                        afpCreateTag.setPTX_TRN(ptx,"รายละเอียดค่าใช้ทางไกล/เคลื่อนที่  "+exBan.get(countDoc).getPhoneNumber());
+                                        shiftTitle=125;
+                                }
+                                
+                                
+                                
+                                
+                                numRowCol1 = numRowCol1-numCharge-1;
+                                afpCreateTag.setFontID(ptx,58);
+                                int countUsage1=0;
+                                int countUsage2=0;
+                                
+                                for(USAGE_XX usage:usageList){
+                                
+                                        
+                                        if(countUsage1>=46&&countUsage2>=54){ //Check new page
+                                            aout.writeStructuredField(ptx);
+                                            afpCreateTag.createTagEPT(aout);
+                                            afpCreateTag.createTagEPG(aout);
+                                            int totalCurentUsage = numUsage-46-54;
+                                            if((totalCurentUsage)%2==0){
+
+                                                numsplit = (totalCurentUsage)/2;
+                                                numRowCol1 = numsplit;
+                                                numRowCol2 = numsplit;
+
+                                            }else if((totalCurentUsage)%2==1){
+
+                                                numsplit = (totalCurentUsage)/2;
+                                                numRowCol1 = numsplit+1;
+                                                numRowCol2 = numsplit;
+
+                                            }
+                                            countUsage1=0;
+                                            countUsage2=0;
+                                            //Next page
+                                            afpCreateTag.createTagBPG(aout);
+                                            SetGnValue.setGNofBAG(aout);
+
+
+                                            afpCreateTag.createTagBPT(aout);
+                                            ptx = AfplibFactory.eINSTANCE.createPTX(); 
+
+                                            afpCreateTag.setPTXxy(ptx,4522,342);
+                                            afpCreateTag.setFontID(ptx,57);
+                                            afpCreateTag.setPTX_TRN(ptx,"หน้า 1 / 8");
+
+                                            afpCreateTag.setPTXxy(ptx,4275,342);
+                                            afpCreateTag.setFontID(ptx,57);
+                                            afpCreateTag.setPTX_TRN(ptx,"ส่วนที่  2");
+
+                                            afpCreateTag.setPTXxy(ptx,2173,722);
+                                            afpCreateTag.setFontID(ptx,60);
+                                            afpCreateTag.setPTX_TRN(ptx,"รายละเอียดค่าใช้บริการ");
+
+                                            afpCreateTag.setPTXxy(ptx,390,829);
+                                            afpCreateTag.setFontID(ptx,58);
+                                            afpCreateTag.setPTX_TRN(ptx,"คุณ ปวิตเตอร์กอร์ ชาณเจริญลาภ");
+
+                                            afpCreateTag.setPTXxy(ptx,2100,829);
+                                            afpCreateTag.setFontID(ptx,58);
+                                            afpCreateTag.setPTX_TRN(ptx,"ประจำเดือน 08/2559");
+
+                                            afpCreateTag.setPTXxy(ptx,2785,829);
+                                            afpCreateTag.setFontID(ptx,58);
+                                            afpCreateTag.setPTX_TRN(ptx,"เลขที่ : 6080645901078 (RES)");
+
+                                            afpCreateTag.setPTXxy(ptx,3960,829);
+                                            afpCreateTag.setFontID(ptx,58);
+                                            afpCreateTag.setPTX_TRN(ptx,"รหัสลูกค้า : "+exBan.get(countDoc).getAccountNo());
+
+                                            //box1
+                                            int inc_point2=0;
+                                            for(int i=0;i<2;i++){
+
+                                                    afpCreateTag.setPTXxy(ptx,390+inc_point2,984);
+                                                    afpCreateTag.setPTX_DrowBox(ptx,2147,237,2);
+
+                                                    afpCreateTag.setPTXxy(ptx,805+inc_point2,984);
+                                                    afpCreateTag.setPTX_DrowBox(ptx,292,237,2);
+
+                                                    afpCreateTag.setPTXxy(ptx,1290+inc_point2,984);
+                                                    afpCreateTag.setPTX_DrowBox(ptx,510,237,2);
+
+                                                    afpCreateTag.setPTXxy(ptx,2010+inc_point2,984);
+                                                    afpCreateTag.setPTX_DrowBox(ptx,257,237,2);
+
+                                                    afpCreateTag.setPTXxy(ptx,1814+inc_point2,1121);
+                                                    afpCreateTag.setFontID(ptx,78);
+                                                    afpCreateTag.setPTX_TRN(ptx,"ประเภท");
+
+                                                    afpCreateTag.setPTXxy(ptx,492+inc_point2,1121);
+                                                    afpCreateTag.setFontID(ptx,78);
+                                                    afpCreateTag.setPTX_TRN(ptx,"หมายเลข");
+
+                                                    afpCreateTag.setPTXxy(ptx,837+inc_point2,1121);
+                                                    afpCreateTag.setFontID(ptx,78);
+                                                    afpCreateTag.setPTX_TRN(ptx,"วันเดือนปี");
+
+                                                    afpCreateTag.setPTXxy(ptx,1133+inc_point2,1121);
+                                                    afpCreateTag.setFontID(ptx,78);
+                                                    afpCreateTag.setPTX_TRN(ptx,"เวลา");
+
+                                                    afpCreateTag.setPTXxy(ptx,1337+inc_point2,1121);
+                                                    afpCreateTag.setFontID(ptx,78);
+                                                    afpCreateTag.setPTX_TRN(ptx,"เรียกไป/เรียกจาก");
+
+                                                    afpCreateTag.setPTXxy(ptx,2029+inc_point2,1121);
+                                                    afpCreateTag.setFontID(ptx,78);
+                                                    afpCreateTag.setPTX_TRN(ptx,"ครั้ง/นาที");
+
+                                                    afpCreateTag.setPTXxy(ptx,2276+inc_point2,1121);
+                                                    afpCreateTag.setFontID(ptx,78);
+                                                    afpCreateTag.setPTX_TRN(ptx,"จำนวนเงิน");
+
+                                                    inc_point2=2190;
+                                            }
+
+                                            aout.writeStructuredField(ptx);
+                                            afpCreateTag.createTagEPT(aout);
+                                            //body
+                                            afpCreateTag.createTagBPT(aout);
+                                            ptx = AfplibFactory.eINSTANCE.createPTX(); 
+
+                                            shiftDown=-210;
+                                        
+                                        }
+                                    
+                                        //Writebody data
+                                    
+                                    
+                                        if(numRowCol1>0&&countUsage1<46){//col1
+                                            
+                                            afpCreateTag.setFontID(ptx,58);
+                                            f2_x=397;
+                                            f2_y=1546+(countUsage1*105)+shiftDown;
+                                            afpCreateTag.setPTXxy(ptx,f2_x,f2_y);				
+                                            afpCreateTag.setPTX_TRN(ptx,usage.getDIALED_TN());
+
+                                            
+                                            f2_x=875;
+                                            afpCreateTag.setPTXxy(ptx,f2_x,f2_y);				
+                                            afpCreateTag.setPTX_TRN(ptx,ChangeDateEnglishToThai.YYYYMMDDHH24MISS2DDMMYYHH24MISS(usage.getCONNECT_DATE()));
+
+                                            f2_x=1322;
+                                            afpCreateTag.setPTXxy(ptx,f2_x,f2_y);				
+                                            afpCreateTag.setPTX_TRN(ptx,usage.getDESTINATION_ON_BILL());
+
+                                            f2_x=2021;
+                                            afpCreateTag.setPTXxy(ptx,f2_x,f2_y);				
+                                            afpCreateTag.setPTX_TRN(ptx,String.format("0:%02d:00", Integer.valueOf(usage.getCALL_VOL_ROUNDED())));
+
+                                            f2_x=2401;
+                                            afpCreateTag.setPTXxy(ptx,f2_x,f2_y);				
+                                            //afpCreateTag.setPTX_TRN(ptx,String.format("%.2f", Double.valueOf(usage.getCHARGE_AMT())));
+                                            SetGnValue.CalPointFont58Single(ptx, String.format("%,.2f", Double.valueOf(usage.getCHARGE_AMT())), f2_x, f2_y);
+                                            countUsage1++;
+                                            numRowCol1--;
+
+                                        }else if(countUsage2<54){//col2
+                                            afpCreateTag.setFontID(ptx,58);
+                                            f2_x=397+2190;
+                                            f2_y=1314+(countUsage2*105)+shiftTitle;
+                                            
+                                            afpCreateTag.setPTXxy(ptx,f2_x,f2_y);				
+                                            afpCreateTag.setPTX_TRN(ptx,usage.getDIALED_TN());
+
+                                            f2_x=875+2190;
+                                            afpCreateTag.setPTXxy(ptx,f2_x,f2_y);				
+                                            afpCreateTag.setPTX_TRN(ptx,ChangeDateEnglishToThai.YYYYMMDDHH24MISS2DDMMYYHH24MISS(usage.getCONNECT_DATE()));
+                                            
+                                            f2_x=1322+2190;
+                                            afpCreateTag.setPTXxy(ptx,f2_x,f2_y);				
+                                            afpCreateTag.setPTX_TRN(ptx,usage.getDESTINATION_ON_BILL());
+
+                                            f2_x=2021+2190;
+                                            afpCreateTag.setPTXxy(ptx,f2_x,f2_y);				
+                                            afpCreateTag.setPTX_TRN(ptx,String.format("0:%02d:00", Integer.valueOf(usage.getCALL_VOL_ROUNDED())));
+
+                                            f2_x=2401+2190;
+                                            afpCreateTag.setPTXxy(ptx,f2_x,f2_y);				
+                                            //afpCreateTag.setPTX_TRN(ptx,String.format("%.2f", Double.valueOf(usage.getCHARGE_AMT())));
+                                            SetGnValue.CalPointFont58Single(ptx, String.format("%,.2f", Double.valueOf(usage.getCHARGE_AMT())), f2_x, f2_y);
+                                            countUsage2++;
+                                        }
+                                        
+                                        
+                                }
+                               
+                        
+                        }
+                        aout.writeStructuredField(ptx);
+                        afpCreateTag.createTagEPT(aout);
+//			f2=new String[]{"0949938870","0949938870","0949938871","0949938871","0949938876"};
+//			f2_x=397;
+//			f2_y=2179;
+//			afpCreateTag.setFontID(ptx,58);
+//			for(int i=0;i<f2.length;i++){
+//				afpCreateTag.setPTXxy(ptx,f2_x,f2_y+(105*i));				
+//				afpCreateTag.setPTX_TRN(ptx,f2[i]);
+//			}
+//			
+//			f2=new String[]{"22/07/59","22/07/59","22/07/59","22/07/59","22/07/59"};
+//			f2_x=875;
+//			f2_y=2179;
+//			afpCreateTag.setFontID(ptx,58);
+//			for(int i=0;i<f2.length;i++){
+//				afpCreateTag.setPTXxy(ptx,f2_x,f2_y+(105*i));				
+//				afpCreateTag.setPTX_TRN(ptx,f2[i]);
+//			}
+//			
+//			f2=new String[]{"094941","094941","094941","094941","094941","094941","094941","094941","094941","094941","094941"};
+//			f2_x=1110;
+//			f2_y=2179;
+//			afpCreateTag.setFontID(ptx,58);
+//			for(int i=0;i<f2.length;i++){
+//				afpCreateTag.setPTXxy(ptx,f2_x,f2_y+(105*i));				
+//				afpCreateTag.setPTX_TRN(ptx,f2[i]);
+//			}
+//			
+//			f2=new String[]{"Mobile in BKK. Area","Mobile in BKK. Area","MobileArea","Mobile in BKK. Area","Mobile in BKK. Area"};
+//			f2_x=1322;
+//			f2_y=2179;
+//			afpCreateTag.setFontID(ptx,58);
+//			for(int i=0;i<f2.length;i++){
+//				afpCreateTag.setPTXxy(ptx,f2_x,f2_y+(105*i));				
+//				afpCreateTag.setPTX_TRN(ptx,f2[i]);
+//			}
+//			
+//			f2=new String[]{" 0:03:00"," 0:03:00"," 0:03:00"," 0:03:00"," 0:03:00"};
+//			f2_x=2021;
+//			f2_y=2179;
+//			afpCreateTag.setFontID(ptx,58);
+//			for(int i=0;i<f2.length;i++){
+//				afpCreateTag.setPTXxy(ptx,f2_x,f2_y+(105*i));				
+//				afpCreateTag.setPTX_TRN(ptx,f2[i]);
+//			}
+//			
+//			f5=new String[]{"9.00","12.00","3.00","1.00","124.00"};
+//			f5_x=2401;//start 0.00
+//			f5_y=2179;
+//			SetGnValue.CalPointFont58(ptx,f5,f5_x,f5_y);
+//			
+//			
+//			///row 2
+//			
+//			
+//			f2=new String[]{"0949938870","0949938870","0949938871","0949938871","0949938876"};
+//			f2_x=397+2190;
+//			f2_y=1314;
+//			afpCreateTag.setFontID(ptx,58);
+//			for(int i=0;i<f2.length;i++){
+//				afpCreateTag.setPTXxy(ptx,f2_x,f2_y+(105*i));				
+//				afpCreateTag.setPTX_TRN(ptx,f2[i]);
+//			}
+//			
+//			f2=new String[]{"22/07/59","22/07/59","22/07/59","22/07/59","22/07/59"};
+//			f2_x=875+2190;
+//			f2_y=1314;
+//			afpCreateTag.setFontID(ptx,58);
+//			for(int i=0;i<f2.length;i++){
+//				afpCreateTag.setPTXxy(ptx,f2_x,f2_y+(105*i));				
+//				afpCreateTag.setPTX_TRN(ptx,f2[i]);
+//			}
+//			
+//			f2=new String[]{"094941","094941","094941","094941","094941"};
+//			f2_x=1110+2190;
+//			f2_y=1314;
+//			afpCreateTag.setFontID(ptx,58);
+//			for(int i=0;i<f2.length;i++){
+//				afpCreateTag.setPTXxy(ptx,f2_x,f2_y+(105*i));				
+//				afpCreateTag.setPTX_TRN(ptx,f2[i]);
+//			}
+//			
+//			f2=new String[]{"Mobile in BKK. Area","Mobile in BKK. Area","MobileArea","Mobile in BKK. Area","Mobile in BKK. Area"};
+//			f2_x=1322+2190;
+//			f2_y=1314;
+//			afpCreateTag.setFontID(ptx,58);
+//			for(int i=0;i<f2.length;i++){
+//				afpCreateTag.setPTXxy(ptx,f2_x,f2_y+(105*i));				
+//				afpCreateTag.setPTX_TRN(ptx,f2[i]);
+//			}
+//			
+//			f2=new String[]{" 0:03:00"," 0:03:00"," 0:03:00"," 0:03:00"," 0:03:00"};
+//			f2_x=2021+2190;
+//			f2_y=1314;
+//			afpCreateTag.setFontID(ptx,58);
+//			for(int i=0;i<f2.length;i++){
+//				afpCreateTag.setPTXxy(ptx,f2_x,f2_y+(105*i));				
+//				afpCreateTag.setPTX_TRN(ptx,f2[i]);
+//			}
+//			
+//			f5=new String[]{"9.00","12.00","3.00","1.00","124.00"};
+//			f5_x=2401+2190;//start 0.00
+//			f5_y=1314;
+//			SetGnValue.CalPointFont58(ptx,f5,f5_x,f5_y);
 			
 
-			aout.writeStructuredField(ptx);
-			afpCreateTag.createTagEPT(aout);
+//			aout.writeStructuredField(ptx);
+//			afpCreateTag.createTagEPT(aout);
 			//tail page
 			afpCreateTag.createTagBPT(aout);
 			ptx = AfplibFactory.eINSTANCE.createPTX(); 
 			
 			afpCreateTag.setPTXxy(ptx,355,4359);
-			afpCreateTag.setFontID(ptx,59);
-			afpCreateTag.setPTX_TRN(ptx,"บริษัทฯ ต้องขออภัยมา ณ ที่นี้หากท่านได้ชำระยอดค้างชำระก่อนได้รับใบแจ้งค่าใช้บริการฉบับนี้");
-			
-			afpCreateTag.setPTXxy(ptx,355,4479);
-			afpCreateTag.setFontID(ptx,59);
-			afpCreateTag.setPTX_TRN(ptx,"โปรดตรวจสอบรายการที่แจ้งในใบแจ้งค่าใช้บริการก่อนการชำระเงิน");
-			
+//			afpCreateTag.setFontID(ptx,59);
+//			afpCreateTag.setPTX_TRN(ptx,"บริษัทฯ ต้องขออภัยมา ณ ที่นี้หากท่านได้ชำระยอดค้างชำระก่อนได้รับใบแจ้งค่าใช้บริการฉบับนี้");
+//			
+//			afpCreateTag.setPTXxy(ptx,355,4479);
+//			afpCreateTag.setFontID(ptx,59);
+//			afpCreateTag.setPTX_TRN(ptx,"โปรดตรวจสอบรายการที่แจ้งในใบแจ้งค่าใช้บริการก่อนการชำระเงิน");
+//			
 			aout.writeStructuredField(ptx);
 			afpCreateTag.createTagEPT(aout);
 			
-			afpCreateTag.createTagIPS(aout,355,4644,"S1TRPCCS");
+			//afpCreateTag.createTagIPS(aout,355,4644,"S1TRPCCS");
 			
 			afpCreateTag.createTagEPG(aout);
 			
@@ -1059,23 +1396,23 @@ public class GenBillRegular {
 			
 			afpCreateTag.setPTXxy(ptx,1080,297);
 			afpCreateTag.setFontID(ptx,58);
-			afpCreateTag.setPTX_TRN(ptx,"   �?ริษัท ที�?อที �?ำ�?ัด (มหา�?�?) 89/2 หมู�? 3 ถ�?�?�?�?�?�?วัฒ�?ะ �?�?ว�?ทุ�?�?สอ�?ห�?อ�? เ�?ตทุ�?�?สอ�?ห�?อ�? �?รุ�?เท�?มหา�?�?ร 10210");
+			afpCreateTag.setPTX_TRN(ptx,"   บริษัท ทีโอที จำกัด (มหาชน) 89/2 หมู่ 3 ถนนแจ้งวัฒนะ แขวงทุ่งสองห้อง เขตหลักสี่ กรุงเทพมหานคร 10210");
 			
 			afpCreateTag.setPTXxy(ptx,1080,384);
 			afpCreateTag.setFontID(ptx,58);
-			afpCreateTag.setPTX_TRN(ptx,"   เล�?ทะเ�?ีย�?�?ิติ�?ุ�?�?ล/เล�?�?ระ�?ำตัว�?ู�?เสียภาษี(Tax ID No.) 0107545000161 สำ�?ั�?�?า�?�?ห�?�?");
+			afpCreateTag.setPTX_TRN(ptx,"   เลขทะเบียนนิติบุคคล/เลขประจำตัวผู้เสียภาษี(Tax ID No.) 0107545000161 สำนักงานใหญ่");
 			
 			afpCreateTag.setPTXxy(ptx,3625,494);
 			afpCreateTag.setFontID(ptx,79);
-			afpCreateTag.setPTX_TRN(ptx,"�?�?เสร�?�?รั�?เ�?ิ�? / �?�?�?ำ�?ั�?ภาษี");
+			afpCreateTag.setPTX_TRN(ptx,"ใบเสร็จรับเงิน / ใบกำกับภาษี");
 			
 			afpCreateTag.setPTXxy(ptx,445,494+45+22);
 			afpCreateTag.setFontID(ptx,58);
-			afpCreateTag.setPTX_TRN(ptx,"รหัสลู�?�?�?า :  12-00070-06912");
+			afpCreateTag.setPTX_TRN(ptx,"รหัสลูกค้า : "+exBan.get(countDoc).getAccountNo());
 			
 			afpCreateTag.setPTXxy(ptx,1562,494+45+22);
 			afpCreateTag.setFontID(ptx,58);
-			afpCreateTag.setPTX_TRN(ptx,"หมายเล�?�?ทรศั�?ท�? : 0-2965-1821");
+			afpCreateTag.setPTX_TRN(ptx,"หมายเลขโทรศัพท์ : "+exBan.get(countDoc).getPhoneNumber());
 			
 			afpCreateTag.setPTXxy(ptx,3625,494+45+22+17);
 			afpCreateTag.setFontID(ptx,79);
@@ -1083,66 +1420,72 @@ public class GenBillRegular {
 			
 			afpCreateTag.setPTXxy(ptx,445,570+85);
 			afpCreateTag.setFontID(ptx,58);
-			afpCreateTag.setPTX_TRN(ptx,"เล�?�?ระ�?ำตัว�?ู�?เสียภาษีอา�?ร :  1200070069129");
+			afpCreateTag.setPTX_TRN(ptx,"เลขประจำตัวผู้เสียภาษีอากร :  "+exBan.get(countDoc).getAccountNo());
 			
 			afpCreateTag.setPTXxy(ptx,445,570+85+100);
 			afpCreateTag.setFontID(ptx,58);
-			afpCreateTag.setPTX_TRN(ptx,"�?ื�?อ   :");
+			afpCreateTag.setPTX_TRN(ptx,"ชื่อ   : "+exBan.get(countDoc).getInputName());
 			
 			afpCreateTag.setPTXxy(ptx,445,570+85+100+100);
 			afpCreateTag.setFontID(ptx,58);
-			afpCreateTag.setPTX_TRN(ptx,"ที�?อยู�? :");
+			afpCreateTag.setPTX_TRN(ptx,"ที่อยุ่ : ");
 			
-			f2=new String[]{"�?าย ทดสอ�? 242799590","123/29 หมู�? หมู�?ที�?6 �?อย สวัสดิ�?�?ิ�?  ถ�?�? �?รุ�?เท�?-�?�?ท�?ุรี1","�?�?ว�?/ตำ�?ล �?า�?เ�?�? เ�?ต/อำเภอ เมือ�?�?�?ท�?ุรี","�?�?ท�?ุรี 11000"};
+			List<String> addrs = new ArrayList<String>();
+                        addrs.add(exBan.get(countDoc).getADDRESS_BILLING1());
+                        addrs.add(exBan.get(countDoc).getADDRESS_BILLING2());
+                        addrs.add(exBan.get(countDoc).getADDRESS_BILLING3());
+                        addrs.add(exBan.get(countDoc).getADDRESS_BILLING4());
 			f2_x=445+180;
-			f2_y=570+85+100;
+			f2_y=570+85+100+100;
 			afpCreateTag.setFontID(ptx,58);
-			for(int i=0;i<f2.length;i++){
-				afpCreateTag.setPTXxy(ptx,f2_x,f2_y+(100*i));				
-				afpCreateTag.setPTX_TRN(ptx,f2[i]);
+                        int rowAddr=0;
+			for(String addr : addrs){
+				afpCreateTag.setPTXxy(ptx,f2_x,f2_y+(100*rowAddr));				
+				afpCreateTag.setPTX_TRN(ptx,addr);
+                                rowAddr++;
 			}
-			
+			int shiftY=100;
 			afpCreateTag.setPTXxy(ptx,3630,445+180+100+100);
 			afpCreateTag.setFontID(ptx,58);
-			afpCreateTag.setPTX_TRN(ptx,"เล�?ที�? : 123274227");
+			afpCreateTag.setPTX_TRN(ptx,"เลขที่ : "+exBan.get(countDoc).getInvoiceNo().split("\\(")[0]);
 			
 			afpCreateTag.setPTXxy(ptx,4250,445+180+100+100);
 			afpCreateTag.setFontID(ptx,58);
-			afpCreateTag.setPTX_TRN(ptx,"วั�?ที�? :  08/03/2555");
+			afpCreateTag.setPTX_TRN(ptx,"วันที่ :  "+exBan.get(countDoc).getBillDate());
 			
 			afpCreateTag.setPTXxy(ptx,3630,445+180+100+100+100);
 			afpCreateTag.setFontID(ptx,58);
-			afpCreateTag.setPTX_TRN(ptx,"สา�?า : B034");
+			afpCreateTag.setPTX_TRN(ptx,"สาขา : B034");
 			
-			afpCreateTag.setPTXxy(ptx,240+529,1092+85);
+			afpCreateTag.setPTXxy(ptx,240+529,1092+85+shiftY);
 			afpCreateTag.setFontID(ptx,58);
-			afpCreateTag.setPTX_TRN(ptx,"เล�?ที�?�?�?�?�?�?�?�?�?า�?ริ�?าร");
+			afpCreateTag.setPTX_TRN(ptx,"เลขที่ใบแจ้งค่าบริการ");
 			
-			afpCreateTag.setPTXxy(ptx,445,1092+85);
+			afpCreateTag.setPTXxy(ptx,445,1092+85+shiftY);
 			afpCreateTag.setFontID(ptx,58);
-			afpCreateTag.setPTX_TRN(ptx,"ลำดั�?ที�?");
+			afpCreateTag.setPTX_TRN(ptx,"ลำดับที่");
 			
-			afpCreateTag.setPTXxy(ptx,1032+463,1092+85);
+			afpCreateTag.setPTXxy(ptx,1032+463,1092+85+shiftY);
 			afpCreateTag.setFontID(ptx,58);
-			afpCreateTag.setPTX_TRN(ptx,"�?ระ�?ำเดือ�?");
+			afpCreateTag.setPTX_TRN(ptx,"ประจำเดือน");
 			
-			afpCreateTag.setPTXxy(ptx,1695+411,1092+85);
+			afpCreateTag.setPTXxy(ptx,1695+411,1092+85+shiftY);
 			afpCreateTag.setFontID(ptx,58);
-			afpCreateTag.setPTX_TRN(ptx,"มูล�?�?าสิ�?�?�?า�?ริ�?าร");
+			afpCreateTag.setPTX_TRN(ptx,"มูลค่าสินค้าบริการ");
 			
-			afpCreateTag.setPTXxy(ptx,2252+538,1092+85);
+			afpCreateTag.setPTXxy(ptx,2252+538,1092+85+shiftY);
 			afpCreateTag.setFontID(ptx,58);
-			afpCreateTag.setPTX_TRN(ptx,"ส�?ว�?ลด");
+			afpCreateTag.setPTX_TRN(ptx,"ส่วนลด");
 			
-			afpCreateTag.setPTXxy(ptx,2712+514,1092+85);
+			afpCreateTag.setPTXxy(ptx,2712+514,1092+85+shiftY);
 			afpCreateTag.setFontID(ptx,58);
-			afpCreateTag.setPTX_TRN(ptx,"มูล�?�?าสุท�?ิ");
+			afpCreateTag.setPTX_TRN(ptx,"มูลค่าสุทธิ");
 			
-			afpCreateTag.setPTXxy(ptx,3355+459,1092+85);
+			afpCreateTag.setPTXxy(ptx,3355+459,1092+85+shiftY);
 			afpCreateTag.setFontID(ptx,58);
-			afpCreateTag.setPTX_TRN(ptx,"ภาษีมูล�?�?าเ�?ิ�?ม");
+			afpCreateTag.setPTX_TRN(ptx,"ภาษีมูลค่าเพิ่ม");
 			
-			afpCreateTag.setPTXxy(ptx,4025+568,1092+85);
+			afpCreateTag.setPTXxy(ptx,4025+568,1092+85+shiftY);
 			afpCreateTag.setFontID(ptx,58);
 			afpCreateTag.setPTX_TRN(ptx,"รวม");
 			
@@ -1152,39 +1495,39 @@ public class GenBillRegular {
 			afpCreateTag.createTagBPT(aout);
 			ptx = AfplibFactory.eINSTANCE.createPTX();
 			
-			afpCreateTag.setPTXxy(ptx,507,1198+97);
+			afpCreateTag.setPTXxy(ptx,507,1198+97+shiftY);
 			afpCreateTag.setFontID(ptx,58);
 			afpCreateTag.setPTX_TRN(ptx,"1");
 			
-			afpCreateTag.setPTXxy(ptx,840,1198+97);
+			afpCreateTag.setPTXxy(ptx,840,1198+97+shiftY);
 			afpCreateTag.setFontID(ptx,58);
 			afpCreateTag.setPTX_TRN(ptx,"2020632900430");
 			
-			afpCreateTag.setPTXxy(ptx,1580,1198+97);
+			afpCreateTag.setPTXxy(ptx,1580,1198+97+shiftY);
 			afpCreateTag.setFontID(ptx,58);
 			afpCreateTag.setPTX_TRN(ptx,"02/55");
 			
-			afpCreateTag.setPTXxy(ptx,1682+570,1198+97);
+			afpCreateTag.setPTXxy(ptx,1682+570,1198+97+shiftY);
 			afpCreateTag.setFontID(ptx,58);
 			afpCreateTag.setPTX_TRN(ptx,"460.50");
 			
-			afpCreateTag.setPTXxy(ptx,2202+601,1198+97);
+			afpCreateTag.setPTXxy(ptx,2202+601,1198+97+shiftY);
 			afpCreateTag.setFontID(ptx,58);
 			afpCreateTag.setPTX_TRN(ptx,"57.50");
 			
-			afpCreateTag.setPTXxy(ptx,2717+570,1198+97);
+			afpCreateTag.setPTXxy(ptx,2717+570,1198+97+shiftY);
 			afpCreateTag.setFontID(ptx,58);
 			afpCreateTag.setPTX_TRN(ptx,"403.00");
 			
-			afpCreateTag.setPTXxy(ptx,3422+601,1198+97);
+			afpCreateTag.setPTXxy(ptx,3422+601,1198+97+shiftY);
 			afpCreateTag.setFontID(ptx,58);
 			afpCreateTag.setPTX_TRN(ptx,"28.21");
 			
-			afpCreateTag.setPTXxy(ptx,3635+121,1198+97);
+			afpCreateTag.setPTXxy(ptx,3635+121,1198+97+shiftY);
 			afpCreateTag.setFontID(ptx,58);
 			afpCreateTag.setPTX_TRN(ptx,"  7%");
 			
-			afpCreateTag.setPTXxy(ptx,3975+570,1198+97);
+			afpCreateTag.setPTXxy(ptx,3975+570,1198+97+shiftY);
 			afpCreateTag.setFontID(ptx,58);
 			afpCreateTag.setPTX_TRN(ptx,"431.21");
 			
@@ -1194,35 +1537,35 @@ public class GenBillRegular {
 			afpCreateTag.createTagBPT(aout);
 			ptx = AfplibFactory.eINSTANCE.createPTX();
 			
-			afpCreateTag.setPTXxy(ptx,540+568,1327+92);
+			afpCreateTag.setPTXxy(ptx,540+568,1327+92+shiftY);
 			afpCreateTag.setFontID(ptx,58);
 			afpCreateTag.setPTX_TRN(ptx,"รวม");
 			
-			afpCreateTag.setPTXxy(ptx,1682+570,1327+92);
+			afpCreateTag.setPTXxy(ptx,1682+570,1327+92+shiftY);
 			afpCreateTag.setFontID(ptx,58);
 			afpCreateTag.setPTX_TRN(ptx,"460.50");
 			
-			afpCreateTag.setPTXxy(ptx,2202+601,1327+92);
+			afpCreateTag.setPTXxy(ptx,2202+601,1327+92+shiftY);
 			afpCreateTag.setFontID(ptx,58);
 			afpCreateTag.setPTX_TRN(ptx,"57.50");
 			
-			afpCreateTag.setPTXxy(ptx,2717+570,1327+92);
+			afpCreateTag.setPTXxy(ptx,2717+570,1327+92+shiftY);
 			afpCreateTag.setFontID(ptx,58);
 			afpCreateTag.setPTX_TRN(ptx,"403.00");
 			
-			afpCreateTag.setPTXxy(ptx,3422+601,1327+92);
+			afpCreateTag.setPTXxy(ptx,3422+601,1327+92+shiftY);
 			afpCreateTag.setFontID(ptx,58);
 			afpCreateTag.setPTX_TRN(ptx,"28.21");
 			
-			afpCreateTag.setPTXxy(ptx,3635+121,1327+92);
+			afpCreateTag.setPTXxy(ptx,3635+121,1327+92+shiftY);
 			afpCreateTag.setFontID(ptx,58);
 			afpCreateTag.setPTX_TRN(ptx,"  7%");
 			
-			afpCreateTag.setPTXxy(ptx,3975+570,1327+92);
+			afpCreateTag.setPTXxy(ptx,3975+570,1327+92+shiftY);
 			afpCreateTag.setFontID(ptx,58);
 			afpCreateTag.setPTX_TRN(ptx,"431.21");
 			
-			afpCreateTag.setPTXxy(ptx,5+3798,1327+92+125);
+			afpCreateTag.setPTXxy(ptx,5+3798,1327+92+125+shiftY);
 			afpCreateTag.setFontID(ptx,58);
 			String thai_bath=new BathToText().getText("431.21");
 			afpCreateTag.setPTX_TRN(ptx,"("+thai_bath+")");
@@ -1236,18 +1579,18 @@ public class GenBillRegular {
 			afpCreateTag.createTagBPT(aout);
 			ptx = AfplibFactory.eINSTANCE.createPTX();
 			
-			f2=new String[]{"�?ริษัทฯ �?ด�?ดำเ�?ิ�?�?ารหั�?ภาษี ณ.ที�?�?�?าย  �?ละ�?ำส�?�?สรร�?า�?ร�?ท�?ท�?า�?�?ล�?ว","อัตรา 3%","อัตรา 5%","รวม"};
+			f2=new String[]{"บริษัทฯ ได้ดำเนินการหักภาษี ณ.ที่จ่าย  �?ละ�?ำส�?�?สรร�?า�?ร�?ท�?ท�?า�?�?ล�?ว","อัตรา 3%","อัตรา 5%","รวม"};
 			f2_x=445+180;
-			f2_y=1327+92+125+100;
+			f2_y=1327+92+125+100+shiftY;
 			afpCreateTag.setFontID(ptx,58);
 			for(int i=0;i<f2.length;i++){
 				afpCreateTag.setPTXxy(ptx,f2_x,f2_y+(100*i));				
 				afpCreateTag.setPTX_TRN(ptx,f2[i]);
 			}
 			
-			f2=new String[]{"�?าท","�?าท","�?าท"};
+			f2=new String[]{"บาท","บาท","บาท"};
 			f2_x=445+180+800;
-			f2_y=1327+92+125+200;
+			f2_y=1327+92+125+200+shiftY;
 			afpCreateTag.setFontID(ptx,58);
 			for(int i=0;i<f2.length;i++){
 				afpCreateTag.setPTXxy(ptx,f2_x,f2_y+(100*i));				
@@ -1262,15 +1605,26 @@ public class GenBillRegular {
 			
 			afpCreateTag.setPTXxy(ptx,3232+706,1657+87+87+87+55);
 			afpCreateTag.setFontID(ptx,58);
-			afpCreateTag.setPTX_TRN(ptx,"�?ู�?�?ัด�?ารส�?ว�?�?ั�?�?ีที�? 2");
+			afpCreateTag.setPTX_TRN(ptx,"ผู้จัดการส่วนบัญชีที่ 2");
 			
 			afpCreateTag.setPTXxy(ptx,3545+522,1657+87+87+87+55+32+50);
 			afpCreateTag.setFontID(ptx,58);
-			afpCreateTag.setPTX_TRN(ptx,"�?ู�?รั�?เ�?ิ�?");
+			afpCreateTag.setPTX_TRN(ptx,"ผู้รับเงิน");
 			
 			afpCreateTag.setPTXxy(ptx,455,1657+87+87+87+55+32+50+37+67);
 			afpCreateTag.setFontID(ptx,58);
-			afpCreateTag.setPTX_TRN(ptx,"�?ื�?อ�?�?า�?าร/�?ริษัท   �?.�?.ส.   เล�?ที�?�?ั�?�?ี/�?ัตรเ�?รดิต");
+                        
+                        String bankNo="";
+                        
+                        if(exBan.get(countDoc).getCREDIT_CARD_NO()==null){
+                                bankNo = "";
+                                   
+                        }else{
+                                bankNo = exBan.get(countDoc).getCREDIT_CARD_NO().substring(exBan.get(countDoc).getCREDIT_CARD_NO().length()/2);
+                            
+                        }
+                        
+			afpCreateTag.setPTX_TRN(ptx,"ชื่อธนาคาร/บริษัท    "+exBan.get(countDoc).getBANK_NAME()+"   เลขที่บัญชี/บัตรเครดิต XXXXXX"+bankNo);
 			
 
 			aout.writeStructuredField(ptx);
