@@ -56,6 +56,10 @@ public class setEnv {
 	// AFP OUT Regular
 	public static String AFP_Regular_file_gen=System.getenv("HOME")+"/var/tea/AFP/Regular/";
 	public static String folderAFP_Regular_file_gen="/"; 
+        
+        // AFP OUT Governor
+	public static String AFP_Governor_file_gen=System.getenv("HOME")+"/var/tea/AFP/Governor/";
+	public static String folderAFP_Governor_file_gen="/"; 
 	
 	public static String AFP_Config_file=System.getenv("HOME")+"/var/tea/AFP/ConfigAFP.txt";
 	

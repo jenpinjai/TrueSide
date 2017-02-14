@@ -1080,7 +1080,7 @@ public class GenBillRegular {
                                 for(USAGE_XX usage:usageList){
                                 
                                         
-                                        if(countUsage1>=46&&countUsage2>=54){ //Check new page
+                                        if(countUsage1>=52-numCharge&&countUsage2>=54){ //Check new page
                                             aout.writeStructuredField(ptx);
                                             afpCreateTag.createTagEPT(aout);
                                             afpCreateTag.createTagEPG(aout);
@@ -1196,7 +1196,7 @@ public class GenBillRegular {
                                         //Writebody data
                                     
                                     
-                                        if(numRowCol1>0&&countUsage1<46){//col1
+                                        if(numRowCol1>0&&countUsage1<52-numCharge){//col1
                                             
                                             afpCreateTag.setFontID(ptx,58);
                                             f2_x=397;
@@ -1579,7 +1579,7 @@ public class GenBillRegular {
 			afpCreateTag.createTagBPT(aout);
 			ptx = AfplibFactory.eINSTANCE.createPTX();
 			
-			f2=new String[]{"บริษัทฯ ได้ดำเนินการหักภาษี ณ.ที่จ่าย  �?ละ�?ำส�?�?สรร�?า�?ร�?ท�?ท�?า�?�?ล�?ว","อัตรา 3%","อัตรา 5%","รวม"};
+			f2=new String[]{"บริษัทฯ ได้ดำเนินการหักภาษี ณ.ที่จ่าย  และนำส่งสรรพากรแทนท่านแล้ว","อัตรา 3%","อัตรา 5%","รวม"};
 			f2_x=445+180;
 			f2_y=1327+92+125+100+shiftY;
 			afpCreateTag.setFontID(ptx,58);

@@ -51,6 +51,27 @@ public class SetGnValue {
 		afpCreateTag.createTagEII(aout,"IMLS    ");
         return 0;
     }
+    	public static int setGovernorGrayArea(AfpOutputStream aout,int px ,int py)throws  IOException {
+		afpCreateTag.createTagBII(aout,"IMLS    ");
+		byte[] ConData2=new byte[] {(byte)0xFF,(byte)0xFF};
+		afpCreateTag.createTagIOC(aout,px,py,0,11520,1000,1000,ConData2);
+		byte[] ConData1 = new byte[] {(byte)0x00,(byte)0x00,(byte)0x09,(byte)0x60,(byte)0x09,
+                (byte)0x60,(byte)0x00,(byte)0x00,(byte)0x00,(byte)0x00,(byte)0x00,(byte)0x00};
+        ConData2 = new byte[] {(byte)0x00,(byte)0x00,(byte)0x00,(byte)0x00,(byte)0x2d,
+                (byte)0x00};
+        byte[] ConData3 = new byte[] {(byte)0x00,(byte)0x01};
+		afpCreateTag.createTagIID(aout,6000,6000,2,2,1,1,ConData1,ConData2,ConData3);
+		afpCreateTag.createTagICP(aout,32,8,2100,100);
+		byte[] IMdata = new byte[] {(byte)0x00,(byte)0x00,(byte)0x00,(byte)0x00,(byte)0x26,
+                (byte)0x26,(byte)0x26,(byte)0x26,(byte)0x00,(byte)0x00,(byte)0x00,(byte)0x00
+                ,(byte)0x00,(byte)0x00,(byte)0x00,(byte)0x00,(byte)0x00,(byte)0x00,(byte)0x00,(byte)0x00
+                ,(byte)0x62,(byte)0x62,(byte)0x62,(byte)0x62
+                ,(byte)0x00,(byte)0x00,(byte)0x00,(byte)0x00,(byte)0x00,(byte)0x00,(byte)0x00,(byte)0x00
+        };
+		afpCreateTag.createTagIRD(aout,IMdata);
+		afpCreateTag.createTagEII(aout,"IMLS    ");
+        return 0;
+    }    
 	public static int CalPointFont59(PTX ptx,String[] f5,int f5_x,int f5_y)throws  IOException {
 		int cal_start_point=0;
 		int check_minus=0;

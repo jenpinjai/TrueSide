@@ -34,7 +34,13 @@ public class CreatePathCMY {
 		String result = String.format("%04d%02d%02d",
 				Integer.parseInt(CYCLE_YEAR), Integer.parseInt(CYCLE_MONTH), Integer.parseInt(CYCLE_CODE));		
 		
-		
+		File homePathFile = new File(homePath);
+                
+                if(!homePathFile.isDirectory()){
+                
+                    new File(homePath).mkdir();
+                
+                }
 		
 	//	System.out.println("Create PATH "+homePath+result);
 		return homePath+result;
