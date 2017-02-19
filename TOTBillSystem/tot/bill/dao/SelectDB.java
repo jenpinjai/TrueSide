@@ -1453,6 +1453,107 @@ public class SelectDB {
 	    }
 	    return 0;
 	}
+        public static BILL_PRINT_INFO selectBILL_PRINT_INFO_Regular_by_ACCID(Connection conn,String CYCLE_CODE,String CYCLE_MONTH,String CYCLE_YEAR,String accId) throws SQLException{
+		Statement stmt ;
+	    ResultSet rset = null;
+	    String strSQL="";
+	    stmt = conn.createStatement();
+	    ArrayList<BILL_PRINT_INFO> stBILL_PRINT_INFO =new ArrayList<BILL_PRINT_INFO>();
+	    try {
+    		strSQL="select " +
+    				"ACCOUNT_ID," +
+    				"CYCLE_CODE," +
+    				"CYCLE_YEAR," +
+    				"CYCLE_MONTH," +
+    				"to_char(SYS_CREATION_DATE,'YYYYMMDD')," +
+    				"to_char(SYS_UPDATE_DATE,'YYYYMMDD')," +
+    				"ZIP_CODE," +
+    				"PYM_MTD," +
+    				"BILL_TYPE," +
+    				"MAX_PAGE," +
+    				"NAME," +
+    				"ADDRESS1," +
+    				"ADDRESS2," +
+    				"ADDRESS3," +
+    				"ADDRESS4," +
+    				"NAME_R," +
+    				"ADDRESS1_R," +
+    				"ADDRESS2_R," +
+    				"ADDRESS3_R," +
+    				"ADDRESS4_R," +
+    				"PRODUCT_NO," +
+    				"INVOICE_NO," +
+    				"ACCOUNT_TYPE_DES," +
+    				"to_char(BILL_DATE,'YYYYMMDD')," +
+    				"PREVIOUS_BALANCE," +
+    				"PAID_AMOUNT," +
+    				"POST_BILL_ADJUSTMENT," +
+    				"TOTAL_CURRENT_CHARGES," +
+    				"OUTSTANDING_BALANCE," +
+    				"BANK_NAME," +
+    				"CREDIT_CARD_NO," +
+    				"to_char(DUE_DATE,'YYYYMMDD')," +
+    				"to_char(BILL_EXTRACT_DATE,'YYYYMMDD')," +
+    				"QA_ACCOUNT_IND," +
+    				"BILL_PRINT_IND," +
+    				"GOVERNMENT_CODE," +
+    				"SUB_GOV_CODE," +
+    				"PRINT_CATEGORY" +
+    				" from BILL_PRINT_INFO  where CYCLE_CODE='"+CYCLE_CODE+"' " +
+    				"and CYCLE_MONTH='"+CYCLE_MONTH+"' and CYCLE_YEAR='"+CYCLE_YEAR+"' and BILL_TYPE='N' and BILL_PRINT_IND='CF' and ACCOUNT_ID='"+accId+"' " +
+    				"order by max_page,zip_code,pym_mtd,account_id";
+    				
+    		//System.out.println(strSQL);
+    		rset = stmt.executeQuery(strSQL);
+            while (rset.next()){
+                stBILL_PRINT_INFO.add(new BILL_PRINT_INFO(
+                		rset.getString("ACCOUNT_ID"),
+                		rset.getString("CYCLE_CODE"),
+                		rset.getString("CYCLE_YEAR"),
+                		rset.getString("CYCLE_MONTH"),
+                		rset.getString("to_char(SYS_CREATION_DATE,'YYYYMMDD')"), 
+                		rset.getString("to_char(SYS_UPDATE_DATE,'YYYYMMDD')"), 
+                		rset.getString("ZIP_CODE"),
+                		rset.getString("PYM_MTD"), 
+                		rset.getString("BILL_TYPE"),
+                		rset.getString("MAX_PAGE"),
+                		rset.getString("NAME"),
+                		rset.getString("ADDRESS1"),
+                		rset.getString("ADDRESS2"),
+                		rset.getString("ADDRESS3"),
+                		rset.getString("ADDRESS4"),
+                		rset.getString("NAME_R"),
+                		rset.getString("ADDRESS1_R"),
+                		rset.getString("ADDRESS2_R"),
+                		rset.getString("ADDRESS3_R"),
+                		rset.getString("ADDRESS4_R"),
+                		rset.getString("PRODUCT_NO"),
+                		rset.getString("INVOICE_NO"),
+                		rset.getString("ACCOUNT_TYPE_DES"),
+                		rset.getString("to_char(BILL_DATE,'YYYYMMDD')"), 
+                		rset.getString("PREVIOUS_BALANCE"),
+                		rset.getString("PAID_AMOUNT"),
+                		rset.getString("POST_BILL_ADJUSTMENT"),
+                		rset.getString("TOTAL_CURRENT_CHARGES"),
+                		rset.getString("OUTSTANDING_BALANCE"),
+                		rset.getString("BANK_NAME"),
+                		rset.getString("CREDIT_CARD_NO"),
+                		rset.getString("to_char(DUE_DATE,'YYYYMMDD')"), 
+                		rset.getString("to_char(BILL_EXTRACT_DATE,'YYYYMMDD')"), 
+                		rset.getString("QA_ACCOUNT_IND"),
+                		rset.getString("BILL_PRINT_IND"),
+                		rset.getString("GOVERNMENT_CODE"),
+                		rset.getString("SUB_GOV_CODE"),
+                		rset.getString("PRINT_CATEGORY")
+                		));
+                	
+            }
+
+	    }finally {
+	            try { rset.close(); stmt.close(); } catch (Exception ignore) {}
+	    }
+	    return stBILL_PRINT_INFO.get(0);
+	}
 	public static int selectBILL_PRINT_INFO_GOV(Connection conn,String CYCLE_CODE,String CYCLE_MONTH,String CYCLE_YEAR,ArrayList<String> idBILL_PRINT_INFO,ArrayList<BILL_PRINT_INFO> stBILL_PRINT_INFO ) throws SQLException{
 		Statement stmt ;
 	    ResultSet rset = null;

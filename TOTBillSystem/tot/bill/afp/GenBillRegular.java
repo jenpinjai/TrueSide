@@ -224,13 +224,13 @@ public class GenBillRegular {
 			//=========================================================
 			
 			int page_now=1;
-			for(int countDoc=0;countDoc<5;countDoc++){
+			for(int countDoc=0;countDoc<exBan.size();countDoc++){
 			//for(int countDoc=0;countDoc<exBan.size();countDoc++){	
 			page_now=1;
 			
 			//Start Doc
 			afpCreateTag.createTagBPG(aout);
-			SetGnValue.setGNofBAG(aout);	//TOT head banner		
+			SetGnValue.setGNofBAG(aout);		
 			
 			afpCreateTag.createTagBPT(aout);
 			PTX ptx = AfplibFactory.eINSTANCE.createPTX(); 
@@ -1056,7 +1056,7 @@ public class GenBillRegular {
                                 
                                 int shiftTitle = 22;
                                 int shiftDown = (106*numCharge);
-                                if(usageList.size()>numCharge){
+                                if(usageList.size()>numCharge+2){
                                 	afpCreateTag.setPTXxy(ptx,420+30,1404+shiftDown);
                                         afpCreateTag.setFontID(ptx,78);
                                         afpCreateTag.setPTX_TRN(ptx,"รายละเอียดค่าใช้ทางไกล/เคลื่อนที่  "+exBan.get(countDoc).getPhoneNumber());
@@ -1220,7 +1220,7 @@ public class GenBillRegular {
                                             f2_x=2401;
                                             afpCreateTag.setPTXxy(ptx,f2_x,f2_y);				
                                             //afpCreateTag.setPTX_TRN(ptx,String.format("%.2f", Double.valueOf(usage.getCHARGE_AMT())));
-                                            SetGnValue.CalPointFont58Single(ptx, String.format("%,.2f", Double.valueOf(usage.getCHARGE_AMT())), f2_x, f2_y);
+                                            SetGnValue.CalPointFont58Single(ptx, String.format("%,.2f", Double.valueOf(usage.getCHARGE_AMT().equals("null")?"0":usage.getCHARGE_AMT())), f2_x, f2_y);
                                             countUsage1++;
                                             numRowCol1--;
 
@@ -1247,7 +1247,7 @@ public class GenBillRegular {
                                             f2_x=2401+2190;
                                             afpCreateTag.setPTXxy(ptx,f2_x,f2_y);				
                                             //afpCreateTag.setPTX_TRN(ptx,String.format("%.2f", Double.valueOf(usage.getCHARGE_AMT())));
-                                            SetGnValue.CalPointFont58Single(ptx, String.format("%,.2f", Double.valueOf(usage.getCHARGE_AMT())), f2_x, f2_y);
+                                            SetGnValue.CalPointFont58Single(ptx, String.format("%,.2f", Double.valueOf(usage.getCHARGE_AMT().equals("null")?"0":usage.getCHARGE_AMT())), f2_x, f2_y);
                                             countUsage2++;
                                         }
                                         
@@ -1712,7 +1712,7 @@ public class GenBillRegular {
 		
 		try { conPRM.close(); } catch (Exception ignore) {}
 	    try { conBILL.close(); } catch (Exception ignore) {}
-	    System.out.println("END");
+	    System.out.println("END GenBillRegular");
 	}
 
 	

@@ -8,6 +8,7 @@ public class BILL_QA {
 	private String SYS_CREATION_DATE;
 	private String SYS_UPDATE_DATE;
 	private String DESCRIPTION;
+        public BILL_QA(){}
 	public BILL_QA(String aCCOUNT_ID, String cYCLE_CODE, String cYCLE_YEAR,
 			String cYCLE_MONTH, String sYS_CREATION_DATE,
 			String sYS_UPDATE_DATE, String dESCRIPTION) {

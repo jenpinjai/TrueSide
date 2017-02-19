@@ -39,13 +39,13 @@ public class ExtractUsage_XX2File {
 		String CYCLE_MONTH=args[1];
 		String CYCLE_YEAR=args[2];
 		
-		String statusQa =args[3];
-		String statusBillType =args[4];
+		//String statusQa =args[3];
+		//String statusBillType =args[4];
 		
 		System.out.print("CYCLE_CODE="+CYCLE_CODE);
 		System.out.print(",CYCLE_MONTH="+CYCLE_MONTH);
 		System.out.println(",CYCLE_YEAR="+CYCLE_YEAR);	
-		System.out.println("QA Status="+statusQa);
+		//System.out.println("QA Status="+statusQa);
 		
 		//get local time
         DateFormat dateFormat = new SimpleDateFormat("yyyyMMddHHmmss",Locale.ENGLISH);

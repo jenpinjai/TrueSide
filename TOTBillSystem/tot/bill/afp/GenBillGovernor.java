@@ -213,41 +213,6 @@ public class GenBillGovernor {
 		    inputFile.close();
 		}
 
-		System.out.println("Start Gen Bill AFP");
-		//start gen bill process
-		String PathOutputAFPRegular=CreatePathCMY.byCMYString(setEnv.AFP_Governor_file_gen, CYCLE_CODE, CYCLE_MONTH, CYCLE_YEAR)+setEnv.folderAFP_Governor_file_gen;
-		System.out.println(PathOutputAFPRegular);
-		new File(PathOutputAFPRegular).mkdir();
-		String outputFile="";
-		if(statusQa.equals("Y")){
-			outputFile=PathOutputAFPRegular+"QA_Governor_Template01.afp";
-		}else{
-			outputFile=PathOutputAFPRegular+"Governor_Template01.afp";
-		}
-		try (AfpOutputStream aout = new AfpOutputStream(new FileOutputStream(outputFile))) {
-			
-			
-			
-			//Start Header=============================================
-			afpCreateTag.createTagBDT(aout);
-			afpCreateTag.createTagIMM(aout,"F20101PA");
-			//End 
-			//=========================================================
-			
-			int page_now=1;
-		  
-			//for(int countDoc=0;countDoc<exBan.size();countDoc++){	
-			page_now=1;
-
-			//Start Doc
-//                      afpCreateTag.createTagBPG(aout);
-//			SetGnValue.setGNofBAG(aout);	//TOT head banner		
-			
-			afpCreateTag.createTagBPT(aout);
-			PTX ptx = AfplibFactory.eINSTANCE.createPTX(); 
-			
-			
-			//aout.writeStructuredField(ptx);
 
 			
 			int f2_x;
@@ -256,16 +221,17 @@ public class GenBillGovernor {
                         //Add data to LinePrintList
                         Map<String,Double> sumCateMap = new HashMap<String,Double>();
                         List<String> cateCodeList = new ArrayList<String>();
+                        int countCharge=0;
                         for(int countDoc=0;countDoc<exBan.size();countDoc++){	
                                 int rowCharge=0;
                                 if(stChargeMap.containsKey(exBan.get(countDoc).getAccountID())){
-
+                                        countCharge++;
                                         LinePrint line = new LinePrint();
                                         line.setFontId(79);
                                         line.setBlockHead(true);
                                         
                                         WordPrint word = new WordPrint();
-                                        word.setText("    "+(countDoc+1)+". หมายเลข "+exBan.get(countDoc).getPhoneNumber());
+                                        word.setText("    "+(countCharge)+". หมายเลข "+exBan.get(countDoc).getPhoneNumber());
                                         word.setPx(0);
                                         line.getWords().add(word);
 
@@ -521,185 +487,248 @@ public class GenBillGovernor {
                                         lineSum.getWords().add(word);
                                         linePrints.add(lineSum);
                             
-                            
-                                
-                       
                         //Cal page number
                         
-                        
                        if(linePrints.size()%108>0){
-                       
                            lastPageNum =linePrints.size()/108 +1;
-                       
                        }else{
-                       
                             lastPageNum =linePrints.size()/108;
                        }
-                        
-			//Page 2 
-			createNextInfoPage(aout,ptx);
-			//body
-			afpCreateTag.createTagBPT(aout);
-			ptx = AfplibFactory.eINSTANCE.createPTX(); 
-			////////////////////////////////////Head banner
-                        afpCreateTag.createTagEPT(aout);
-			
-			afpCreateTag.createTagIPS(aout,355,212,"S1BLLTR1");
-			
-			afpCreateTag.createTagIPS(aout,3545,212,"S1SPACE1");
-			
-			afpCreateTag.createTagBPT(aout);
-                        ////////////////////////////////////////////
-                        aout.writeStructuredField(ptx);
-                        afpCreateTag.createTagEPT(aout);//Write
-                    
-                   
+                       
+                       //Cal Max file number
+                       
+                       int maxFileNumber =0;
+                       int numForSplitFile = 1000; //Config number for new file when page more than
+                       int lastFileLastPage=0;
+                       maxFileNumber = lastPageNum/numForSplitFile;
+                       lastFileLastPage = lastPageNum%numForSplitFile;
+                       if(lastPageNum%numForSplitFile>0){
+                       
+                           maxFileNumber++;
+                       }
+                       
+                       System.out.println("Start Gen Bill AFP");
+                       //start gen bill process
+                       String PathOutputAFPRegular=CreatePathCMY.byCMYString(setEnv.AFP_Governor_file_gen, CYCLE_CODE, CYCLE_MONTH, CYCLE_YEAR)+setEnv.folderAFP_Governor_file_gen;
+                       System.out.println(PathOutputAFPRegular);
+                       new File(PathOutputAFPRegular).mkdir();
 
-                    
-                    int countLine1=0;
-                    int countLine2=0;
-                    int numRowCol1=0;
-                    int numRowCol2=0;
-                    int numsplit  =0;
-                    int lineSize  = linePrints.size();            
-
-                    if(lineSize%2==0){
-
-                        numsplit = lineSize/2;
-                        numRowCol1 = numsplit;
-                        numRowCol2 = numsplit;
-
-                    }else if((lineSize)%2==1){
-
-                        numsplit = lineSize/2;
-                        numRowCol1 = numsplit+1;
-                        numRowCol2 = numsplit;
-
-                    }
-                    //Begin set AFP file
-                    afpCreateTag.createTagBPT(aout);
-		    ptx = AfplibFactory.eINSTANCE.createPTX(); 
-                    
-                    int fx=0;
-                    int fy=0;
-                    int numLinePrinted=0;
-                    int grayPx=0;
-                    int grayPy=0;
-                    boolean startBlocking=false;
-                    for(LinePrint line:linePrints){
-                    
-                               
-                        
-                                if(countLine1>=54&&countLine2>=54){
-                                    aout.writeStructuredField(ptx);
-                                    afpCreateTag.createTagEPT(aout);
-                                    afpCreateTag.createTagEPG(aout);
-                                    int totalCurentUsage = lineSize-numLinePrinted;
-                                    if((totalCurentUsage)%2==0){
-
-                                            numsplit = (totalCurentUsage)/2;
-                                            numRowCol1 = numsplit;
-                                            numRowCol2 = numsplit;
-
-                                    }else if((totalCurentUsage)%2==1){
-
-                                            numsplit = (totalCurentUsage)/2;
-                                            numRowCol1 = numsplit+1;
-                                            numRowCol2 = numsplit;
-
-                                    }
-                                            countLine1=0;
-                                            countLine2=0;
-                                            //Next page
-                                            createNextInfoPage(aout,ptx);
-                                
-                                            afpCreateTag.createTagBPT(aout);
-                                            ptx = AfplibFactory.eINSTANCE.createPTX();
+                       String outputFile="";
+                       for(int fileNum=1;fileNum<=maxFileNumber;fileNum++){
+                           
+                                lastPageNum =numForSplitFile;
+                                currPageNum =0;
+                           
+                                if(fileNum==maxFileNumber){
+                                    lastPageNum = lastFileLastPage;
                                 }
-                                if(!line.isBlock()){
-                                    startBlocking=false;
+                           
+                                if(statusQa.equals("Y")){
+                                         outputFile=PathOutputAFPRegular+"QA_Governor_Template"+String.format("%02d", fileNum)+".afp";
+                                }else{
+                                         outputFile=PathOutputAFPRegular+"Governor_Template"+String.format("%02d", fileNum)+".afp";
                                 }
-                                
-                                if((numRowCol1>0||startBlocking)&&countLine1<54){//col1
-                                    fx=397;
-                                    fy=1336+(countLine1*105);       
-                                    numRowCol1--;
-                                    countLine1++;
-                                }else if(countLine2<54){//col2
-                                    fx=397+2190;
-                                    fy=1336+(countLine2*105); 
-                                    countLine2++;
-                                }
-                                for(WordPrint wordPrint:line.getWords()){
-                                        afpCreateTag.setFontID(ptx,line.getFontId());
-                                        if(!wordPrint.isIsPullRight()){
-                                            
-                                            afpCreateTag.setPTXxy(ptx,fx+wordPrint.getPx(),fy);				
-                                            afpCreateTag.setPTX_TRN(ptx,wordPrint.getText());
-                                        
-                                        }else{
-                                        
-                                            afpCreateTag.setPTXxy(ptx,fx+wordPrint.getPx(),fy);
-                                            SetGnValue.CalPointFont58Single(ptx, wordPrint.getText(), fx+wordPrint.getPx(), fy);
-                                        
-                                        }
-                                        
-                                        if(wordPrint.getText().equals("รวมค่าบริการทั้งสิ้น")){
-                                        
-                                            grayPx = fx;
-                                            grayPy = fy;
-                                        
-                                        }
-                                }
-                                
-                                if(line.isBlockHead()&&countLine2<=0){
-                                
-                                    startBlocking=true;
-                                
-                                }
-                                
-                                
-                                numLinePrinted++;
-                    
-                    }
-                    //LastPage
-                    
-                    aout.writeStructuredField(ptx);
-                    afpCreateTag.createTagEPT(aout);
-                    
-                    
-                    SetGnValue.setGovernorGrayArea(aout,grayPx,grayPy-75);
-			
-			afpCreateTag.createTagBPT(aout);
-			ptx = AfplibFactory.eINSTANCE.createPTX();
-			
-                        
-                        aout.writeStructuredField(ptx);
-			afpCreateTag.createTagEPT(aout);
-                    
-		    //tail page
-                    afpCreateTag.createTagBPT(aout);
-                    ptx = AfplibFactory.eINSTANCE.createPTX(); 
-			
-                    afpCreateTag.setPTXxy(ptx,355,4359);
 
-			
-			
-                    afpCreateTag.createTagEPG(aout);
-		    
-                    if(lastPageNum%2==1){
-                        //write emtry page
-                        afpCreateTag.createTagBPG(aout);
-                        SetGnValue.setGNofBAG(aout);
-                        afpCreateTag.createTagEPG(aout);
-                    }
-			
-                    //Start Tailer
-                    afpCreateTag.createTagEDT(aout);
-                    //End Tailer
-		} catch (IOException e) {
-            e.printStackTrace();
-        }
+                                try (AfpOutputStream aout = new AfpOutputStream(new FileOutputStream(outputFile))) {
+
+                                 //Start Header=============================================
+                                 afpCreateTag.createTagBDT(aout);
+                                 afpCreateTag.createTagIMM(aout,"F20101PA");
+                                 //End 
+                                 //=========================================================
+
+                                 int page_now=1;
+
+                                 //for(int countDoc=0;countDoc<exBan.size();countDoc++){	
+                                 page_now=1;
+
+                                 //Start Doc
+         //                      afpCreateTag.createTagBPG(aout);
+         //			SetGnValue.setGNofBAG(aout);	//TOT head banner		
+
+                                 afpCreateTag.createTagBPT(aout);
+                                 PTX ptx = AfplibFactory.eINSTANCE.createPTX(); 
+
+
+                                 //aout.writeStructuredField(ptx);
+                                 //Page 2 
+                                 createNextInfoPage(aout,ptx);
+                                 //body
+                                 afpCreateTag.createTagBPT(aout);
+                                 ptx = AfplibFactory.eINSTANCE.createPTX(); 
+                                 ////////////////////////////////////Head banner
+                                 afpCreateTag.createTagEPT(aout);
+
+                                 afpCreateTag.createTagIPS(aout,355,212,"S1BLLTR1");
+
+                                 afpCreateTag.createTagIPS(aout,3545,212,"S1SPACE1");
+
+                                 afpCreateTag.createTagBPT(aout);
+                                 ////////////////////////////////////////////
+                                 aout.writeStructuredField(ptx);
+                                 afpCreateTag.createTagEPT(aout);//Write
+
+                             
+                             //Cal sup lineList
+                             int headList=0;
+                             int tailList=0;
+                             headList = (fileNum-1)*numForSplitFile*108;
+                             tailList = fileNum*numForSplitFile*108;
+                             
+                             if(fileNum==maxFileNumber){
+                             
+                                 tailList = linePrints.size();
+                             }
+
+
+                             int countLine1=0;
+                             int countLine2=0;
+                             int numRowCol1=0;
+                             int numRowCol2=0;
+                             int numsplit  =0;
+                             int lineSize  = linePrints.subList(headList, tailList).size();
+
+                             if(lineSize%2==0){
+
+                                 numsplit = lineSize/2;
+                                 numRowCol1 = numsplit;
+                                 numRowCol2 = numsplit;
+
+                             }else if((lineSize)%2==1){
+
+                                 numsplit = lineSize/2;
+                                 numRowCol1 = numsplit+1;
+                                 numRowCol2 = numsplit;
+
+                             }
+                             //Begin set AFP file
+                             afpCreateTag.createTagBPT(aout);
+                             ptx = AfplibFactory.eINSTANCE.createPTX(); 
+
+                             int fx=0;
+                             int fy=0;
+                             int numLinePrinted=0;
+                             int grayPx=0;
+                             int grayPy=0;
+                             boolean startBlocking=false;
+                             
+                            
+                             
+                             for(LinePrint line:linePrints.subList(headList, tailList)){
+
+
+
+                                         if(countLine1>=54&&countLine2>=54){
+                                             aout.writeStructuredField(ptx);
+                                             afpCreateTag.createTagEPT(aout);
+                                             afpCreateTag.createTagEPG(aout);
+                                             int totalCurentUsage = lineSize-numLinePrinted;
+                                             if((totalCurentUsage)%2==0){
+
+                                                     numsplit = (totalCurentUsage)/2;
+                                                     numRowCol1 = numsplit;
+                                                     numRowCol2 = numsplit;
+
+                                             }else if((totalCurentUsage)%2==1){
+
+                                                     numsplit = (totalCurentUsage)/2;
+                                                     numRowCol1 = numsplit+1;
+                                                     numRowCol2 = numsplit;
+
+                                             }
+                                                     countLine1=0;
+                                                     countLine2=0;
+                                                     //Next page
+                                                     createNextInfoPage(aout,ptx);
+
+                                                     afpCreateTag.createTagBPT(aout);
+                                                     ptx = AfplibFactory.eINSTANCE.createPTX();
+                                         }
+                                         if(!line.isBlock()){
+                                             startBlocking=false;
+                                         }
+
+                                         if((numRowCol1>0||startBlocking)&&countLine1<54){//col1
+                                             fx=397;
+                                             fy=1336+(countLine1*105);       
+                                             numRowCol1--;
+                                             countLine1++;
+                                         }else if(countLine2<54){//col2
+                                             fx=397+2190;
+                                             fy=1336+(countLine2*105); 
+                                             countLine2++;
+                                         }
+                                         for(WordPrint wordPrint:line.getWords()){
+                                                 afpCreateTag.setFontID(ptx,line.getFontId());
+                                                 if(!wordPrint.isIsPullRight()){
+
+                                                     afpCreateTag.setPTXxy(ptx,fx+wordPrint.getPx(),fy);				
+                                                     afpCreateTag.setPTX_TRN(ptx,wordPrint.getText());
+
+                                                 }else{
+
+                                                     afpCreateTag.setPTXxy(ptx,fx+wordPrint.getPx(),fy);
+                                                     SetGnValue.CalPointFont58Single(ptx, wordPrint.getText(), fx+wordPrint.getPx(), fy);
+
+                                                 }
+
+                                                 if(wordPrint.getText().equals("รวมค่าบริการทั้งสิ้น")){
+
+                                                     grayPx = fx;
+                                                     grayPy = fy;
+
+                                                 }
+                                         }
+
+                                         if(line.isBlockHead()&&countLine2<=0){
+
+                                             startBlocking=true;
+
+                                         }
+
+
+                                         numLinePrinted++;
+
+                             }
+                             //LastPage
+
+                             aout.writeStructuredField(ptx);
+                             afpCreateTag.createTagEPT(aout);
+
+
+                             SetGnValue.setGovernorGrayArea(aout,grayPx,grayPy-75);
+
+                                 afpCreateTag.createTagBPT(aout);
+                                 ptx = AfplibFactory.eINSTANCE.createPTX();
+
+
+                                 aout.writeStructuredField(ptx);
+                                 afpCreateTag.createTagEPT(aout);
+
+                             //tail page
+                             afpCreateTag.createTagBPT(aout);
+                             ptx = AfplibFactory.eINSTANCE.createPTX(); 
+
+                             afpCreateTag.setPTXxy(ptx,355,4359);
+
+
+
+                             afpCreateTag.createTagEPG(aout);
+
+                             if(lastPageNum%2==1){
+                                 //write emtry page
+                                 afpCreateTag.createTagBPG(aout);
+                                 SetGnValue.setGNofBAG(aout);
+                                 afpCreateTag.createTagEPG(aout);
+                             }
+
+                             //Start Tailer
+                             afpCreateTag.createTagEDT(aout);
+                             //End Tailer
+                         } catch (IOException e) {
+                             e.printStackTrace();
+                         }
+                }               
 		System.out.println("create success");
 		long endTime = System.currentTimeMillis();
 		
@@ -709,8 +738,8 @@ public class GenBillGovernor {
 		System.out.println("Time : " + elapse / 1000.0);
 		
 		try { conPRM.close(); } catch (Exception ignore) {}
-	    try { conBILL.close(); } catch (Exception ignore) {}
-	    System.out.println("END");
+                try { conBILL.close(); } catch (Exception ignore) {}
+                System.out.println("END");
 	}
 
 	public static void createNextInfoPage(AfpOutputStream aout,PTX ptx) throws IOException{
@@ -722,6 +751,58 @@ public class GenBillGovernor {
                                             afpCreateTag.createTagBPT(aout);
                                             ptx = AfplibFactory.eINSTANCE.createPTX(); 
 
+                                            
+                                            //OMR
+                                            if(currPageNum%2==1){
+                                                    int calOddbit=0;
+
+                                                    //start bit
+                                                    afpCreateTag.setPTXxy(ptx,120,517);
+                                                    afpCreateTag.setDIR(ptx,150,7,0);
+                                                    calOddbit++;
+
+                                                    String printBit=String.format("%5s", Integer.toBinaryString(5)).replace(' ', '0');
+                                                    //bit 1 start 877 inc 120 to 1357
+                                                    for(int countOMRBit=4;countOMRBit>=0;countOMRBit--){
+                                                            if(printBit.charAt(countOMRBit)=='1'){	
+                                                                    afpCreateTag.setPTXxy(ptx,120,1357-(120*countOMRBit));
+                                                                    afpCreateTag.setDIR(ptx,150,7,0);
+                                                                    calOddbit++;
+                                                            }
+                                                    }
+                                                    if(lastPageNum%2==0&&currPageNum==lastPageNum-1){
+                                                         //stop page
+                                                        afpCreateTag.setPTXxy(ptx,120,1957);
+                                                        afpCreateTag.setDIR(ptx,150,7,0);
+                                                        calOddbit++;
+                                                    
+                                                    }else if(lastPageNum%2==1&&currPageNum==lastPageNum){
+                                                    
+                                                         //stop page
+                                                        afpCreateTag.setPTXxy(ptx,120,1957);
+                                                        afpCreateTag.setDIR(ptx,150,7,0);
+                                                        calOddbit++;
+                                                    
+                                                    }
+                                                        
+                                                        
+                                                    //stop bit
+                                                    afpCreateTag.setPTXxy(ptx,120,2197);
+                                                    afpCreateTag.setDIR(ptx,150,7,0);
+                                                    calOddbit++;
+
+                                                    if(calOddbit%2!=0){
+                                                    //check odd bit
+                                                    afpCreateTag.setPTXxy(ptx,120,757);
+                                                    afpCreateTag.setDIR(ptx,150,7,0);
+                                                    }
+
+                                                    aout.writeStructuredField(ptx);
+                                                    //afpCreateTag.createTagEPT(aout);
+                                                    //afpCreateTag.createTagEPG(aout);
+                                                    //End OMR
+                                            }
+                                            
                                             afpCreateTag.setPTXxy(ptx,pageNumX,pageNumY);
                                             afpCreateTag.setFontID(ptx,57);
                                             afpCreateTag.setPTX_TRN(ptx,"หน้า "+String.format("%,d", currPageNum)+" / "+String.format("%,d", lastPageNum));
