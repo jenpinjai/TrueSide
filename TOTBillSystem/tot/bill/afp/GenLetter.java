@@ -1,6 +1,7 @@
 package tot.bill.afp;
 
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.FileReader;
@@ -10,6 +11,8 @@ import java.util.ArrayList;
 import org.afplib.afplib.*;
 import org.afplib.io.AfpOutputStream;
 import java.sql.*;
+import tot.bill.resources.setEnv;
+import tot.bill.service.CreatePathCMY;
 
 
 
@@ -125,7 +128,17 @@ public class GenLetter {
 		*/
 		System.out.println("Start Gen AFP");
 		String outputFile="Letter.afp";
-		try (AfpOutputStream aout = new AfpOutputStream(new FileOutputStream(outputFile))) {
+                String letterFolderPath = setEnv.AFP_Letter_file_gen;
+                String PathOutputBillPrintInfo=letterFolderPath+outputFile;
+                
+                File letterFolder = new File(letterFolderPath);
+                if(!letterFolder.isDirectory()){
+                
+                        letterFolder.mkdir();
+                }
+                
+                
+		try (AfpOutputStream aout = new AfpOutputStream(new FileOutputStream(PathOutputBillPrintInfo))) {
 			
 			
 			
@@ -167,8 +180,8 @@ public class GenLetter {
 					"เรียน		         ท่านผู้ใช้บริการโทรศัพท์ที่นับถือ",
 					" ",
 					"                 บริษัท ทีโอที จำกัด (มหาชน) ขอขอบคุณที่ท่านได้ใช้บริการของ บมจ. ทีโอที และมีประวัติการชำระเงินที่ดีตลอด",
-					"ระยะเวลาที่ผ่านมา แต่บัดนี้ บมจ. ทีโอที ขอเรียนให้ท่านทราบว่า จากการตรวจสอบการชำระค่าบริการ หมายเลขของท่านมี",
-					"ยอดค้างชำระค่าบริการโทรศัพท์",
+					"ระยะเวลาที่ผ่านมา แต่บัดนี้ บมจ. ทีโอที ขอเรียนให้ท่านทราบว่า จากการตรวจสอบการชำระค่าบริการ หมายเลขของท่านมียอด",
+					"ค้างชำระค่าบริการโทรศัพท์",
 					"                 บมจ. ทีโอที จึงหวังเป็นอย่างยิ่งว่าเมื่อท่านได้รับจดหมายฉบับนี้ ท่านจะดำเนินการชำระยอดเงินดังกล่าวเต็ม",
 					"จำนวนทันที โดยท่านสามารถชำระค่าบริการ ณ ศูนย์บริการลูกค้า ทีโอที ทุกแห่ง ภายใน 15 วันนับตั้งแต่วันที่ระบุในเอกสาร",
 					"ฉบับนี้และเพื่อความสะดวกของท่านโปรดกรุณานำใบแจ้งหนี้ที่ค้างชำระมาด้วย เมื่อพ้นกำหนดเวลาข้างต้น ",
@@ -186,30 +199,64 @@ public class GenLetter {
 				afpCreateTag.setPTXxy(ptx,f1_x,f1_y+(140*i));				
 				afpCreateTag.setPTX_TRN(ptx,f1[i]);
 			}
-
-
+                        
+                        afpCreateTag.setPTXxy(ptx,f1_x+2640,f1_y+845);//Set Line spawn
+                        afpCreateTag.setPTX_DrawLine(ptx, 1360, 1);//Write Underline
+                        
+                        afpCreateTag.setPTXxy(ptx,f1_x,f1_y+985);//Set Line spawn
+                        afpCreateTag.setPTX_DrawLine(ptx, 2560, 1);//Write Underline
+                        
+                        int shifDown=200;
+                        
+                        
 			
 			
-			
-			afpCreateTag.setPTXxy(ptx,1535,4355);
+			afpCreateTag.setPTXxy(ptx,1635,4305+shifDown);
 			afpCreateTag.setFontID(ptx,80);
 			afpCreateTag.setPTX_TRN(ptx,"รายละเอียดค่าเช่าและค่าบริการโทรศัพท์ค้างชำระ");
 			
-			afpCreateTag.setPTXxy(ptx,920,4475);
+                        afpCreateTag.setPTXxy(ptx,1635,4315+shifDown);//Set Line spawn
+                        afpCreateTag.setPTX_DrawLine(ptx, 1710, 1);//Write Underline
+                        
+			afpCreateTag.setPTXxy(ptx,1020,4475+shifDown);
 			afpCreateTag.setFontID(ptx,59);
 			afpCreateTag.setPTX_TRN(ptx,"ณ วันที่	                        รวมยอดค้างชำระทั้งสิ้น	                       วันที่ครบกำหนดชำระ");
 			
+			afpCreateTag.setPTXxy(ptx,1020,4480+shifDown);//Set Line spawn
+                        afpCreateTag.setPTX_DrawLine(ptx, 210, 1);//Write Underline
+                        
+                        afpCreateTag.setPTXxy(ptx,1815,4480+shifDown);//Set Line spawn
+                        afpCreateTag.setPTX_DrawLine(ptx, 670, 1);//Write Underline
+                        
+                        afpCreateTag.setPTXxy(ptx,3030,4480+shifDown);//Set Line spawn
+                        afpCreateTag.setPTX_DrawLine(ptx, 600, 1);//Write Underline
 			
-			
-			afpCreateTag.setPTXxy(ptx,850,4595);
+			afpCreateTag.setPTXxy(ptx,950,4595+shifDown);
 			afpCreateTag.setFontID(ptx,59);
 			afpCreateTag.setPTX_TRN(ptx,LAST_INVOICE_DATE.get(countDoc));
 			
-			afpCreateTag.setPTXxy(ptx,1950,4595);
+                        
+                        int shifNumCenter =0;
+                        /////Cal shif center
+                        String balaceAmount = String.format("%,.2f", Double.valueOf("78678678670.33"));
+                        if(balaceAmount.length()>4){
+                            for(int s=balaceAmount.length()-5;s>=0;s--){
+                                
+                                if(balaceAmount.charAt(s)==','){
+                                
+                                        shifNumCenter+=3;
+                                }else{
+                                        shifNumCenter+=20;
+                                }
+                            }
+                        }
+                        
+			afpCreateTag.setPTXxy(ptx,2085-shifNumCenter,4595+shifDown);
 			afpCreateTag.setFontID(ptx,59);
-			afpCreateTag.setPTX_TRN(ptx,AR_BALANCE.get(countDoc));
-			
-			afpCreateTag.setPTXxy(ptx,3070,4595);
+			//afpCreateTag.setPTX_TRN(ptx,String.format("%,.2f", Double.valueOf(AR_BALANCE.get(countDoc))));
+			afpCreateTag.setPTX_TRN(ptx,balaceAmount);
+                        
+			afpCreateTag.setPTXxy(ptx,3170,4595+shifDown);
 			afpCreateTag.setFontID(ptx,59);
 			afpCreateTag.setPTX_TRN(ptx,LAST_INVOICE_DUE_DATE.get(countDoc));
 			
@@ -220,14 +267,14 @@ public class GenLetter {
 					"อิมพีเรียล สำโรง, แฟชั่น ไอซ์แลนด์, ซีคอนแสควร์, เดอะมอลล์(งามวงศ์วาน,บางกะปิ,ท่าพระ,บางแค) , ฟิวเจอร์ปาร์ค รังสิต, โลตัส(แจ้งวัฒนะ,พระราม 1,ศรีนครินทร์),",
 					"เซ็นทรัล(บางนา,ลาดพร้าว,ปิ่นเกล้า,พระราม 2,พระราม 3) , ยูไนเต็ดเซ็นเตอร์"};
 			f1_x=630;
-			f1_y=4855;
+			f1_y=4855+shifDown;
 			afpCreateTag.setFontID(ptx,58);
 			for(int i=0;i<f1.length;i++){
 				afpCreateTag.setPTXxy(ptx,f1_x,f1_y+(100*i));				
 				afpCreateTag.setPTX_TRN(ptx,f1[i]);
 			}
 			
-			afpCreateTag.setPTXxy(ptx,630,5320);
+			afpCreateTag.setPTXxy(ptx,630,5320+shifDown);
 			afpCreateTag.setFontID(ptx,59);
 			afpCreateTag.setPTX_TRN(ptx,"หมายเหตุ");
 					
@@ -235,14 +282,14 @@ public class GenLetter {
 					"หากท่านมีข้อสงสัยประการใดสามารถติดต่อสอบถามได้ที่ โทร 0-2900-9000 ระหว่างเวลา 08:00 - 18:00  น.",
 					"ทุกวันไม่เว้นวันหยุดราชการ"};
 			f1_x=1000;
-			f1_y=5320;
+			f1_y=5320+shifDown;
 			afpCreateTag.setFontID(ptx,59);
 			for(int i=0;i<f1.length;i++){
 				afpCreateTag.setPTXxy(ptx,f1_x,f1_y+(120*i));				
 				afpCreateTag.setPTX_TRN(ptx,f1[i]);
 			}
 
-			afpCreateTag.setPTXxy(ptx,1000,5750);
+			afpCreateTag.setPTXxy(ptx,1000,5750+shifDown);
 			afpCreateTag.setFontID(ptx,80);
 			afpCreateTag.setPTX_TRN(ptx,"ขอขอบพระคุณที่ใช้บริการ บริษัท ทรู คอร์ปอเรชั่น จำกัด (มหาชน)");
 			

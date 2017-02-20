@@ -61,6 +61,10 @@ public class setEnv {
 	public static String AFP_Governor_file_gen=System.getenv("HOME")+"/var/tea/AFP/Governor/";
 	public static String folderAFP_Governor_file_gen="/"; 
         
+        // AFP OUT Governor
+	public static String AFP_Letter_file_gen=System.getenv("HOME")+"/var/tea/AFP/Letter/";
+	public static String folderAFP_Letter_file_gen="/"; 
+        
         // EXCEL IN Bill_QA
 	public static String EXCEL_BILL_QA_file_INPUT=System.getenv("HOME")+"/var/tea/BillQAWeb/input";
         public static String EXCEL_BILL_QA_file_OUTPUT=System.getenv("HOME")+"/var/tea/BillQAWeb/output";

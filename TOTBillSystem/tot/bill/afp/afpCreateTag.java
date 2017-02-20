@@ -172,7 +172,17 @@ public class afpCreateTag {
 		setDBR(ptx,box_y*-1+box_border,box_border,0);
 		return 0;
 	}
-	
+	public static int setPTX_DrawLine(PTX ptx,int box_x,int box_border)throws  IOException {
+
+		setDIR(ptx,box_x,box_border,0);
+		setPTXRelativexy(ptx,box_x,0);
+		//setDBR(ptx,box_y,box_border,0);
+		//setPTXRelativexy(ptx,0,box_y-box_border);
+		//setDIR(ptx,box_x*-1,box_border,0);
+		//setPTXRelativexy(ptx,box_x*-1,0);
+		//setDBR(ptx,box_y*-1+box_border,box_border,0);
+		return 0;
+	}
 	
 	public static int setPTX_TRN(PTX ptx,String writeText)throws  IOException {
 		TRN trn =AfplibFactory.eINSTANCE.createTRN();                       
@@ -202,6 +212,44 @@ public class afpCreateTag {
         outputStr=outputStr+"ษmว";
         
         outputStrMap=mapBarcodAll.Map128ALL(inputStr4);
+        outputStr=outputStr+outputStrMap;
+        
+        outputStr=outputStr+mapBarcodAll.checkSumMap128ALL(outputStr);
+        
+        outputStr=outputStr+"ฮ";
+        //System.out.println(outputStr);
+
+       // byte[] aa = ebcdicToAscii.convertStringToEBCDIC(outputStr.getBytes());
+        byte[] aa=outputStr.getBytes("CP838"); 
+        trn.setTRNDATA(aa);
+        ptx.getCS().add(trn);
+       return 0;
+	}
+        
+        public static int setPTX_TRN_Barcode5Data(PTX ptx,String inputStr1,String inputStr2,String inputStr3,String inputStr4,String inputStr5)throws  IOException {
+		TRN trn =AfplibFactory.eINSTANCE.createTRN();                       
+        
+        String outputStr="";
+        String outputStrMap="";
+        outputStr="ฬ|ว";
+        
+        outputStrMap=mapBarcodAll.Map128ALL(inputStr1);
+        outputStr=outputStr+outputStrMap;
+        outputStr=outputStr+"ษmว";
+        
+        outputStrMap=mapBarcodAll.Map128ALL(inputStr2);
+        outputStr=outputStr+outputStrMap;
+        outputStr=outputStr+"ษmว";
+        
+        outputStrMap=mapBarcodAll.Map128ALL(inputStr3);
+        outputStr=outputStr+outputStrMap;
+        outputStr=outputStr+"ษmว";
+        
+        outputStrMap=mapBarcodAll.Map128ALL(inputStr4);
+        outputStr=outputStr+outputStrMap;
+        outputStr=outputStr+"ษmว";
+        
+        outputStrMap=mapBarcodAll.Map128ALL(inputStr5);
         outputStr=outputStr+outputStrMap;
         
         outputStr=outputStr+mapBarcodAll.checkSumMap128ALL(outputStr);
