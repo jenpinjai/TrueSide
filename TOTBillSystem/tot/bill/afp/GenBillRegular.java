@@ -18,9 +18,12 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Function;
 
 import org.afplib.afplib.*;
 import org.afplib.io.AfpOutputStream;
+import org.apache.commons.beanutils.BeanComparator;
+import static tot.bill.afp.GenBillGovernor.miniteToHHmmssFormat;
 
 import tot.bill.dao.SelectDB;
 import tot.bill.dao.createConnectionDB;
@@ -158,8 +161,7 @@ public class GenBillRegular {
                         featureMap.put(feature.getCATEGORY_CODE(), feature.getFEATURE_DESC());
                 }
                 
-                
-                
+
                 //read Usage
 		
 	    String PathOutputUsage=CreatePathCMY.byCMYString(setEnv.Usage_file_gen, CYCLE_CODE, CYCLE_MONTH, CYCLE_YEAR)+setEnv.folderUsage_file_gen;
@@ -201,21 +203,78 @@ public class GenBillRegular {
 		}finally {
 		    inputFile.close();
 		}
+                
+                //Sort Account by  maxPage and  Post code
+                for(AccountIDExtract account:exBan){
+                        //Update maxPage
+                        int maxPage=2;
+                        int itemsCountPage=0;
+                        if(stUsageMap.containsKey(account.getAccountID())){
+                            
+                            ArrayList<USAGE_XX> usageList = stUsageMap.get(account.getAccountID());
+                            itemsCountPage+=usageList.size()+2;
+                        }
+                        
+                        if(stChargeMap.containsKey(account.getAccountID())){
+                        
+                            ArrayList<SumChargeOnBill> chargeList = stChargeMap.get(account.getAccountID());
+                            itemsCountPage+=chargeList.size()+2;
+                        }
+                        itemsCountPage+=54;//Shift from First page logo
+                        maxPage+= itemsCountPage/108;
+                        if(itemsCountPage%108!=0){
+                            maxPage++;
+                        }
+                        if(itemsCountPage==0){
+                            maxPage++;
+                        }
+                        account.setMaxPage(String.valueOf(maxPage));
+                
+                }
+               
+                Comparator<AccountIDExtract> accComparetor = new Comparator<AccountIDExtract>() {
 
+                    @Override
+                    public int compare(AccountIDExtract o1, AccountIDExtract o2) {
+                        
+                        int result = Double.valueOf(o1.getMaxPage()).compareTo(Double.valueOf(o2.getMaxPage()));
+                        Integer postCode1 = Integer.valueOf(o1.getADDRESS_BILLING4().split(",")[1]);
+                        Integer postCode2 = Integer.valueOf(o2.getADDRESS_BILLING4().split(",")[1]);
+                        return  result==0?postCode1.compareTo(postCode2):result;
+                        
+                    }
+                };
+                
+                Collections.sort(exBan,accComparetor);
+                int testNum=1;
+                int sumPageNum =0;
+                for(AccountIDExtract accTest :exBan){
+                
+                    sumPageNum+=Integer.valueOf(accTest.getMaxPage());
+                    System.out.println("==============max page :"+accTest.getMaxPage()+"\t Post code :"+accTest.getADDRESS_BILLING4().split(",")[1]+"\t"+testNum);
+                    testNum++;
+                
+                }
+                System.out.println("====================================Sum pages is :"+sumPageNum);
+                
+                ///200,000 pages per 1 Gb per file
+                
 		System.out.println("Start Gen Bill AFP");
 		//start gen bill process
 		String PathOutputAFPRegular=CreatePathCMY.byCMYString(setEnv.AFP_Regular_file_gen, CYCLE_CODE, CYCLE_MONTH, CYCLE_YEAR)+setEnv.folderAFP_Regular_file_gen;
 		System.out.println(PathOutputAFPRegular);
 		new File(PathOutputAFPRegular).mkdir();
 		String outputFile="";
+                int numOfFiles=1;
 		if(statusQa.equals("Y")){
-			outputFile=PathOutputAFPRegular+"QA_Regular_Template01.afp";
+			outputFile=PathOutputAFPRegular+"QA_Regular_Template"+String.format("%02d", numOfFiles)+".afp";
 		}else{
-			outputFile=PathOutputAFPRegular+"Regular_Template01.afp";
+			outputFile=PathOutputAFPRegular+"Regular_Template"+String.format("%02d", numOfFiles)+".afp";
 		}
-		try (AfpOutputStream aout = new AfpOutputStream(new FileOutputStream(outputFile))) {
+                AfpOutputStream aout;
+		try  {
 			
-			
+			aout = new AfpOutputStream(new FileOutputStream(outputFile));
 			
 			//Start Header=============================================
 			afpCreateTag.createTagBDT(aout);
@@ -224,10 +283,16 @@ public class GenBillRegular {
 			//=========================================================
 			
 			int page_now=1;
-			for(int countDoc=0;countDoc<exBan.size();countDoc++){
+                        int countPage=0;
+                        int limitPagePerFile=1000;  //Default is 200,000
+			for(int countDoc=0;countDoc<1000;countDoc++){
 			//for(int countDoc=0;countDoc<exBan.size();countDoc++){	
 			page_now=1;
-			
+                        //Calculate maxpage
+			int currentPage=1;
+                        System.out.println("====================Process Account:"+(countDoc+1));
+                        
+                         
 			//Start Doc
 			afpCreateTag.createTagBPG(aout);
 			SetGnValue.setGNofBAG(aout);		
@@ -254,7 +319,7 @@ public class GenBillRegular {
 			ptx = AfplibFactory.eINSTANCE.createPTX(); 
 			afpCreateTag.setPTXxy(ptx,4527,587);
 			afpCreateTag.setFontID(ptx,57);
-			afpCreateTag.setPTX_TRN(ptx,AFPConfig.get(13)+page_now+" / "+exBan.get(countDoc).getMaxPage());
+			afpCreateTag.setPTX_TRN(ptx,AFPConfig.get(13)+currentPage+" / "+exBan.get(countDoc).getMaxPage());
 			
 			afpCreateTag.setPTXxy(ptx,4275,587);
 			afpCreateTag.setFontID(ptx,57);
@@ -427,7 +492,7 @@ public class GenBillRegular {
 				}else if(cardNo.length()==10){
 					cardNo="XXXXXX"+cardNo.substring(6, 10);
 				}else{
-					cardNo="XXXXXXXX"+cardNo.substring(8, cardNo.length());
+					cardNo="XXXXXXXX"+cardNo.substring(cardNo.length()/2, cardNo.length());
 				}
 				
 				f3=new String[]{AFPConfig.get(29),AFPConfig.get(30)
@@ -852,7 +917,7 @@ public class GenBillRegular {
 			afpCreateTag.setDIR(ptx,150,7,0);
 			calOddbit++;
 			
-			String printBit=String.format("%5s", Integer.toBinaryString(3)).replace(' ', '0');
+			String printBit=String.format("%5s", Integer.toBinaryString(((countDoc+1)%32))).replace(' ', '0');
 			//bit 1 start 877 inc 120 to 1357
 			for(int countOMRBit=4;countOMRBit>=0;countOMRBit--){
 				if(printBit.charAt(countOMRBit)=='1'){	
@@ -861,11 +926,15 @@ public class GenBillRegular {
 					calOddbit++;
 				}
 			}
-
-			//stop page
-			afpCreateTag.setPTXxy(ptx,120,1957);
-			afpCreateTag.setDIR(ptx,150,7,0);
-			calOddbit++;
+                        
+//                        if(maxPage==3){
+//                            //stop page
+//                            afpCreateTag.setPTXxy(ptx,120,1957);
+//                            afpCreateTag.setDIR(ptx,150,7,0);
+//                            calOddbit++;
+//                        
+//                        }
+                           
 			//stop bit
 			afpCreateTag.setPTXxy(ptx,120,2197);
 			afpCreateTag.setDIR(ptx,150,7,0);
@@ -881,20 +950,21 @@ public class GenBillRegular {
 			afpCreateTag.createTagEPT(aout);
 			
 			afpCreateTag.createTagEPG(aout);
+                        countPage++;
 			//End Doc
 			
 			
 			//Page 2 
 			afpCreateTag.createTagBPG(aout);
 			SetGnValue.setGNofBAG(aout);
-			
-			
+			currentPage++;
+			countPage++;
 			afpCreateTag.createTagBPT(aout);
 			ptx = AfplibFactory.eINSTANCE.createPTX(); 
 			
 			afpCreateTag.setPTXxy(ptx,4522,342);
 			afpCreateTag.setFontID(ptx,57);
-			afpCreateTag.setPTX_TRN(ptx,"หน้า 1 / 8");
+			afpCreateTag.setPTX_TRN(ptx,"หน้า "+currentPage+" / "+exBan.get(countDoc).getMaxPage());
 			
 			afpCreateTag.setPTXxy(ptx,4275,342);
 			afpCreateTag.setFontID(ptx,57);
@@ -969,6 +1039,26 @@ public class GenBillRegular {
 			
 			aout.writeStructuredField(ptx);
 			afpCreateTag.createTagEPT(aout);
+                        
+                        //tail page
+			afpCreateTag.createTagBPT(aout);
+			ptx = AfplibFactory.eINSTANCE.createPTX(); 
+			
+			afpCreateTag.setPTXxy(ptx,355,4359);
+			afpCreateTag.setFontID(ptx,59);
+			afpCreateTag.setPTX_TRN(ptx,"บริษัทฯ ต้องขออภัยมา ณ ที่นี้หากท่านได้ชำระยอดค้างชำระก่อนได้รับใบแจ้งค่าใช้บริการฉบับนี้");
+			
+			afpCreateTag.setPTXxy(ptx,355,4479);
+			afpCreateTag.setFontID(ptx,59);
+			afpCreateTag.setPTX_TRN(ptx,"โปรดตรวจสอบรายการที่แจ้งในใบแจ้งค่าใช้บริการก่อนการชำระเงิน");
+			
+			aout.writeStructuredField(ptx);
+			afpCreateTag.createTagEPT(aout);
+			
+			afpCreateTag.createTagIPS(aout,355,4644,"S1TRPCCS");
+                        
+                        
+                        
 			//body
 			afpCreateTag.createTagBPT(aout);
 			ptx = AfplibFactory.eINSTANCE.createPTX(); 
@@ -1056,6 +1146,9 @@ public class GenBillRegular {
                                 
                                 int shiftTitle = 22;
                                 int shiftDown = (106*numCharge);
+                                if(rowCharge==0){
+                                    shiftDown-=106;
+                                }
                                 if(usageList.size()>numCharge+2){
                                 	afpCreateTag.setPTXxy(ptx,420+30,1404+shiftDown);
                                         afpCreateTag.setFontID(ptx,78);
@@ -1073,18 +1166,25 @@ public class GenBillRegular {
                                 
                                 
                                 numRowCol1 = numRowCol1-numCharge-1;
+                                if(rowCharge==0){
+                                   // numRowCol1+=1;
+                                    numCharge--;
+                                }
                                 afpCreateTag.setFontID(ptx,58);
                                 int countUsage1=0;
                                 int countUsage2=0;
-                                
+                                int maxItemsLeft=52-27; //Full is 54
+                                int maxItemsRight=54-27;
+                                int totalCurentUsage=numUsage;
+                                int usageLoop=0;
                                 for(USAGE_XX usage:usageList){
-                                
+                                        usageLoop++;
                                         
-                                        if(countUsage1>=52-numCharge&&countUsage2>=54){ //Check new page
+                                        if(countUsage1>=maxItemsLeft-numCharge&&countUsage2>=maxItemsRight){ //Check new page
                                             aout.writeStructuredField(ptx);
                                             afpCreateTag.createTagEPT(aout);
                                             afpCreateTag.createTagEPG(aout);
-                                            int totalCurentUsage = numUsage-46-54;
+                                            totalCurentUsage -= (maxItemsLeft-numCharge+maxItemsRight);
                                             if((totalCurentUsage)%2==0){
 
                                                 numsplit = (totalCurentUsage)/2;
@@ -1107,10 +1207,11 @@ public class GenBillRegular {
 
                                             afpCreateTag.createTagBPT(aout);
                                             ptx = AfplibFactory.eINSTANCE.createPTX(); 
-
+                                            currentPage++;
+                                            countPage++;
                                             afpCreateTag.setPTXxy(ptx,4522,342);
                                             afpCreateTag.setFontID(ptx,57);
-                                            afpCreateTag.setPTX_TRN(ptx,"หน้า 1 / 8");
+                                            afpCreateTag.setPTX_TRN(ptx,"หน้า "+currentPage+" / "+exBan.get(countDoc).getMaxPage());
 
                                             afpCreateTag.setPTXxy(ptx,4275,342);
                                             afpCreateTag.setFontID(ptx,57);
@@ -1135,6 +1236,43 @@ public class GenBillRegular {
                                             afpCreateTag.setPTXxy(ptx,3960,829);
                                             afpCreateTag.setFontID(ptx,58);
                                             afpCreateTag.setPTX_TRN(ptx,"รหัสลูกค้า : "+exBan.get(countDoc).getAccountNo());
+                                            
+                                            
+                                            if(currentPage%2==1){
+                                                    //OMR
+
+                                                 
+
+                                                    calOddbit=0;
+
+                                                    //start bit
+                                                    afpCreateTag.setPTXxy(ptx,120,517);
+                                                    afpCreateTag.setDIR(ptx,150,7,0);
+                                                    calOddbit++;
+
+                                                    printBit=String.format("%5s", Integer.toBinaryString(((countDoc+1)%32))).replace(' ', '0');
+                                                    //bit 1 start 877 inc 120 to 1357
+                                                    for(int countOMRBit=4;countOMRBit>=0;countOMRBit--){
+                                                            if(printBit.charAt(countOMRBit)=='1'){	
+                                                                    afpCreateTag.setPTXxy(ptx,120,1357-(120*countOMRBit));
+                                                                    afpCreateTag.setDIR(ptx,150,7,0);
+                                                                    calOddbit++;
+                                                            }
+                                                    }
+                                                    
+                                                        
+                                                    //stop bit
+                                                    afpCreateTag.setPTXxy(ptx,120,2197);
+                                                    afpCreateTag.setDIR(ptx,150,7,0);
+                                                    calOddbit++;
+
+                                                    if(calOddbit%2!=0){
+                                                    //check odd bit
+                                                    afpCreateTag.setPTXxy(ptx,120,757);
+                                                    afpCreateTag.setDIR(ptx,150,7,0);
+                                                    }
+
+                                            }
 
                                             //box1
                                             int inc_point2=0;
@@ -1190,13 +1328,15 @@ public class GenBillRegular {
                                             ptx = AfplibFactory.eINSTANCE.createPTX(); 
 
                                             shiftDown=-210;
-                                        
+                                            numCharge=-2;
+                                            maxItemsLeft=52;
+                                            maxItemsRight=54;
                                         }
                                     
                                         //Writebody data
                                     
                                     
-                                        if(numRowCol1>0&&countUsage1<52-numCharge){//col1
+                                        if(numRowCol1>0&&countUsage1<maxItemsLeft-numCharge){//col1
                                             
                                             afpCreateTag.setFontID(ptx,58);
                                             f2_x=397;
@@ -1215,7 +1355,7 @@ public class GenBillRegular {
 
                                             f2_x=2021;
                                             afpCreateTag.setPTXxy(ptx,f2_x,f2_y);				
-                                            afpCreateTag.setPTX_TRN(ptx,String.format("0:%02d:00", Integer.valueOf(usage.getCALL_VOL_ROUNDED())));
+                                            afpCreateTag.setPTX_TRN(ptx,miniteToHHmmssFormat(Integer.valueOf(usage.getCALL_VOL_ROUNDED()==null?"0":usage.getCALL_VOL_ROUNDED())));
 
                                             f2_x=2401;
                                             afpCreateTag.setPTXxy(ptx,f2_x,f2_y);				
@@ -1224,7 +1364,7 @@ public class GenBillRegular {
                                             countUsage1++;
                                             numRowCol1--;
 
-                                        }else if(countUsage2<54){//col2
+                                        }else if(countUsage2<maxItemsRight){//col2
                                             afpCreateTag.setFontID(ptx,58);
                                             f2_x=397+2190;
                                             f2_y=1314+(countUsage2*105)+shiftTitle;
@@ -1249,6 +1389,16 @@ public class GenBillRegular {
                                             //afpCreateTag.setPTX_TRN(ptx,String.format("%.2f", Double.valueOf(usage.getCHARGE_AMT())));
                                             SetGnValue.CalPointFont58Single(ptx, String.format("%,.2f", Double.valueOf(usage.getCHARGE_AMT().equals("null")?"0":usage.getCHARGE_AMT())), f2_x, f2_y);
                                             countUsage2++;
+                                        }
+                                        
+                                        if(usageLoop==usageList.size()&&currentPage%2==1){
+                                            
+                                            //write emtry page
+                                            afpCreateTag.createTagBPG(aout);
+                                            SetGnValue.setGNofBAG(aout);
+                                            afpCreateTag.createTagEPG(aout);
+                                        
+                                        
                                         }
                                         
                                         
@@ -1362,33 +1512,17 @@ public class GenBillRegular {
 //			f5_y=1314;
 //			SetGnValue.CalPointFont58(ptx,f5,f5_x,f5_y);
 			
-
+//
 //			aout.writeStructuredField(ptx);
 //			afpCreateTag.createTagEPT(aout);
-			//tail page
-			afpCreateTag.createTagBPT(aout);
-			ptx = AfplibFactory.eINSTANCE.createPTX(); 
-			
-			afpCreateTag.setPTXxy(ptx,355,4359);
-//			afpCreateTag.setFontID(ptx,59);
-//			afpCreateTag.setPTX_TRN(ptx,"บริษัทฯ ต้องขออภัยมา ณ ที่นี้หากท่านได้ชำระยอดค้างชำระก่อนได้รับใบแจ้งค่าใช้บริการฉบับนี้");
-//			
-//			afpCreateTag.setPTXxy(ptx,355,4479);
-//			afpCreateTag.setFontID(ptx,59);
-//			afpCreateTag.setPTX_TRN(ptx,"โปรดตรวจสอบรายการที่แจ้งในใบแจ้งค่าใช้บริการก่อนการชำระเงิน");
-//			
-			aout.writeStructuredField(ptx);
-			afpCreateTag.createTagEPT(aout);
-			
-			//afpCreateTag.createTagIPS(aout,355,4644,"S1TRPCCS");
-			
 			afpCreateTag.createTagEPG(aout);
 			
 			
 			//page3
 			afpCreateTag.createTagBPG(aout);
 			SetGnValue.setGNofBAG(aout);
-			
+			currentPage++;
+                        countPage++;
 			afpCreateTag.createTagIPS(aout,450,170,"S1NRCTR1");
 			
 			afpCreateTag.createTagBPT(aout);
@@ -1656,7 +1790,7 @@ public class GenBillRegular {
 			afpCreateTag.setDIR(ptx,150,7,0);
 			calOddbit++;
 			
-			printBit=String.format("%5s", Integer.toBinaryString(3)).replace(' ', '0');
+			printBit=String.format("%5s", Integer.toBinaryString((countDoc+1)%32)).replace(' ', '0');
 			//bit 1 start 877 inc 120 to 1357
 			for(int countOMRBit=4;countOMRBit>=0;countOMRBit--){
 				if(printBit.charAt(countOMRBit)=='1'){	
@@ -1692,7 +1826,35 @@ public class GenBillRegular {
 			SetGnValue.setGNofBAG(aout);
 			afpCreateTag.createTagEPG(aout);
 			
-			}//for
+                        
+                        //Check new File
+                        
+                        if(countPage>limitPagePerFile){
+                                numOfFiles++;
+                                //Start Tailer
+                                afpCreateTag.createTagEDT(aout);
+                                //End Tailer
+                                if(statusQa.equals("Y")){
+                                    outputFile=PathOutputAFPRegular+"QA_Regular_Template"+String.format("%02d", numOfFiles)+".afp";
+                                }else{
+                                    outputFile=PathOutputAFPRegular+"Regular_Template"+String.format("%02d", numOfFiles)+".afp";
+                                }
+                                
+                                aout = new AfpOutputStream(new FileOutputStream(outputFile));
+                                //Start Header=============================================
+                                afpCreateTag.createTagBDT(aout);
+                                afpCreateTag.createTagIMM(aout,"F20101PA");
+                                //End 
+                                //=========================================================
+
+                                 page_now=1;
+                                 countPage=0;
+                               
+                            
+                            
+                        }
+                        
+		    }//for
 			
 			
 			
@@ -1700,8 +1862,8 @@ public class GenBillRegular {
 			afpCreateTag.createTagEDT(aout);
 			//End Tailer
 		} catch (IOException e) {
-            e.printStackTrace();
-        }
+                        e.printStackTrace();
+                }
 		System.out.println("create success");
 		long endTime = System.currentTimeMillis();
 		
@@ -1711,8 +1873,8 @@ public class GenBillRegular {
 		System.out.println("Time : " + elapse / 1000.0);
 		
 		try { conPRM.close(); } catch (Exception ignore) {}
-	    try { conBILL.close(); } catch (Exception ignore) {}
-	    System.out.println("END GenBillRegular");
+                try { conBILL.close(); } catch (Exception ignore) {}
+                System.out.println("END GenBillRegular");
 	}
 
 	
