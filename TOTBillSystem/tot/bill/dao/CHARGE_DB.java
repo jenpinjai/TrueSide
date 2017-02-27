@@ -191,4 +191,43 @@ public class CHARGE_DB {
 	    }
 	    return 0;
 	}
+        public static int selectSUM_CHARGE_SeviceChargeByAccId(Connection conn,String charge_type,String CYCLE_CODE,String CYCLE_MONTH,String CYCLE_YEAR,String AccountId,ArrayList<SumCharge> stSumCharge ) throws SQLException{
+		Statement stmt ;
+	    ResultSet rset = null;
+	    String strSQL="";
+	    stmt = conn.createStatement();
+	    
+	    try {
+    		strSQL="select " +
+    				"ACCOUNT_ID," +    				
+    				"CATEGORY_CODE," +
+    				"sum(ACTV_AMT)," +
+    				"sum(TAX_AMT), " +
+    				"TAX_CODE " +
+    				"from CHARGE "+
+    				"where CHARGE_TYPE "+charge_type+" and "+
+    				"CYCLE_CODE='"+CYCLE_CODE+"' " +
+    				"and CYCLE_MONTH='"+CYCLE_MONTH+"' and CYCLE_YEAR='"+CYCLE_YEAR+"' and ACCOUNT_ID='"+AccountId+"' "+ 
+    				"group by ACCOUNT_ID,CATEGORY_CODE,TAX_CODE "+
+    				"order by ACCOUNT_ID,CATEGORY_CODE";
+    				    				
+ 	
+    		System.out.println(strSQL);
+    		rset = stmt.executeQuery(strSQL);
+            while (rset.next()){
+            	
+                stSumCharge.add(new SumCharge(
+                		rset.getString("ACCOUNT_ID"),               		
+                		rset.getString("CATEGORY_CODE"),
+                		rset.getString("sum(ACTV_AMT)"),
+                		rset.getString("sum(TAX_AMT)"),
+                		rset.getString("TAX_CODE")                		
+                		));  	
+            }
+
+	    }finally {
+	            try { rset.close(); stmt.close(); } catch (Exception ignore) {}
+	    }
+	    return 0;
+	}
 }

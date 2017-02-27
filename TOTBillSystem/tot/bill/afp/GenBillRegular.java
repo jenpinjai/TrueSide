@@ -18,11 +18,9 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.function.Function;
 
 import org.afplib.afplib.*;
 import org.afplib.io.AfpOutputStream;
-import org.apache.commons.beanutils.BeanComparator;
 import static tot.bill.afp.GenBillGovernor.miniteToHHmmssFormat;
 
 import tot.bill.dao.SelectDB;
@@ -284,8 +282,8 @@ public class GenBillRegular {
 			
 			int page_now=1;
                         int countPage=0;
-                        int limitPagePerFile=1000;  //Default is 200,000
-			for(int countDoc=0;countDoc<1000;countDoc++){
+                        int limitPagePerFile=200000;  //Default is 200,000
+			for(int countDoc=0;countDoc<exBan.size();countDoc++){
 			//for(int countDoc=0;countDoc<exBan.size();countDoc++){	
 			page_now=1;
                         //Calculate maxpage

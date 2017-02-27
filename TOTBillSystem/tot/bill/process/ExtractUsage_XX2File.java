@@ -89,7 +89,7 @@ public class ExtractUsage_XX2File {
         
         SelectDB.selectUSAGE_XX_U(conBILL,stCYCLE_CONTROL.get(0).getUSG_BUCKET(), CYCLE_CODE, CYCLE_MONTH, CYCLE_YEAR, idUsage, stUSAGE_XX); 
         
-        ArrayList<AccountIDExtract> stAccountIDExtract=new ArrayList<AccountIDExtract>();   
+    
         
         DecimalFormatSymbols decimalFormatSymbols = new DecimalFormatSymbols();
     	decimalFormatSymbols.setDecimalSeparator('.');

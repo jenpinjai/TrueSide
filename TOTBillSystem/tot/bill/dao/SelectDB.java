@@ -2095,6 +2095,68 @@ public class SelectDB {
 	    }
 	    return 0;
 	}
+        public static int selectUSAGE_XX_UByAccId(Connection conn,String tableName,String CYCLE_CODE,String CYCLE_MONTH,String CYCLE_YEAR,String AccountId,ArrayList<String> idUSAGE_XX,ArrayList<USAGE_XX> stUSAGE_XX ) throws SQLException{
+		Statement stmt ;
+	    ResultSet rset = null;
+	    String strSQL="";
+	    stmt = conn.createStatement();
+	    
+	    try {
+    		strSQL="select " +
+    				"CYCLE_CODE," +
+    				"CYCLE_YEAR," +
+    				"CYCLE_MONTH," +
+    				"ACCOUNT_ID," +
+    				"ORIG_TN," +
+    				"to_char(CONNECT_DATE,'YYYYMMDDHH24MISS')," +
+    				"CALL_DURATION," +
+    				"to_char(SYS_CREATION_DATE,'YYYYMMDD')," +
+    				"to_char(SYS_UPDATE_DATE,'YYYYMMDD')," +
+    				"CALL_VOL_ROUNDED," +
+    				"PRODUCT_TYPE," +
+    				"PRODUCT_NO," +
+    				"DIALED_TN," +
+    				"PRICE_PLAN_CODE," +
+    				"FEATURE_CODE," +
+    				"CHARGE_AMT," +
+    				"CALL_ADJUSTMENT_IND," +
+    				"DESTINATION_ON_BILL," +
+    				"BILL_STATUS" +
+    				" from "+tableName+"  where CYCLE_CODE='"+CYCLE_CODE+"' " +
+    				"and CYCLE_MONTH='"+CYCLE_MONTH+"' and CYCLE_YEAR='"+CYCLE_YEAR+"' and BILL_STATUS = 'U' and ACCOUNT_ID ='"+AccountId+"'  order by ACCOUNT_ID";
+ 	
+    		//System.out.println(strSQL);
+    		rset = stmt.executeQuery(strSQL);
+            while (rset.next()){
+            	idUSAGE_XX.add(rset.getString("ACCOUNT_ID"));
+                stUSAGE_XX.add(new USAGE_XX(
+                		rset.getString("CYCLE_CODE"),
+                		rset.getString("CYCLE_YEAR"),
+                		rset.getString("CYCLE_MONTH"),
+                		rset.getString("ACCOUNT_ID"),
+                		rset.getString("ORIG_TN"),
+                		rset.getString("to_char(CONNECT_DATE,'YYYYMMDDHH24MISS')"), 
+                		rset.getString("CALL_DURATION"),
+                		rset.getString("to_char(SYS_CREATION_DATE,'YYYYMMDD')"), 
+                		rset.getString("to_char(SYS_UPDATE_DATE,'YYYYMMDD')"), 
+                		rset.getString("CALL_VOL_ROUNDED"),
+                		rset.getString("PRODUCT_TYPE"),
+                		rset.getString("PRODUCT_NO"),
+                		rset.getString("DIALED_TN"),
+                		rset.getString("PRICE_PLAN_CODE"),
+                		rset.getString("FEATURE_CODE"),
+                		rset.getString("CHARGE_AMT"),
+                		rset.getString("CALL_ADJUSTMENT_IND"),
+                		rset.getString("DESTINATION_ON_BILL"),
+                		rset.getString("BILL_STATUS")               	
+                		));  	
+            }
+
+	    }finally {
+	            try { rset.close(); stmt.close(); } catch (Exception ignore) {}
+	    }
+	    return 0;
+	}
 	public static int selectUSAGE_S(Connection conn,String tableName,String CYCLE_CODE,String CYCLE_MONTH,String CYCLE_YEAR,ArrayList<String> idUSAGE_S,ArrayList<USAGE_S> stUSAGE_S ) throws SQLException{
 		Statement stmt ;
 	    ResultSet rset = null;
