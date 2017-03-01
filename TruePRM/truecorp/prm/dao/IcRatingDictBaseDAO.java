@@ -5,11 +5,10 @@ import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 import org.apache.log4j.Logger;
-import truecorp.prm.core.dao.SystemBaseDao;
 import truecorp.prm.table.IcRatingDict;
 import truecorp.prm.table.IcRatingDictPK;
 
-public class IcRatingDictBaseDAO extends SystemBaseDao{
+public class IcRatingDictBaseDAO {
 
     private static Logger log = Logger.getLogger(IcRatingDictBaseDAO.class);
 
@@ -17,12 +16,12 @@ public class IcRatingDictBaseDAO extends SystemBaseDao{
     public IcRatingDictBaseDAO() {
     }
 
-    public int insert( IcRatingDict icRatingDict) throws SQLException {
+    public int insert( IcRatingDict icRatingDict, Connection conn) throws SQLException {
         PreparedStatement stmt = null;
-        String SQL_STATEMENT ="Insert into IC_RATING_DICT(SEQUENCE_NO, LANGUAGE_CODE, SYS_CREATION_DATE, SYS_UPDATE_DATE, OPERATOR_ID, APPLICATION_ID, DL_SERVICE_CODE, DL_UPDATE_STAMP, TEXT) ";
+        String SQL_STATEMENT ="Insert into [IC_RATING_DICT](SEQUENCE_NO, LANGUAGE_CODE, SYS_CREATION_DATE, SYS_UPDATE_DATE, OPERATOR_ID, APPLICATION_ID, DL_SERVICE_CODE, DL_UPDATE_STAMP, TEXT) ";
 	SQL_STATEMENT += "values ( ?, ?, ?, ?, ?, ?, ?, ?, ?)";
         try {
-            stmt = getPrmConnection().prepareStatement(SQL_STATEMENT);
+            stmt = conn.prepareStatement(SQL_STATEMENT);
             stmt.setBigDecimal( 1, icRatingDict.getSequenceNo());
             stmt.setString( 2, icRatingDict.getLanguageCode());
             stmt.setDate( 3, icRatingDict.getSysCreationDate());
@@ -48,12 +47,12 @@ public class IcRatingDictBaseDAO extends SystemBaseDao{
         }
         return -1;
     }
-    public int update( IcRatingDict icRatingDict) throws SQLException {
+    public int update( IcRatingDict icRatingDict, Connection conn) throws SQLException {
         PreparedStatement stmt = null;
-        String SQL_STATEMENT ="Update IC_RATING_DICT set SYS_CREATION_DATE = ?  , SYS_UPDATE_DATE = ?  , OPERATOR_ID = ?  , APPLICATION_ID = ?  , DL_SERVICE_CODE = ?  , DL_UPDATE_STAMP = ?  , TEXT = ?  ";
+        String SQL_STATEMENT ="Update [IC_RATING_DICT] set SYS_CREATION_DATE = ?  , SYS_UPDATE_DATE = ?  , OPERATOR_ID = ?  , APPLICATION_ID = ?  , DL_SERVICE_CODE = ?  , DL_UPDATE_STAMP = ?  , TEXT = ?  ";
 	    SQL_STATEMENT += "where SEQUENCE_NO = ?  and LANGUAGE_CODE = ? ";
         try {
-            stmt = getPrmConnection().prepareStatement(SQL_STATEMENT);
+            stmt = conn.prepareStatement(SQL_STATEMENT);
             stmt.setDate( 1, icRatingDict.getSysCreationDate());
             stmt.setDate( 2, icRatingDict.getSysUpdateDate());
             stmt.setBigDecimal( 3, icRatingDict.getOperatorId());
@@ -80,11 +79,11 @@ public class IcRatingDictBaseDAO extends SystemBaseDao{
         return -1;
     }    
     
-    public int delete( IcRatingDict icRatingDict) throws SQLException {
+    public int delete( IcRatingDict icRatingDict, Connection conn) throws SQLException {
         PreparedStatement stmt = null;
-        String SQL_STATEMENT ="Delete from IC_RATING_DICT where SEQUENCE_NO = ?  and LANGUAGE_CODE = ? ";
+        String SQL_STATEMENT ="Delete from [IC_RATING_DICT] where SEQUENCE_NO = ?  and LANGUAGE_CODE = ? ";
         try {
-            stmt = getPrmConnection().prepareStatement(SQL_STATEMENT);
+            stmt = conn.prepareStatement(SQL_STATEMENT);
             stmt.setBigDecimal( 1, icRatingDict.getSequenceNo());
             stmt.setString( 2, icRatingDict.getLanguageCode());
             int status = stmt.executeUpdate();
@@ -106,17 +105,17 @@ public class IcRatingDictBaseDAO extends SystemBaseDao{
 
 
 
-    public IcRatingDict findByPK( IcRatingDictPK icRatingDictPK) throws SQLException {
-        return findByPK( icRatingDictPK.getSequenceNo(),icRatingDictPK.getLanguageCode());   
+    public IcRatingDict findByPK( IcRatingDictPK icRatingDictPK, Connection conn) throws SQLException {
+        return findByPK( icRatingDictPK.getSequenceNo(),icRatingDictPK.getLanguageCode(), conn);   
     }
 
 
-    public IcRatingDict findByPK( java.math.BigDecimal sequenceNo,String languageCode) throws SQLException {
+    public IcRatingDict findByPK( java.math.BigDecimal sequenceNo,String languageCode, Connection conn) throws SQLException {
         PreparedStatement stmt = null;
         ResultSet rs = null;
-        String SQL_STATEMENT ="Select * from IC_RATING_DICT where SEQUENCE_NO = ?  and LANGUAGE_CODE = ? ";
+        String SQL_STATEMENT ="Select * from [IC_RATING_DICT] where SEQUENCE_NO = ?  and LANGUAGE_CODE = ? ";
         try {
-            stmt = getPrmConnection().prepareStatement(SQL_STATEMENT);
+            stmt = conn.prepareStatement(SQL_STATEMENT);
             stmt.setBigDecimal(1, sequenceNo );
             stmt.setString(2, languageCode );
             rs = stmt.executeQuery();
@@ -132,12 +131,12 @@ public class IcRatingDictBaseDAO extends SystemBaseDao{
         return null;
     }
 
-    public List findAll() throws SQLException {
+    public List findAll(Connection conn) throws SQLException {
         PreparedStatement stmt = null;
         ResultSet rs = null;
-        String SQL_STATEMENT ="Select * from IC_RATING_DICT";
+        String SQL_STATEMENT ="Select * from [IC_RATING_DICT]";
         try {
-            stmt = getPrmConnection().prepareStatement(SQL_STATEMENT);
+            stmt = conn.prepareStatement(SQL_STATEMENT);
             rs = stmt.executeQuery();
             return fetchAll(rs);
         } catch (SQLException ex) {
@@ -151,12 +150,12 @@ public class IcRatingDictBaseDAO extends SystemBaseDao{
         return null;
     }
 
-    public List findByWhereCondisions(String whereConditions) throws SQLException {
+    public List findByWhereCondisions(String whereConditions, Connection conn) throws SQLException {
         PreparedStatement stmt = null;
         ResultSet rs = null;
-        String SQL_STATEMENT ="Select * from IC_RATING_DICT where " + whereConditions;
+        String SQL_STATEMENT ="Select * from [IC_RATING_DICT] where " + whereConditions;
         try {
-            stmt = getPrmConnection().prepareStatement(SQL_STATEMENT);
+            stmt = conn.prepareStatement(SQL_STATEMENT);
             rs = stmt.executeQuery();
             return fetchAll(rs);
         } catch (SQLException ex) {
@@ -170,12 +169,12 @@ public class IcRatingDictBaseDAO extends SystemBaseDao{
         return null;
     }
     
-    public List findBySequenceNo( java.math.BigDecimal sequenceNo) throws SQLException {
+    public List findBySequenceNo( java.math.BigDecimal sequenceNo, Connection conn) throws SQLException {
         PreparedStatement stmt = null;
         ResultSet rs = null;
-        String SQL_STATEMENT = "Select * from IC_RATING_DICT where SEQUENCE_NO = ? order by SEQUENCE_NO";
+        String SQL_STATEMENT = "Select * from [IC_RATING_DICT] where SEQUENCE_NO = ? order by SEQUENCE_NO";
         try {
-            stmt = getPrmConnection().prepareStatement(SQL_STATEMENT);
+            stmt = conn.prepareStatement(SQL_STATEMENT);
             stmt.setBigDecimal(1, sequenceNo );
             rs = stmt.executeQuery();
             return fetchAll(rs);
@@ -189,12 +188,12 @@ public class IcRatingDictBaseDAO extends SystemBaseDao{
         }
         return null;
     }
-    public List findByLanguageCode( String languageCode) throws SQLException {
+    public List findByLanguageCode( String languageCode, Connection conn) throws SQLException {
         PreparedStatement stmt = null;
         ResultSet rs = null;
-        String SQL_STATEMENT = "Select * from IC_RATING_DICT where LANGUAGE_CODE = ? order by LANGUAGE_CODE";
+        String SQL_STATEMENT = "Select * from [IC_RATING_DICT] where LANGUAGE_CODE = ? order by LANGUAGE_CODE";
         try {
-            stmt = getPrmConnection().prepareStatement(SQL_STATEMENT);
+            stmt = conn.prepareStatement(SQL_STATEMENT);
             stmt.setString(1, languageCode );
             rs = stmt.executeQuery();
             return fetchAll(rs);
@@ -208,12 +207,12 @@ public class IcRatingDictBaseDAO extends SystemBaseDao{
         }
         return null;
     }
-    public List findBySysCreationDate( java.sql.Date sysCreationDate) throws SQLException {
+    public List findBySysCreationDate( java.sql.Date sysCreationDate, Connection conn) throws SQLException {
         PreparedStatement stmt = null;
         ResultSet rs = null;
-        String SQL_STATEMENT = "Select * from IC_RATING_DICT where SYS_CREATION_DATE = ? order by SYS_CREATION_DATE";
+        String SQL_STATEMENT = "Select * from [IC_RATING_DICT] where SYS_CREATION_DATE = ? order by SYS_CREATION_DATE";
         try {
-            stmt = getPrmConnection().prepareStatement(SQL_STATEMENT);
+            stmt = conn.prepareStatement(SQL_STATEMENT);
             stmt.setDate(1, sysCreationDate );
             rs = stmt.executeQuery();
             return fetchAll(rs);
@@ -227,12 +226,12 @@ public class IcRatingDictBaseDAO extends SystemBaseDao{
         }
         return null;
     }
-    public List findBySysUpdateDate( java.sql.Date sysUpdateDate) throws SQLException {
+    public List findBySysUpdateDate( java.sql.Date sysUpdateDate, Connection conn) throws SQLException {
         PreparedStatement stmt = null;
         ResultSet rs = null;
-        String SQL_STATEMENT = "Select * from IC_RATING_DICT where SYS_UPDATE_DATE = ? order by SYS_UPDATE_DATE";
+        String SQL_STATEMENT = "Select * from [IC_RATING_DICT] where SYS_UPDATE_DATE = ? order by SYS_UPDATE_DATE";
         try {
-            stmt = getPrmConnection().prepareStatement(SQL_STATEMENT);
+            stmt = conn.prepareStatement(SQL_STATEMENT);
             stmt.setDate(1, sysUpdateDate );
             rs = stmt.executeQuery();
             return fetchAll(rs);
@@ -246,12 +245,12 @@ public class IcRatingDictBaseDAO extends SystemBaseDao{
         }
         return null;
     }
-    public List findByOperatorId( java.math.BigDecimal operatorId) throws SQLException {
+    public List findByOperatorId( java.math.BigDecimal operatorId, Connection conn) throws SQLException {
         PreparedStatement stmt = null;
         ResultSet rs = null;
-        String SQL_STATEMENT = "Select * from IC_RATING_DICT where OPERATOR_ID = ? order by OPERATOR_ID";
+        String SQL_STATEMENT = "Select * from [IC_RATING_DICT] where OPERATOR_ID = ? order by OPERATOR_ID";
         try {
-            stmt = getPrmConnection().prepareStatement(SQL_STATEMENT);
+            stmt = conn.prepareStatement(SQL_STATEMENT);
             stmt.setBigDecimal(1, operatorId );
             rs = stmt.executeQuery();
             return fetchAll(rs);
@@ -265,12 +264,12 @@ public class IcRatingDictBaseDAO extends SystemBaseDao{
         }
         return null;
     }
-    public List findByApplicationId( String applicationId) throws SQLException {
+    public List findByApplicationId( String applicationId, Connection conn) throws SQLException {
         PreparedStatement stmt = null;
         ResultSet rs = null;
-        String SQL_STATEMENT = "Select * from IC_RATING_DICT where APPLICATION_ID = ? order by APPLICATION_ID";
+        String SQL_STATEMENT = "Select * from [IC_RATING_DICT] where APPLICATION_ID = ? order by APPLICATION_ID";
         try {
-            stmt = getPrmConnection().prepareStatement(SQL_STATEMENT);
+            stmt = conn.prepareStatement(SQL_STATEMENT);
             stmt.setString(1, applicationId );
             rs = stmt.executeQuery();
             return fetchAll(rs);
@@ -284,12 +283,12 @@ public class IcRatingDictBaseDAO extends SystemBaseDao{
         }
         return null;
     }
-    public List findByDlServiceCode( String dlServiceCode) throws SQLException {
+    public List findByDlServiceCode( String dlServiceCode, Connection conn) throws SQLException {
         PreparedStatement stmt = null;
         ResultSet rs = null;
-        String SQL_STATEMENT = "Select * from IC_RATING_DICT where DL_SERVICE_CODE = ? order by DL_SERVICE_CODE";
+        String SQL_STATEMENT = "Select * from [IC_RATING_DICT] where DL_SERVICE_CODE = ? order by DL_SERVICE_CODE";
         try {
-            stmt = getPrmConnection().prepareStatement(SQL_STATEMENT);
+            stmt = conn.prepareStatement(SQL_STATEMENT);
             stmt.setString(1, dlServiceCode );
             rs = stmt.executeQuery();
             return fetchAll(rs);
@@ -303,12 +302,12 @@ public class IcRatingDictBaseDAO extends SystemBaseDao{
         }
         return null;
     }
-    public List findByDlUpdateStamp( java.math.BigDecimal dlUpdateStamp) throws SQLException {
+    public List findByDlUpdateStamp( java.math.BigDecimal dlUpdateStamp, Connection conn) throws SQLException {
         PreparedStatement stmt = null;
         ResultSet rs = null;
-        String SQL_STATEMENT = "Select * from IC_RATING_DICT where DL_UPDATE_STAMP = ? order by DL_UPDATE_STAMP";
+        String SQL_STATEMENT = "Select * from [IC_RATING_DICT] where DL_UPDATE_STAMP = ? order by DL_UPDATE_STAMP";
         try {
-            stmt = getPrmConnection().prepareStatement(SQL_STATEMENT);
+            stmt = conn.prepareStatement(SQL_STATEMENT);
             stmt.setBigDecimal(1, dlUpdateStamp );
             rs = stmt.executeQuery();
             return fetchAll(rs);
@@ -322,12 +321,12 @@ public class IcRatingDictBaseDAO extends SystemBaseDao{
         }
         return null;
     }
-    public List findByText( String text) throws SQLException {
+    public List findByText( String text, Connection conn) throws SQLException {
         PreparedStatement stmt = null;
         ResultSet rs = null;
-        String SQL_STATEMENT = "Select * from IC_RATING_DICT where TEXT = ? order by TEXT";
+        String SQL_STATEMENT = "Select * from [IC_RATING_DICT] where TEXT = ? order by TEXT";
         try {
-            stmt = getPrmConnection().prepareStatement(SQL_STATEMENT);
+            stmt = conn.prepareStatement(SQL_STATEMENT);
             stmt.setString(1, text );
             rs = stmt.executeQuery();
             return fetchAll(rs);
@@ -344,7 +343,7 @@ public class IcRatingDictBaseDAO extends SystemBaseDao{
 
 /*    
 
-    public List findByCriteriaOR( IcRatingDict criteria) throws SQLException {
+    public List findByCriteriaOR( IcRatingDict criteria, Connection conn) throws SQLException {
         PreparedStatement stmt = null;
         ResultSet rs = null;
         String SQL_STATEMENT = "";
@@ -395,7 +394,7 @@ public class IcRatingDictBaseDAO extends SystemBaseDao{
             return new ArrayList();
 
         try {
-            stmt = getPrmConnection().prepareStatement(SQL_STATEMENT);
+            stmt = conn.prepareStatement(SQL_STATEMENT);
             int index = 1;
             if (criteria.getBigDecimal() != null) 
                 stmt.setString(index++, criteria.getBigDecimal() );
@@ -466,59 +465,15 @@ public class IcRatingDictBaseDAO extends SystemBaseDao{
         return null;
     }
 
-    public void populateParent(IcRatingDict icRatingDict) throws SQLException {
+    public void populateParent(IcRatingDict icRatingDict, Connection conn) throws SQLException {
     }
 
-    public void populateChild(IcRatingDict icRatingDict) throws SQLException {
+    public void populateChild(IcRatingDict icRatingDict, Connection conn) throws SQLException {
     }
 
-    public void populateAll(IcRatingDict icRatingDict) throws SQLException {
-        populateParent(icRatingDict);
-        populateChild(icRatingDict);
-    }
-    
-    public int getMaxDescriptionSeq() throws SQLException {
-        PreparedStatement stmt = null;
-        String SQL_STATEMENT ="select max(sequence_no) as description_seq from ic_rating_dict ";
-	
-        try {
-            stmt = getPrmConnection().prepareStatement(SQL_STATEMENT);
-            ResultSet   resultSet = stmt.executeQuery();
-            log.info("getMaxDescriptionSeq SUCCESS");
-            resultSet.next();
-            return resultSet.getInt("description_seq");
-        } catch (SQLException ex) {
-            ex.printStackTrace();
-            log.error(ex.toString());
-        } catch (Exception ex) {
-            ex.printStackTrace();
-            log.error(ex.toString());
-        } finally {
-            stmt.close();
-        }
-        return -1;
-    }
-    
-    public int deleteAllBy(String serviceType,String partnerCode) throws SQLException {
-        Statement stmt = null;
-        String SQL_STATEMENT ="delete ic_rating_dict where substr(TEXT,1,8)='"+serviceType+" "+partnerCode+" '  ";
-        try {
-            stmt = getPrmConnection().createStatement();
-            int status = stmt.executeUpdate(SQL_STATEMENT);
-            log.info("DELETE IcRatingDict SUCCESS");
-            return status;
-        } catch (SQLException ex) {
-            ex.printStackTrace();
-            log.error("DELETE IcRatingDict FAIL");
-            log.error(ex.toString());
-        } catch (Exception ex) {
-            ex.printStackTrace();
-            log.error("DELETE IcRatingDict FAIL");
-            log.error(ex.toString());
-        } finally {
-            stmt.close();
-        }
-        return -1;
+    public void populateAll(IcRatingDict icRatingDict, Connection conn) throws SQLException {
+        populateParent(icRatingDict, conn);
+        populateChild(icRatingDict, conn);
     }
 
 }
