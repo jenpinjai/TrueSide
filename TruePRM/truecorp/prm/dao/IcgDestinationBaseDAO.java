@@ -5,10 +5,11 @@ import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 import org.apache.log4j.Logger;
+import truecorp.prm.core.dao.SystemBaseDao;
 import truecorp.prm.table.IcgDestination;
 import truecorp.prm.table.IcgDestinationPK;
 
-public class IcgDestinationBaseDAO {
+public class IcgDestinationBaseDAO extends SystemBaseDao{
 
     private static Logger log = Logger.getLogger(IcgDestinationBaseDAO.class);
 
@@ -16,12 +17,12 @@ public class IcgDestinationBaseDAO {
     public IcgDestinationBaseDAO() {
     }
 
-    public int insert( IcgDestination icgDestination, Connection conn) throws SQLException {
+    public int insert( IcgDestination icgDestination) throws SQLException {
         PreparedStatement stmt = null;
-        String SQL_STATEMENT ="Insert into [ICG_DESTINATION](DESTINATION_CD, EFFECTIVE_DATE, SYS_CREATION_DATE, SYS_UPDATE_DATE, OPERATOR_ID, APPLICATION_ID, DL_SERVICE_CODE, DL_UPDATE_STAMP, BILLING_NAME_SEQ, JURISDICTION, GUI_DSP_IND, EXPIRATION_DATE) ";
+        String SQL_STATEMENT ="Insert into ICG_DESTINATION(DESTINATION_CD, EFFECTIVE_DATE, SYS_CREATION_DATE, SYS_UPDATE_DATE, OPERATOR_ID, APPLICATION_ID, DL_SERVICE_CODE, DL_UPDATE_STAMP, BILLING_NAME_SEQ, JURISDICTION, GUI_DSP_IND, EXPIRATION_DATE) ";
 	SQL_STATEMENT += "values ( ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
         try {
-            stmt = conn.prepareStatement(SQL_STATEMENT);
+            stmt = getPrmConnection().prepareStatement(SQL_STATEMENT);
             stmt.setString( 1, icgDestination.getDestinationCd());
             stmt.setDate( 2, icgDestination.getEffectiveDate());
             stmt.setDate( 3, icgDestination.getSysCreationDate());
@@ -50,12 +51,12 @@ public class IcgDestinationBaseDAO {
         }
         return -1;
     }
-    public int update( IcgDestination icgDestination, Connection conn) throws SQLException {
+    public int update( IcgDestination icgDestination) throws SQLException {
         PreparedStatement stmt = null;
-        String SQL_STATEMENT ="Update [ICG_DESTINATION] set SYS_CREATION_DATE = ?  , SYS_UPDATE_DATE = ?  , OPERATOR_ID = ?  , APPLICATION_ID = ?  , DL_SERVICE_CODE = ?  , DL_UPDATE_STAMP = ?  , BILLING_NAME_SEQ = ?  , JURISDICTION = ?  , GUI_DSP_IND = ?  , EXPIRATION_DATE = ?  ";
+        String SQL_STATEMENT ="Update ICG_DESTINATION set SYS_CREATION_DATE = ?  , SYS_UPDATE_DATE = ?  , OPERATOR_ID = ?  , APPLICATION_ID = ?  , DL_SERVICE_CODE = ?  , DL_UPDATE_STAMP = ?  , BILLING_NAME_SEQ = ?  , JURISDICTION = ?  , GUI_DSP_IND = ?  , EXPIRATION_DATE = ?  ";
 	    SQL_STATEMENT += "where DESTINATION_CD = ?  and EFFECTIVE_DATE = ? ";
         try {
-            stmt = conn.prepareStatement(SQL_STATEMENT);
+            stmt = getPrmConnection().prepareStatement(SQL_STATEMENT);
             stmt.setDate( 1, icgDestination.getSysCreationDate());
             stmt.setDate( 2, icgDestination.getSysUpdateDate());
             stmt.setBigDecimal( 3, icgDestination.getOperatorId());
@@ -85,11 +86,11 @@ public class IcgDestinationBaseDAO {
         return -1;
     }    
     
-    public int delete( IcgDestination icgDestination, Connection conn) throws SQLException {
+    public int delete( IcgDestination icgDestination) throws SQLException {
         PreparedStatement stmt = null;
-        String SQL_STATEMENT ="Delete from [ICG_DESTINATION] where DESTINATION_CD = ?  and EFFECTIVE_DATE = ? ";
+        String SQL_STATEMENT ="Delete from ICG_DESTINATION where DESTINATION_CD = ?  and EFFECTIVE_DATE = ? ";
         try {
-            stmt = conn.prepareStatement(SQL_STATEMENT);
+            stmt = getPrmConnection().prepareStatement(SQL_STATEMENT);
             stmt.setString( 1, icgDestination.getDestinationCd());
             stmt.setDate( 2, icgDestination.getEffectiveDate());
             int status = stmt.executeUpdate();
@@ -111,17 +112,17 @@ public class IcgDestinationBaseDAO {
 
 
 
-    public IcgDestination findByPK( IcgDestinationPK icgDestinationPK, Connection conn) throws SQLException {
-        return findByPK( icgDestinationPK.getDestinationCd(),icgDestinationPK.getEffectiveDate(), conn);   
+    public IcgDestination findByPK( IcgDestinationPK icgDestinationPK) throws SQLException {
+        return findByPK( icgDestinationPK.getDestinationCd(),icgDestinationPK.getEffectiveDate());   
     }
 
 
-    public IcgDestination findByPK( String destinationCd,java.sql.Date effectiveDate, Connection conn) throws SQLException {
+    public IcgDestination findByPK( String destinationCd,java.sql.Date effectiveDate) throws SQLException {
         PreparedStatement stmt = null;
         ResultSet rs = null;
-        String SQL_STATEMENT ="Select * from [ICG_DESTINATION] where DESTINATION_CD = ?  and EFFECTIVE_DATE = ? ";
+        String SQL_STATEMENT ="Select * from ICG_DESTINATION where DESTINATION_CD = ?  and EFFECTIVE_DATE = ? ";
         try {
-            stmt = conn.prepareStatement(SQL_STATEMENT);
+            stmt = getPrmConnection().prepareStatement(SQL_STATEMENT);
             stmt.setString(1, destinationCd );
             stmt.setDate(2, effectiveDate );
             rs = stmt.executeQuery();
@@ -137,12 +138,12 @@ public class IcgDestinationBaseDAO {
         return null;
     }
 
-    public List findAll(Connection conn) throws SQLException {
+    public List findAll() throws SQLException {
         PreparedStatement stmt = null;
         ResultSet rs = null;
-        String SQL_STATEMENT ="Select * from [ICG_DESTINATION]";
+        String SQL_STATEMENT ="Select * from ICG_DESTINATION";
         try {
-            stmt = conn.prepareStatement(SQL_STATEMENT);
+            stmt = getPrmConnection().prepareStatement(SQL_STATEMENT);
             rs = stmt.executeQuery();
             return fetchAll(rs);
         } catch (SQLException ex) {
@@ -156,12 +157,12 @@ public class IcgDestinationBaseDAO {
         return null;
     }
 
-    public List findByWhereCondisions(String whereConditions, Connection conn) throws SQLException {
+    public List findByWhereCondisions(String whereConditions) throws SQLException {
         PreparedStatement stmt = null;
         ResultSet rs = null;
-        String SQL_STATEMENT ="Select * from [ICG_DESTINATION] where " + whereConditions;
+        String SQL_STATEMENT ="Select * from ICG_DESTINATION where " + whereConditions;
         try {
-            stmt = conn.prepareStatement(SQL_STATEMENT);
+            stmt = getPrmConnection().prepareStatement(SQL_STATEMENT);
             rs = stmt.executeQuery();
             return fetchAll(rs);
         } catch (SQLException ex) {
@@ -175,12 +176,12 @@ public class IcgDestinationBaseDAO {
         return null;
     }
     
-    public List findByDestinationCd( String destinationCd, Connection conn) throws SQLException {
+    public List findByDestinationCd( String destinationCd) throws SQLException {
         PreparedStatement stmt = null;
         ResultSet rs = null;
-        String SQL_STATEMENT = "Select * from [ICG_DESTINATION] where DESTINATION_CD = ? order by DESTINATION_CD";
+        String SQL_STATEMENT = "Select * from ICG_DESTINATION where DESTINATION_CD = ? order by DESTINATION_CD";
         try {
-            stmt = conn.prepareStatement(SQL_STATEMENT);
+            stmt = getPrmConnection().prepareStatement(SQL_STATEMENT);
             stmt.setString(1, destinationCd );
             rs = stmt.executeQuery();
             return fetchAll(rs);
@@ -194,12 +195,12 @@ public class IcgDestinationBaseDAO {
         }
         return null;
     }
-    public List findByEffectiveDate( java.sql.Date effectiveDate, Connection conn) throws SQLException {
+    public List findByEffectiveDate( java.sql.Date effectiveDate) throws SQLException {
         PreparedStatement stmt = null;
         ResultSet rs = null;
-        String SQL_STATEMENT = "Select * from [ICG_DESTINATION] where EFFECTIVE_DATE = ? order by EFFECTIVE_DATE";
+        String SQL_STATEMENT = "Select * from ICG_DESTINATION where EFFECTIVE_DATE = ? order by EFFECTIVE_DATE";
         try {
-            stmt = conn.prepareStatement(SQL_STATEMENT);
+            stmt = getPrmConnection().prepareStatement(SQL_STATEMENT);
             stmt.setDate(1, effectiveDate );
             rs = stmt.executeQuery();
             return fetchAll(rs);
@@ -213,12 +214,12 @@ public class IcgDestinationBaseDAO {
         }
         return null;
     }
-    public List findBySysCreationDate( java.sql.Date sysCreationDate, Connection conn) throws SQLException {
+    public List findBySysCreationDate( java.sql.Date sysCreationDate) throws SQLException {
         PreparedStatement stmt = null;
         ResultSet rs = null;
-        String SQL_STATEMENT = "Select * from [ICG_DESTINATION] where SYS_CREATION_DATE = ? order by SYS_CREATION_DATE";
+        String SQL_STATEMENT = "Select * from ICG_DESTINATION where SYS_CREATION_DATE = ? order by SYS_CREATION_DATE";
         try {
-            stmt = conn.prepareStatement(SQL_STATEMENT);
+            stmt = getPrmConnection().prepareStatement(SQL_STATEMENT);
             stmt.setDate(1, sysCreationDate );
             rs = stmt.executeQuery();
             return fetchAll(rs);
@@ -232,12 +233,12 @@ public class IcgDestinationBaseDAO {
         }
         return null;
     }
-    public List findBySysUpdateDate( java.sql.Date sysUpdateDate, Connection conn) throws SQLException {
+    public List findBySysUpdateDate( java.sql.Date sysUpdateDate) throws SQLException {
         PreparedStatement stmt = null;
         ResultSet rs = null;
-        String SQL_STATEMENT = "Select * from [ICG_DESTINATION] where SYS_UPDATE_DATE = ? order by SYS_UPDATE_DATE";
+        String SQL_STATEMENT = "Select * from ICG_DESTINATION where SYS_UPDATE_DATE = ? order by SYS_UPDATE_DATE";
         try {
-            stmt = conn.prepareStatement(SQL_STATEMENT);
+            stmt = getPrmConnection().prepareStatement(SQL_STATEMENT);
             stmt.setDate(1, sysUpdateDate );
             rs = stmt.executeQuery();
             return fetchAll(rs);
@@ -251,12 +252,12 @@ public class IcgDestinationBaseDAO {
         }
         return null;
     }
-    public List findByOperatorId( java.math.BigDecimal operatorId, Connection conn) throws SQLException {
+    public List findByOperatorId( java.math.BigDecimal operatorId) throws SQLException {
         PreparedStatement stmt = null;
         ResultSet rs = null;
-        String SQL_STATEMENT = "Select * from [ICG_DESTINATION] where OPERATOR_ID = ? order by OPERATOR_ID";
+        String SQL_STATEMENT = "Select * from ICG_DESTINATION where OPERATOR_ID = ? order by OPERATOR_ID";
         try {
-            stmt = conn.prepareStatement(SQL_STATEMENT);
+            stmt = getPrmConnection().prepareStatement(SQL_STATEMENT);
             stmt.setBigDecimal(1, operatorId );
             rs = stmt.executeQuery();
             return fetchAll(rs);
@@ -270,12 +271,12 @@ public class IcgDestinationBaseDAO {
         }
         return null;
     }
-    public List findByApplicationId( String applicationId, Connection conn) throws SQLException {
+    public List findByApplicationId( String applicationId) throws SQLException {
         PreparedStatement stmt = null;
         ResultSet rs = null;
-        String SQL_STATEMENT = "Select * from [ICG_DESTINATION] where APPLICATION_ID = ? order by APPLICATION_ID";
+        String SQL_STATEMENT = "Select * from ICG_DESTINATION where APPLICATION_ID = ? order by APPLICATION_ID";
         try {
-            stmt = conn.prepareStatement(SQL_STATEMENT);
+            stmt = getPrmConnection().prepareStatement(SQL_STATEMENT);
             stmt.setString(1, applicationId );
             rs = stmt.executeQuery();
             return fetchAll(rs);
@@ -289,12 +290,12 @@ public class IcgDestinationBaseDAO {
         }
         return null;
     }
-    public List findByDlServiceCode( String dlServiceCode, Connection conn) throws SQLException {
+    public List findByDlServiceCode( String dlServiceCode) throws SQLException {
         PreparedStatement stmt = null;
         ResultSet rs = null;
-        String SQL_STATEMENT = "Select * from [ICG_DESTINATION] where DL_SERVICE_CODE = ? order by DL_SERVICE_CODE";
+        String SQL_STATEMENT = "Select * from ICG_DESTINATION where DL_SERVICE_CODE = ? order by DL_SERVICE_CODE";
         try {
-            stmt = conn.prepareStatement(SQL_STATEMENT);
+            stmt = getPrmConnection().prepareStatement(SQL_STATEMENT);
             stmt.setString(1, dlServiceCode );
             rs = stmt.executeQuery();
             return fetchAll(rs);
@@ -308,12 +309,12 @@ public class IcgDestinationBaseDAO {
         }
         return null;
     }
-    public List findByDlUpdateStamp( java.math.BigDecimal dlUpdateStamp, Connection conn) throws SQLException {
+    public List findByDlUpdateStamp( java.math.BigDecimal dlUpdateStamp) throws SQLException {
         PreparedStatement stmt = null;
         ResultSet rs = null;
-        String SQL_STATEMENT = "Select * from [ICG_DESTINATION] where DL_UPDATE_STAMP = ? order by DL_UPDATE_STAMP";
+        String SQL_STATEMENT = "Select * from ICG_DESTINATION where DL_UPDATE_STAMP = ? order by DL_UPDATE_STAMP";
         try {
-            stmt = conn.prepareStatement(SQL_STATEMENT);
+            stmt = getPrmConnection().prepareStatement(SQL_STATEMENT);
             stmt.setBigDecimal(1, dlUpdateStamp );
             rs = stmt.executeQuery();
             return fetchAll(rs);
@@ -327,12 +328,12 @@ public class IcgDestinationBaseDAO {
         }
         return null;
     }
-    public List findByBillingNameSeq( java.math.BigDecimal billingNameSeq, Connection conn) throws SQLException {
+    public List findByBillingNameSeq( java.math.BigDecimal billingNameSeq) throws SQLException {
         PreparedStatement stmt = null;
         ResultSet rs = null;
-        String SQL_STATEMENT = "Select * from [ICG_DESTINATION] where BILLING_NAME_SEQ = ? order by BILLING_NAME_SEQ";
+        String SQL_STATEMENT = "Select * from ICG_DESTINATION where BILLING_NAME_SEQ = ? order by BILLING_NAME_SEQ";
         try {
-            stmt = conn.prepareStatement(SQL_STATEMENT);
+            stmt = getPrmConnection().prepareStatement(SQL_STATEMENT);
             stmt.setBigDecimal(1, billingNameSeq );
             rs = stmt.executeQuery();
             return fetchAll(rs);
@@ -346,12 +347,12 @@ public class IcgDestinationBaseDAO {
         }
         return null;
     }
-    public List findByJurisdiction( String jurisdiction, Connection conn) throws SQLException {
+    public List findByJurisdiction( String jurisdiction) throws SQLException {
         PreparedStatement stmt = null;
         ResultSet rs = null;
-        String SQL_STATEMENT = "Select * from [ICG_DESTINATION] where JURISDICTION = ? order by JURISDICTION";
+        String SQL_STATEMENT = "Select * from ICG_DESTINATION where JURISDICTION = ? order by JURISDICTION";
         try {
-            stmt = conn.prepareStatement(SQL_STATEMENT);
+            stmt = getPrmConnection().prepareStatement(SQL_STATEMENT);
             stmt.setString(1, jurisdiction );
             rs = stmt.executeQuery();
             return fetchAll(rs);
@@ -365,12 +366,12 @@ public class IcgDestinationBaseDAO {
         }
         return null;
     }
-    public List findByGuiDspInd( String guiDspInd, Connection conn) throws SQLException {
+    public List findByGuiDspInd( String guiDspInd) throws SQLException {
         PreparedStatement stmt = null;
         ResultSet rs = null;
-        String SQL_STATEMENT = "Select * from [ICG_DESTINATION] where GUI_DSP_IND = ? order by GUI_DSP_IND";
+        String SQL_STATEMENT = "Select * from ICG_DESTINATION where GUI_DSP_IND = ? order by GUI_DSP_IND";
         try {
-            stmt = conn.prepareStatement(SQL_STATEMENT);
+            stmt = getPrmConnection().prepareStatement(SQL_STATEMENT);
             stmt.setString(1, guiDspInd );
             rs = stmt.executeQuery();
             return fetchAll(rs);
@@ -384,12 +385,12 @@ public class IcgDestinationBaseDAO {
         }
         return null;
     }
-    public List findByExpirationDate( java.sql.Date expirationDate, Connection conn) throws SQLException {
+    public List findByExpirationDate( java.sql.Date expirationDate) throws SQLException {
         PreparedStatement stmt = null;
         ResultSet rs = null;
-        String SQL_STATEMENT = "Select * from [ICG_DESTINATION] where EXPIRATION_DATE = ? order by EXPIRATION_DATE";
+        String SQL_STATEMENT = "Select * from ICG_DESTINATION where EXPIRATION_DATE = ? order by EXPIRATION_DATE";
         try {
-            stmt = conn.prepareStatement(SQL_STATEMENT);
+            stmt = getPrmConnection().prepareStatement(SQL_STATEMENT);
             stmt.setDate(1, expirationDate );
             rs = stmt.executeQuery();
             return fetchAll(rs);
@@ -406,7 +407,7 @@ public class IcgDestinationBaseDAO {
 
 /*    
 
-    public List findByCriteriaOR( IcgDestination criteria, Connection conn) throws SQLException {
+    public List findByCriteriaOR( IcgDestination criteria) throws SQLException {
         PreparedStatement stmt = null;
         ResultSet rs = null;
         String SQL_STATEMENT = "";
@@ -469,7 +470,7 @@ public class IcgDestinationBaseDAO {
             return new ArrayList();
 
         try {
-            stmt = conn.prepareStatement(SQL_STATEMENT);
+            stmt = getPrmConnection().prepareStatement(SQL_STATEMENT);
             int index = 1;
             if (criteria.getString() != null) 
                 stmt.setString(index++, criteria.getString() );
@@ -552,15 +553,15 @@ public class IcgDestinationBaseDAO {
         return null;
     }
 
-    public void populateParent(IcgDestination icgDestination, Connection conn) throws SQLException {
+    public void populateParent(IcgDestination icgDestination) throws SQLException {
     }
 
-    public void populateChild(IcgDestination icgDestination, Connection conn) throws SQLException {
+    public void populateChild(IcgDestination icgDestination) throws SQLException {
     }
 
-    public void populateAll(IcgDestination icgDestination, Connection conn) throws SQLException {
-        populateParent(icgDestination, conn);
-        populateChild(icgDestination, conn);
+    public void populateAll(IcgDestination icgDestination) throws SQLException {
+        populateParent(icgDestination);
+        populateChild(icgDestination);
     }
 
 }

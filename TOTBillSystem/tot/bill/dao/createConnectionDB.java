@@ -5,7 +5,7 @@ import java.sql.DriverManager;
 
 public class createConnectionDB {
 	
-	public static Connection openConnectBillDB()throws  IOException {
+    public static Connection openConnectBillDB()throws  IOException {
 		
 		String ipBILL=System.getenv("ipBILL");
 		String userBILL=System.getenv("userBILL");
