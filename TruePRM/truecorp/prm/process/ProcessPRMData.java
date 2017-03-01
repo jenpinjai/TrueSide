@@ -11,6 +11,7 @@ import truecorp.prm.business.FileBusiness;
 import truecorp.prm.business.PRMBusiness;
 import truecorp.prm.core.dao.SystemBaseDao;
 import truecorp.prm.model.TransactionPartner;
+import truecorp.prm.test.MyUnitTest;
 
 /**
  *
@@ -21,7 +22,7 @@ public class ProcessPRMData {
     public static void main(String[] args) throws Exception {
     
         try{
-        
+            MyUnitTest.main(null);
           List<TransactionPartner> transactionList  =  FileBusiness.readRateSheet();
           if(new Date().getDate()<10||true){
               PRMBusiness.processEarlyMonth(transactionList);
@@ -30,9 +31,6 @@ public class ProcessPRMData {
               PRMBusiness.processHalfMonth(transactionList);
           }
             
-        
-          
-          
         }catch(Exception ex){
         
             ex.printStackTrace();

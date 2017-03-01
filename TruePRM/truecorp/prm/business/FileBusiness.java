@@ -41,7 +41,7 @@ import truecorp.prm.table.TiticPartnerRef;
 public class FileBusiness {
     
     public static List<TransactionPartner> readRateSheet() throws Exception{
-    
+        String lineError="";
         try{
             List<TransactionPartner>  partnerList = new ArrayList<TransactionPartner>();
             File autoSheetFolder = new File(setEnv.EXCEL_RATESHEET_file_INPUT);
@@ -75,10 +75,12 @@ public class FileBusiness {
                         String line;
                         BufferedReader br = new BufferedReader(new FileReader(csvFile));
                         int rowNum=0;
-                        while((line = br.readLine()) != null&&line.length()>0){
+                        while((line = br.readLine()) != null){
                              rowNum++;
+                            // System.out.println("Line num:"+rowNum);
                              String[] b = line.split(splitBy);
-                             if(rowNum==1)continue;
+                             lineError = line;
+                             if(rowNum==1||line.split(splitBy).length<2)continue;
                              RateSheet  rateSheet = new RateSheet();
                              //for(String text:b){ System.out.print(text+"\t\t");}
                              rateSheet.setPrmPartnerCd(b[0]);
@@ -89,26 +91,26 @@ public class FileBusiness {
                              rateSheet.setServiceType(b[5]);
                              rateSheet.setMinChrg(b[9]);
                              rateSheet.setRoundingUnit(b[10]);
-                             rateSheet.setIsChange(b[10]);
+                             rateSheet.setIsChange(b[11]);
                              partner.setServiceType(rateSheet.getServiceType());
                              partner.getRateSheetList().add(rateSheet);
                         }
                         System.out.println("Service type :"+partner.getServiceType());
                         br.close();
                         partnerList.add(partner);
-//                        for(RateSheet rate  : partner.getRateSheetList()){
-//                            
-//                            System.out.println(rate.getPrmPartnerCd()+
-//                                          "\t"+rate.getPrefix()+
-//                                    "\t"+rate.getDescription()+
-//                                    "\t"+rate.getCost()+
-//                                    "\t"+new SimpleDateFormat("dd/MM/yyyy",Locale.US).format(rate.getEffective())+
-//                                    "\t"+rate.getServiceType()+
-//                                    "\t"+rate.getMinChrg()+
-//                                    "\t"+rate.getRoundingUnit()+
-//                                    "\t"+rate.getIsChange());
-//                            
-//                        }
+                        for(RateSheet rate  : partner.getRateSheetList()){
+                            
+                            System.out.println(rate.getPrmPartnerCd()+
+                                          "\t"+rate.getPrefix()+
+                                    "\t"+rate.getDescription()+
+                                    "\t"+rate.getCost()+
+                                    "\t"+new SimpleDateFormat("dd/MM/yyyy",Locale.US).format(rate.getEffective())+
+                                    "\t"+rate.getServiceType()+
+                                    "\t"+rate.getMinChrg()+
+                                    "\t"+rate.getRoundingUnit()+
+                                    "\t"+rate.getIsChange());
+                            
+                        }
                        
                     }
                 
@@ -118,6 +120,7 @@ public class FileBusiness {
         }catch(Exception ex){
         
             ex.printStackTrace();
+            System.out.println("===================================LINE ERROR:"+lineError);
             return null;
         }
     

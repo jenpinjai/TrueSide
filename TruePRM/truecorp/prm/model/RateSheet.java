@@ -22,6 +22,7 @@ public class RateSheet {
     private String minChrg;
     private String roundingUnit;
     private String isChange;
+    private String destinationCd;
 
     public String getPrmPartnerCd() {
         return prmPartnerCd;
@@ -93,6 +94,14 @@ public class RateSheet {
 
     public void setIsChange(String isChange) {
         this.isChange = isChange;
+    }
+
+    public String getDestinationCd() {
+        return destinationCd;
+    }
+
+    public void setDestinationCd(String destinationCd) {
+        this.destinationCd = destinationCd;
     }
     
     
