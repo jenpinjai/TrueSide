@@ -5,7 +5,12 @@
  */
 package truecorp.prm.process;
 
+import java.util.Date;
+import java.util.List;
+import truecorp.prm.business.FileBusiness;
+import truecorp.prm.business.PRMBusiness;
 import truecorp.prm.core.dao.SystemBaseDao;
+import truecorp.prm.model.TransactionPartner;
 
 /**
  *
@@ -17,17 +22,24 @@ public class ProcessPRMData {
     
         try{
         
+          List<TransactionPartner> transactionList  =  FileBusiness.readRateSheet();
+          if(new Date().getDate()<10||true){
+              PRMBusiness.processEarlyMonth(transactionList);
+              
+          }else{
+              PRMBusiness.processHalfMonth(transactionList);
+          }
+            
         
-        
-        
-        
+          
+          
         }catch(Exception ex){
         
             ex.printStackTrace();
         
         }finally{
-            
-            SystemBaseDao.getPrmConnection().close();
+            ///For close main transaction
+            SystemBaseDao.getPrmConnection().close(); //Close DB connection
             
         }
      

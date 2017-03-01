@@ -77,7 +77,7 @@ public class ReadExcel {
                     {
                        
                             // Move files to destination folder
-                            file.renameTo(new File(destinationFolder + "\\" + file.getName()));
+                            file.renameTo(new File(destinationFolder + "/" + file.getName()));
                         
                         // Add if you want to delete the source folder 
                         file.delete();

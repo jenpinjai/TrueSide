@@ -5,10 +5,12 @@ import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 import org.apache.log4j.Logger;
+import truecorp.prm.core.dao.SystemBaseDao;
+import static truecorp.prm.core.dao.SystemBaseDao.getPrmConnection;
 import truecorp.prm.table.IcgDestinationAddres;
 import truecorp.prm.table.IcgDestinationAddresPK;
 
-public class IcgDestinationAddresBaseDAO {
+public class IcgDestinationAddresBaseDAO extends SystemBaseDao {
 
     private static Logger log = Logger.getLogger(IcgDestinationAddresBaseDAO.class);
 
@@ -16,12 +18,12 @@ public class IcgDestinationAddresBaseDAO {
     public IcgDestinationAddresBaseDAO() {
     }
 
-    public int insert( IcgDestinationAddres icgDestinationAddres, Connection conn) throws SQLException {
+    public int insert( IcgDestinationAddres icgDestinationAddres) throws SQLException {
         PreparedStatement stmt = null;
-        String SQL_STATEMENT ="Insert into [ICG_DESTINATION_ADDRES](DESTINATION_CD, ADDRESS, EFFECTIVE_DATE, SYS_CREATION_DATE, SYS_UPDATE_DATE, OPERATOR_ID, APPLICATION_ID, DL_SERVICE_CODE, DL_UPDATE_STAMP, EXPIRATION_DATE) ";
+        String SQL_STATEMENT ="Insert into ICG_DESTINATION_ADDRES(DESTINATION_CD, ADDRESS, EFFECTIVE_DATE, SYS_CREATION_DATE, SYS_UPDATE_DATE, OPERATOR_ID, APPLICATION_ID, DL_SERVICE_CODE, DL_UPDATE_STAMP, EXPIRATION_DATE) ";
 	SQL_STATEMENT += "values ( ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
         try {
-            stmt = conn.prepareStatement(SQL_STATEMENT);
+            stmt = getPrmConnection().prepareStatement(SQL_STATEMENT);
             stmt.setString( 1, icgDestinationAddres.getDestinationCd());
             stmt.setString( 2, icgDestinationAddres.getAddress());
             stmt.setDate( 3, icgDestinationAddres.getEffectiveDate());
@@ -48,12 +50,12 @@ public class IcgDestinationAddresBaseDAO {
         }
         return -1;
     }
-    public int update( IcgDestinationAddres icgDestinationAddres, Connection conn) throws SQLException {
+    public int update( IcgDestinationAddres icgDestinationAddres) throws SQLException {
         PreparedStatement stmt = null;
-        String SQL_STATEMENT ="Update [ICG_DESTINATION_ADDRES] set SYS_CREATION_DATE = ?  , SYS_UPDATE_DATE = ?  , OPERATOR_ID = ?  , APPLICATION_ID = ?  , DL_SERVICE_CODE = ?  , DL_UPDATE_STAMP = ?  , EXPIRATION_DATE = ?  ";
+        String SQL_STATEMENT ="Update ICG_DESTINATION_ADDRES set SYS_CREATION_DATE = ?  , SYS_UPDATE_DATE = ?  , OPERATOR_ID = ?  , APPLICATION_ID = ?  , DL_SERVICE_CODE = ?  , DL_UPDATE_STAMP = ?  , EXPIRATION_DATE = ?  ";
 	    SQL_STATEMENT += "where DESTINATION_CD = ?  and ADDRESS = ?  and EFFECTIVE_DATE = ? ";
         try {
-            stmt = conn.prepareStatement(SQL_STATEMENT);
+            stmt = getPrmConnection().prepareStatement(SQL_STATEMENT);
             stmt.setDate( 1, icgDestinationAddres.getSysCreationDate());
             stmt.setDate( 2, icgDestinationAddres.getSysUpdateDate());
             stmt.setBigDecimal( 3, icgDestinationAddres.getOperatorId());
@@ -81,11 +83,11 @@ public class IcgDestinationAddresBaseDAO {
         return -1;
     }    
     
-    public int delete( IcgDestinationAddres icgDestinationAddres, Connection conn) throws SQLException {
+    public int delete( IcgDestinationAddres icgDestinationAddres) throws SQLException {
         PreparedStatement stmt = null;
-        String SQL_STATEMENT ="Delete from [ICG_DESTINATION_ADDRES] where DESTINATION_CD = ?  and ADDRESS = ?  and EFFECTIVE_DATE = ? ";
+        String SQL_STATEMENT ="Delete from ICG_DESTINATION_ADDRES where DESTINATION_CD = ?  and ADDRESS = ?  and EFFECTIVE_DATE = ? ";
         try {
-            stmt = conn.prepareStatement(SQL_STATEMENT);
+            stmt = getPrmConnection().prepareStatement(SQL_STATEMENT);
             stmt.setString( 1, icgDestinationAddres.getDestinationCd());
             stmt.setString( 2, icgDestinationAddres.getAddress());
             stmt.setDate( 3, icgDestinationAddres.getEffectiveDate());
@@ -108,17 +110,17 @@ public class IcgDestinationAddresBaseDAO {
 
 
 
-    public IcgDestinationAddres findByPK( IcgDestinationAddresPK icgDestinationAddresPK, Connection conn) throws SQLException {
-        return findByPK( icgDestinationAddresPK.getDestinationCd(),icgDestinationAddresPK.getAddress(),icgDestinationAddresPK.getEffectiveDate(), conn);   
+    public IcgDestinationAddres findByPK( IcgDestinationAddresPK icgDestinationAddresPK) throws SQLException {
+        return findByPK( icgDestinationAddresPK.getDestinationCd(),icgDestinationAddresPK.getAddress(),icgDestinationAddresPK.getEffectiveDate());   
     }
 
 
-    public IcgDestinationAddres findByPK( String destinationCd,String address,java.sql.Date effectiveDate, Connection conn) throws SQLException {
+    public IcgDestinationAddres findByPK( String destinationCd,String address,java.sql.Date effectiveDate) throws SQLException {
         PreparedStatement stmt = null;
         ResultSet rs = null;
-        String SQL_STATEMENT ="Select * from [ICG_DESTINATION_ADDRES] where DESTINATION_CD = ?  and ADDRESS = ?  and EFFECTIVE_DATE = ? ";
+        String SQL_STATEMENT ="Select * from ICG_DESTINATION_ADDRES where DESTINATION_CD = ?  and ADDRESS = ?  and EFFECTIVE_DATE = ? ";
         try {
-            stmt = conn.prepareStatement(SQL_STATEMENT);
+            stmt = getPrmConnection().prepareStatement(SQL_STATEMENT);
             stmt.setString(1, destinationCd );
             stmt.setString(2, address );
             stmt.setDate(3, effectiveDate );
@@ -135,12 +137,12 @@ public class IcgDestinationAddresBaseDAO {
         return null;
     }
 
-    public List findAll(Connection conn) throws SQLException {
+    public List findAll() throws SQLException {
         PreparedStatement stmt = null;
         ResultSet rs = null;
-        String SQL_STATEMENT ="Select * from [ICG_DESTINATION_ADDRES]";
+        String SQL_STATEMENT ="Select * from ICG_DESTINATION_ADDRES";
         try {
-            stmt = conn.prepareStatement(SQL_STATEMENT);
+            stmt = getPrmConnection().prepareStatement(SQL_STATEMENT);
             rs = stmt.executeQuery();
             return fetchAll(rs);
         } catch (SQLException ex) {
@@ -154,12 +156,12 @@ public class IcgDestinationAddresBaseDAO {
         return null;
     }
 
-    public List findByWhereCondisions(String whereConditions, Connection conn) throws SQLException {
+    public List findByWhereCondisions(String whereConditions) throws SQLException {
         PreparedStatement stmt = null;
         ResultSet rs = null;
-        String SQL_STATEMENT ="Select * from [ICG_DESTINATION_ADDRES] where " + whereConditions;
+        String SQL_STATEMENT ="Select * from ICG_DESTINATION_ADDRES where " + whereConditions;
         try {
-            stmt = conn.prepareStatement(SQL_STATEMENT);
+            stmt = getPrmConnection().prepareStatement(SQL_STATEMENT);
             rs = stmt.executeQuery();
             return fetchAll(rs);
         } catch (SQLException ex) {
@@ -173,12 +175,12 @@ public class IcgDestinationAddresBaseDAO {
         return null;
     }
     
-    public List findByDestinationCd( String destinationCd, Connection conn) throws SQLException {
+    public List findByDestinationCd( String destinationCd) throws SQLException {
         PreparedStatement stmt = null;
         ResultSet rs = null;
-        String SQL_STATEMENT = "Select * from [ICG_DESTINATION_ADDRES] where DESTINATION_CD = ? order by DESTINATION_CD";
+        String SQL_STATEMENT = "Select * from ICG_DESTINATION_ADDRES where DESTINATION_CD = ? order by DESTINATION_CD";
         try {
-            stmt = conn.prepareStatement(SQL_STATEMENT);
+            stmt = getPrmConnection().prepareStatement(SQL_STATEMENT);
             stmt.setString(1, destinationCd );
             rs = stmt.executeQuery();
             return fetchAll(rs);
@@ -192,12 +194,12 @@ public class IcgDestinationAddresBaseDAO {
         }
         return null;
     }
-    public List findByAddress( String address, Connection conn) throws SQLException {
+    public List findByAddress( String address) throws SQLException {
         PreparedStatement stmt = null;
         ResultSet rs = null;
-        String SQL_STATEMENT = "Select * from [ICG_DESTINATION_ADDRES] where ADDRESS = ? order by ADDRESS";
+        String SQL_STATEMENT = "Select * from ICG_DESTINATION_ADDRES where ADDRESS = ? order by ADDRESS";
         try {
-            stmt = conn.prepareStatement(SQL_STATEMENT);
+            stmt = getPrmConnection().prepareStatement(SQL_STATEMENT);
             stmt.setString(1, address );
             rs = stmt.executeQuery();
             return fetchAll(rs);
@@ -211,12 +213,12 @@ public class IcgDestinationAddresBaseDAO {
         }
         return null;
     }
-    public List findByEffectiveDate( java.sql.Date effectiveDate, Connection conn) throws SQLException {
+    public List findByEffectiveDate( java.sql.Date effectiveDate) throws SQLException {
         PreparedStatement stmt = null;
         ResultSet rs = null;
-        String SQL_STATEMENT = "Select * from [ICG_DESTINATION_ADDRES] where EFFECTIVE_DATE = ? order by EFFECTIVE_DATE";
+        String SQL_STATEMENT = "Select * from ICG_DESTINATION_ADDRES where EFFECTIVE_DATE = ? order by EFFECTIVE_DATE";
         try {
-            stmt = conn.prepareStatement(SQL_STATEMENT);
+            stmt = getPrmConnection().prepareStatement(SQL_STATEMENT);
             stmt.setDate(1, effectiveDate );
             rs = stmt.executeQuery();
             return fetchAll(rs);
@@ -230,12 +232,12 @@ public class IcgDestinationAddresBaseDAO {
         }
         return null;
     }
-    public List findBySysCreationDate( java.sql.Date sysCreationDate, Connection conn) throws SQLException {
+    public List findBySysCreationDate( java.sql.Date sysCreationDate) throws SQLException {
         PreparedStatement stmt = null;
         ResultSet rs = null;
-        String SQL_STATEMENT = "Select * from [ICG_DESTINATION_ADDRES] where SYS_CREATION_DATE = ? order by SYS_CREATION_DATE";
+        String SQL_STATEMENT = "Select * from ICG_DESTINATION_ADDRES where SYS_CREATION_DATE = ? order by SYS_CREATION_DATE";
         try {
-            stmt = conn.prepareStatement(SQL_STATEMENT);
+            stmt = getPrmConnection().prepareStatement(SQL_STATEMENT);
             stmt.setDate(1, sysCreationDate );
             rs = stmt.executeQuery();
             return fetchAll(rs);
@@ -249,12 +251,12 @@ public class IcgDestinationAddresBaseDAO {
         }
         return null;
     }
-    public List findBySysUpdateDate( java.sql.Date sysUpdateDate, Connection conn) throws SQLException {
+    public List findBySysUpdateDate( java.sql.Date sysUpdateDate) throws SQLException {
         PreparedStatement stmt = null;
         ResultSet rs = null;
-        String SQL_STATEMENT = "Select * from [ICG_DESTINATION_ADDRES] where SYS_UPDATE_DATE = ? order by SYS_UPDATE_DATE";
+        String SQL_STATEMENT = "Select * from ICG_DESTINATION_ADDRES where SYS_UPDATE_DATE = ? order by SYS_UPDATE_DATE";
         try {
-            stmt = conn.prepareStatement(SQL_STATEMENT);
+            stmt = getPrmConnection().prepareStatement(SQL_STATEMENT);
             stmt.setDate(1, sysUpdateDate );
             rs = stmt.executeQuery();
             return fetchAll(rs);
@@ -268,12 +270,12 @@ public class IcgDestinationAddresBaseDAO {
         }
         return null;
     }
-    public List findByOperatorId( java.math.BigDecimal operatorId, Connection conn) throws SQLException {
+    public List findByOperatorId( java.math.BigDecimal operatorId) throws SQLException {
         PreparedStatement stmt = null;
         ResultSet rs = null;
-        String SQL_STATEMENT = "Select * from [ICG_DESTINATION_ADDRES] where OPERATOR_ID = ? order by OPERATOR_ID";
+        String SQL_STATEMENT = "Select * from ICG_DESTINATION_ADDRES where OPERATOR_ID = ? order by OPERATOR_ID";
         try {
-            stmt = conn.prepareStatement(SQL_STATEMENT);
+            stmt = getPrmConnection().prepareStatement(SQL_STATEMENT);
             stmt.setBigDecimal(1, operatorId );
             rs = stmt.executeQuery();
             return fetchAll(rs);
@@ -287,12 +289,12 @@ public class IcgDestinationAddresBaseDAO {
         }
         return null;
     }
-    public List findByApplicationId( String applicationId, Connection conn) throws SQLException {
+    public List findByApplicationId( String applicationId) throws SQLException {
         PreparedStatement stmt = null;
         ResultSet rs = null;
-        String SQL_STATEMENT = "Select * from [ICG_DESTINATION_ADDRES] where APPLICATION_ID = ? order by APPLICATION_ID";
+        String SQL_STATEMENT = "Select * from ICG_DESTINATION_ADDRES where APPLICATION_ID = ? order by APPLICATION_ID";
         try {
-            stmt = conn.prepareStatement(SQL_STATEMENT);
+            stmt = getPrmConnection().prepareStatement(SQL_STATEMENT);
             stmt.setString(1, applicationId );
             rs = stmt.executeQuery();
             return fetchAll(rs);
@@ -306,12 +308,12 @@ public class IcgDestinationAddresBaseDAO {
         }
         return null;
     }
-    public List findByDlServiceCode( String dlServiceCode, Connection conn) throws SQLException {
+    public List findByDlServiceCode( String dlServiceCode) throws SQLException {
         PreparedStatement stmt = null;
         ResultSet rs = null;
-        String SQL_STATEMENT = "Select * from [ICG_DESTINATION_ADDRES] where DL_SERVICE_CODE = ? order by DL_SERVICE_CODE";
+        String SQL_STATEMENT = "Select * from ICG_DESTINATION_ADDRES where DL_SERVICE_CODE = ? order by DL_SERVICE_CODE";
         try {
-            stmt = conn.prepareStatement(SQL_STATEMENT);
+            stmt = getPrmConnection().prepareStatement(SQL_STATEMENT);
             stmt.setString(1, dlServiceCode );
             rs = stmt.executeQuery();
             return fetchAll(rs);
@@ -325,12 +327,12 @@ public class IcgDestinationAddresBaseDAO {
         }
         return null;
     }
-    public List findByDlUpdateStamp( java.math.BigDecimal dlUpdateStamp, Connection conn) throws SQLException {
+    public List findByDlUpdateStamp( java.math.BigDecimal dlUpdateStamp) throws SQLException {
         PreparedStatement stmt = null;
         ResultSet rs = null;
-        String SQL_STATEMENT = "Select * from [ICG_DESTINATION_ADDRES] where DL_UPDATE_STAMP = ? order by DL_UPDATE_STAMP";
+        String SQL_STATEMENT = "Select * from ICG_DESTINATION_ADDRES where DL_UPDATE_STAMP = ? order by DL_UPDATE_STAMP";
         try {
-            stmt = conn.prepareStatement(SQL_STATEMENT);
+            stmt = getPrmConnection().prepareStatement(SQL_STATEMENT);
             stmt.setBigDecimal(1, dlUpdateStamp );
             rs = stmt.executeQuery();
             return fetchAll(rs);
@@ -344,12 +346,12 @@ public class IcgDestinationAddresBaseDAO {
         }
         return null;
     }
-    public List findByExpirationDate( java.sql.Date expirationDate, Connection conn) throws SQLException {
+    public List findByExpirationDate( java.sql.Date expirationDate) throws SQLException {
         PreparedStatement stmt = null;
         ResultSet rs = null;
-        String SQL_STATEMENT = "Select * from [ICG_DESTINATION_ADDRES] where EXPIRATION_DATE = ? order by EXPIRATION_DATE";
+        String SQL_STATEMENT = "Select * from ICG_DESTINATION_ADDRES where EXPIRATION_DATE = ? order by EXPIRATION_DATE";
         try {
-            stmt = conn.prepareStatement(SQL_STATEMENT);
+            stmt = getPrmConnection().prepareStatement(SQL_STATEMENT);
             stmt.setDate(1, expirationDate );
             rs = stmt.executeQuery();
             return fetchAll(rs);
@@ -366,7 +368,7 @@ public class IcgDestinationAddresBaseDAO {
 
 /*    
 
-    public List findByCriteriaOR( IcgDestinationAddres criteria, Connection conn) throws SQLException {
+    public List findByCriteriaOR( IcgDestinationAddres criteria) throws SQLException {
         PreparedStatement stmt = null;
         ResultSet rs = null;
         String SQL_STATEMENT = "";
@@ -421,7 +423,7 @@ public class IcgDestinationAddresBaseDAO {
             return new ArrayList();
 
         try {
-            stmt = conn.prepareStatement(SQL_STATEMENT);
+            stmt = getPrmConnection().prepareStatement(SQL_STATEMENT);
             int index = 1;
             if (criteria.getString() != null) 
                 stmt.setString(index++, criteria.getString() );
@@ -497,15 +499,15 @@ public class IcgDestinationAddresBaseDAO {
     }
 
 
-    public void populateParent(IcgDestinationAddres icgDestinationAddres, Connection conn) throws SQLException {
+    public void populateParent(IcgDestinationAddres icgDestinationAddres) throws SQLException {
     }
 
-    public void populateChild(IcgDestinationAddres icgDestinationAddres, Connection conn) throws SQLException {
+    public void populateChild(IcgDestinationAddres icgDestinationAddres) throws SQLException {
     }
 
-    public void populateAll(IcgDestinationAddres icgDestinationAddres, Connection conn) throws SQLException {
-        populateParent(icgDestinationAddres, conn);
-        populateChild(icgDestinationAddres, conn);
+    public void populateAll(IcgDestinationAddres icgDestinationAddres) throws SQLException {
+        populateParent(icgDestinationAddres);
+        populateChild(icgDestinationAddres);
     }
 
 }

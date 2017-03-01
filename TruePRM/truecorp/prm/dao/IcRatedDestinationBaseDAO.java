@@ -5,11 +5,13 @@ import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 import org.apache.log4j.Logger;
+import truecorp.prm.core.dao.SystemBaseDao;
+import static truecorp.prm.core.dao.SystemBaseDao.getPrmConnection;
 import truecorp.prm.table.IcRatedDestination;
 import truecorp.prm.table.IcRatedDestinationPK;
 
 
-public class IcRatedDestinationBaseDAO {
+public class IcRatedDestinationBaseDAO extends SystemBaseDao{
 
     private static Logger log = Logger.getLogger(IcRatedDestinationBaseDAO.class);
 
@@ -17,12 +19,12 @@ public class IcRatedDestinationBaseDAO {
     public IcRatedDestinationBaseDAO() {
     }
 
-    public int insert( IcRatedDestination icRatedDestination, Connection conn) throws SQLException {
+    public int insert( IcRatedDestination icRatedDestination) throws SQLException {
         PreparedStatement stmt = null;
-        String SQL_STATEMENT ="Insert into [IC_RATED_DESTINATION](RATE_PLAN_CD, DESTINATION_CD, CHRG_PARAM_ID, EFFECTIVE_DATE, SYS_CREATION_DATE, SYS_UPDATE_DATE, OPERATOR_ID, APPLICATION_ID, DL_SERVICE_CODE, DL_UPDATE_STAMP, QUAL_PARAM_1_ID, QUAL_PARAM_1_SET_CD, QUAL_PARAM_2_ID, QUAL_PARAM_2_SET_CD, QUAL_PARAM_3_ID, QUAL_PARAM_3_SET_CD, QUAL_PARAM_4_ID, QUAL_PARAM_4_SET_CD, QUAL_PARAM_5_ID, QUAL_PARAM_5_SET_CD, QUAL_PARAM_6_ID, QUAL_PARAM_6_SET_CD, QUAL_PARAM_7_ID, QUAL_PARAM_7_SET_CD, DEST_SORT_ORDER_CD, RATES_PRES_IND, UOM, MIN_CHRG_PARAM, ROUNDING_UNIT, RATING_UNIT, RATE_SCHEME_IND, MIN_CHRG, PARAM_DSP_ORDER, ONE_TIME_CHRG, ACCES_CHRG, EXPIRATION_DATE) ";
+        String SQL_STATEMENT ="Insert into IC_RATED_DESTINATION(RATE_PLAN_CD, DESTINATION_CD, CHRG_PARAM_ID, EFFECTIVE_DATE, SYS_CREATION_DATE, SYS_UPDATE_DATE, OPERATOR_ID, APPLICATION_ID, DL_SERVICE_CODE, DL_UPDATE_STAMP, QUAL_PARAM_1_ID, QUAL_PARAM_1_SET_CD, QUAL_PARAM_2_ID, QUAL_PARAM_2_SET_CD, QUAL_PARAM_3_ID, QUAL_PARAM_3_SET_CD, QUAL_PARAM_4_ID, QUAL_PARAM_4_SET_CD, QUAL_PARAM_5_ID, QUAL_PARAM_5_SET_CD, QUAL_PARAM_6_ID, QUAL_PARAM_6_SET_CD, QUAL_PARAM_7_ID, QUAL_PARAM_7_SET_CD, DEST_SORT_ORDER_CD, RATES_PRES_IND, UOM, MIN_CHRG_PARAM, ROUNDING_UNIT, RATING_UNIT, RATE_SCHEME_IND, MIN_CHRG, PARAM_DSP_ORDER, ONE_TIME_CHRG, ACCES_CHRG, EXPIRATION_DATE) ";
 	SQL_STATEMENT += "values ( ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
         try {
-            stmt = conn.prepareStatement(SQL_STATEMENT);
+            stmt = getPrmConnection().prepareStatement(SQL_STATEMENT);
             stmt.setString( 1, icRatedDestination.getRatePlanCd());
             stmt.setString( 2, icRatedDestination.getDestinationCd());
             stmt.setBigDecimal( 3, icRatedDestination.getChrgParamId());
@@ -75,12 +77,12 @@ public class IcRatedDestinationBaseDAO {
         }
         return -1;
     }
-    public int update( IcRatedDestination icRatedDestination, Connection conn) throws SQLException {
+    public int update( IcRatedDestination icRatedDestination) throws SQLException {
         PreparedStatement stmt = null;
-        String SQL_STATEMENT ="Update [IC_RATED_DESTINATION] set SYS_CREATION_DATE = ?  , SYS_UPDATE_DATE = ?  , OPERATOR_ID = ?  , APPLICATION_ID = ?  , DL_SERVICE_CODE = ?  , DL_UPDATE_STAMP = ?  , QUAL_PARAM_1_ID = ?  , QUAL_PARAM_1_SET_CD = ?  , QUAL_PARAM_2_ID = ?  , QUAL_PARAM_2_SET_CD = ?  , QUAL_PARAM_3_ID = ?  , QUAL_PARAM_3_SET_CD = ?  , QUAL_PARAM_4_ID = ?  , QUAL_PARAM_4_SET_CD = ?  , QUAL_PARAM_5_ID = ?  , QUAL_PARAM_5_SET_CD = ?  , QUAL_PARAM_6_ID = ?  , QUAL_PARAM_6_SET_CD = ?  , QUAL_PARAM_7_ID = ?  , QUAL_PARAM_7_SET_CD = ?  , DEST_SORT_ORDER_CD = ?  , RATES_PRES_IND = ?  , UOM = ?  , MIN_CHRG_PARAM = ?  , ROUNDING_UNIT = ?  , RATING_UNIT = ?  , RATE_SCHEME_IND = ?  , MIN_CHRG = ?  , PARAM_DSP_ORDER = ?  , ONE_TIME_CHRG = ?  , ACCES_CHRG = ?  , EXPIRATION_DATE = ?  ";
+        String SQL_STATEMENT ="Update IC_RATED_DESTINATION set SYS_CREATION_DATE = ?  , SYS_UPDATE_DATE = ?  , OPERATOR_ID = ?  , APPLICATION_ID = ?  , DL_SERVICE_CODE = ?  , DL_UPDATE_STAMP = ?  , QUAL_PARAM_1_ID = ?  , QUAL_PARAM_1_SET_CD = ?  , QUAL_PARAM_2_ID = ?  , QUAL_PARAM_2_SET_CD = ?  , QUAL_PARAM_3_ID = ?  , QUAL_PARAM_3_SET_CD = ?  , QUAL_PARAM_4_ID = ?  , QUAL_PARAM_4_SET_CD = ?  , QUAL_PARAM_5_ID = ?  , QUAL_PARAM_5_SET_CD = ?  , QUAL_PARAM_6_ID = ?  , QUAL_PARAM_6_SET_CD = ?  , QUAL_PARAM_7_ID = ?  , QUAL_PARAM_7_SET_CD = ?  , DEST_SORT_ORDER_CD = ?  , RATES_PRES_IND = ?  , UOM = ?  , MIN_CHRG_PARAM = ?  , ROUNDING_UNIT = ?  , RATING_UNIT = ?  , RATE_SCHEME_IND = ?  , MIN_CHRG = ?  , PARAM_DSP_ORDER = ?  , ONE_TIME_CHRG = ?  , ACCES_CHRG = ?  , EXPIRATION_DATE = ?  ";
 	    SQL_STATEMENT += "where RATE_PLAN_CD = ?  and DESTINATION_CD = ?  and CHRG_PARAM_ID = ?  and EFFECTIVE_DATE = ? ";
         try {
-            stmt = conn.prepareStatement(SQL_STATEMENT);
+            stmt = getPrmConnection().prepareStatement(SQL_STATEMENT);
             stmt.setDate( 1, icRatedDestination.getSysCreationDate());
             stmt.setDate( 2, icRatedDestination.getSysUpdateDate());
             stmt.setBigDecimal( 3, icRatedDestination.getOperatorId());
@@ -134,11 +136,11 @@ public class IcRatedDestinationBaseDAO {
         return -1;
     }    
     
-    public int delete( IcRatedDestination icRatedDestination, Connection conn) throws SQLException {
+    public int delete( IcRatedDestination icRatedDestination) throws SQLException {
         PreparedStatement stmt = null;
-        String SQL_STATEMENT ="Delete from [IC_RATED_DESTINATION] where RATE_PLAN_CD = ?  and DESTINATION_CD = ?  and CHRG_PARAM_ID = ?  and EFFECTIVE_DATE = ? ";
+        String SQL_STATEMENT ="Delete from IC_RATED_DESTINATION where RATE_PLAN_CD = ?  and DESTINATION_CD = ?  and CHRG_PARAM_ID = ?  and EFFECTIVE_DATE = ? ";
         try {
-            stmt = conn.prepareStatement(SQL_STATEMENT);
+            stmt = getPrmConnection().prepareStatement(SQL_STATEMENT);
             stmt.setString( 1, icRatedDestination.getRatePlanCd());
             stmt.setString( 2, icRatedDestination.getDestinationCd());
             stmt.setBigDecimal( 3, icRatedDestination.getChrgParamId());
@@ -162,17 +164,17 @@ public class IcRatedDestinationBaseDAO {
 
 
 
-    public IcRatedDestination findByPK( IcRatedDestinationPK icRatedDestinationPK, Connection conn) throws SQLException {
-        return findByPK( icRatedDestinationPK.getRatePlanCd(),icRatedDestinationPK.getDestinationCd(),icRatedDestinationPK.getChrgParamId(),icRatedDestinationPK.getEffectiveDate(), conn);   
+    public IcRatedDestination findByPK( IcRatedDestinationPK icRatedDestinationPK) throws SQLException {
+        return findByPK( icRatedDestinationPK.getRatePlanCd(),icRatedDestinationPK.getDestinationCd(),icRatedDestinationPK.getChrgParamId(),icRatedDestinationPK.getEffectiveDate());   
     }
 
 
-    public IcRatedDestination findByPK( String ratePlanCd,String destinationCd,java.math.BigDecimal chrgParamId,java.sql.Date effectiveDate, Connection conn) throws SQLException {
+    public IcRatedDestination findByPK( String ratePlanCd,String destinationCd,java.math.BigDecimal chrgParamId,java.sql.Date effectiveDate) throws SQLException {
         PreparedStatement stmt = null;
         ResultSet rs = null;
-        String SQL_STATEMENT ="Select * from [IC_RATED_DESTINATION] where RATE_PLAN_CD = ?  and DESTINATION_CD = ?  and CHRG_PARAM_ID = ?  and EFFECTIVE_DATE = ? ";
+        String SQL_STATEMENT ="Select * from IC_RATED_DESTINATION where RATE_PLAN_CD = ?  and DESTINATION_CD = ?  and CHRG_PARAM_ID = ?  and EFFECTIVE_DATE = ? ";
         try {
-            stmt = conn.prepareStatement(SQL_STATEMENT);
+            stmt = getPrmConnection().prepareStatement(SQL_STATEMENT);
             stmt.setString(1, ratePlanCd );
             stmt.setString(2, destinationCd );
             stmt.setBigDecimal(3, chrgParamId );
@@ -190,12 +192,12 @@ public class IcRatedDestinationBaseDAO {
         return null;
     }
 
-    public List findAll(Connection conn) throws SQLException {
+    public List findAll() throws SQLException {
         PreparedStatement stmt = null;
         ResultSet rs = null;
-        String SQL_STATEMENT ="Select * from [IC_RATED_DESTINATION]";
+        String SQL_STATEMENT ="Select * from IC_RATED_DESTINATION";
         try {
-            stmt = conn.prepareStatement(SQL_STATEMENT);
+            stmt = getPrmConnection().prepareStatement(SQL_STATEMENT);
             rs = stmt.executeQuery();
             return fetchAll(rs);
         } catch (SQLException ex) {
@@ -209,12 +211,12 @@ public class IcRatedDestinationBaseDAO {
         return null;
     }
 
-    public List findByWhereCondisions(String whereConditions, Connection conn) throws SQLException {
+    public List findByWhereCondisions(String whereConditions) throws SQLException {
         PreparedStatement stmt = null;
         ResultSet rs = null;
-        String SQL_STATEMENT ="Select * from [IC_RATED_DESTINATION] where " + whereConditions;
+        String SQL_STATEMENT ="Select * from IC_RATED_DESTINATION where " + whereConditions;
         try {
-            stmt = conn.prepareStatement(SQL_STATEMENT);
+            stmt = getPrmConnection().prepareStatement(SQL_STATEMENT);
             rs = stmt.executeQuery();
             return fetchAll(rs);
         } catch (SQLException ex) {
@@ -228,12 +230,12 @@ public class IcRatedDestinationBaseDAO {
         return null;
     }
     
-    public List findByRatePlanCd( String ratePlanCd, Connection conn) throws SQLException {
+    public List findByRatePlanCd( String ratePlanCd) throws SQLException {
         PreparedStatement stmt = null;
         ResultSet rs = null;
-        String SQL_STATEMENT = "Select * from [IC_RATED_DESTINATION] where RATE_PLAN_CD = ? order by RATE_PLAN_CD";
+        String SQL_STATEMENT = "Select * from IC_RATED_DESTINATION where RATE_PLAN_CD = ? order by RATE_PLAN_CD";
         try {
-            stmt = conn.prepareStatement(SQL_STATEMENT);
+            stmt = getPrmConnection().prepareStatement(SQL_STATEMENT);
             stmt.setString(1, ratePlanCd );
             rs = stmt.executeQuery();
             return fetchAll(rs);
@@ -247,12 +249,12 @@ public class IcRatedDestinationBaseDAO {
         }
         return null;
     }
-    public List findByDestinationCd( String destinationCd, Connection conn) throws SQLException {
+    public List findByDestinationCd( String destinationCd) throws SQLException {
         PreparedStatement stmt = null;
         ResultSet rs = null;
-        String SQL_STATEMENT = "Select * from [IC_RATED_DESTINATION] where DESTINATION_CD = ? order by DESTINATION_CD";
+        String SQL_STATEMENT = "Select * from IC_RATED_DESTINATION where DESTINATION_CD = ? order by DESTINATION_CD";
         try {
-            stmt = conn.prepareStatement(SQL_STATEMENT);
+            stmt = getPrmConnection().prepareStatement(SQL_STATEMENT);
             stmt.setString(1, destinationCd );
             rs = stmt.executeQuery();
             return fetchAll(rs);
@@ -266,12 +268,12 @@ public class IcRatedDestinationBaseDAO {
         }
         return null;
     }
-    public List findByChrgParamId( java.math.BigDecimal chrgParamId, Connection conn) throws SQLException {
+    public List findByChrgParamId( java.math.BigDecimal chrgParamId) throws SQLException {
         PreparedStatement stmt = null;
         ResultSet rs = null;
-        String SQL_STATEMENT = "Select * from [IC_RATED_DESTINATION] where CHRG_PARAM_ID = ? order by CHRG_PARAM_ID";
+        String SQL_STATEMENT = "Select * from IC_RATED_DESTINATION where CHRG_PARAM_ID = ? order by CHRG_PARAM_ID";
         try {
-            stmt = conn.prepareStatement(SQL_STATEMENT);
+            stmt = getPrmConnection().prepareStatement(SQL_STATEMENT);
             stmt.setBigDecimal(1, chrgParamId );
             rs = stmt.executeQuery();
             return fetchAll(rs);
@@ -285,12 +287,12 @@ public class IcRatedDestinationBaseDAO {
         }
         return null;
     }
-    public List findByEffectiveDate( java.sql.Date effectiveDate, Connection conn) throws SQLException {
+    public List findByEffectiveDate( java.sql.Date effectiveDate) throws SQLException {
         PreparedStatement stmt = null;
         ResultSet rs = null;
-        String SQL_STATEMENT = "Select * from [IC_RATED_DESTINATION] where EFFECTIVE_DATE = ? order by EFFECTIVE_DATE";
+        String SQL_STATEMENT = "Select * from IC_RATED_DESTINATION where EFFECTIVE_DATE = ? order by EFFECTIVE_DATE";
         try {
-            stmt = conn.prepareStatement(SQL_STATEMENT);
+            stmt = getPrmConnection().prepareStatement(SQL_STATEMENT);
             stmt.setDate(1, effectiveDate );
             rs = stmt.executeQuery();
             return fetchAll(rs);
@@ -304,12 +306,12 @@ public class IcRatedDestinationBaseDAO {
         }
         return null;
     }
-    public List findBySysCreationDate( java.sql.Date sysCreationDate, Connection conn) throws SQLException {
+    public List findBySysCreationDate( java.sql.Date sysCreationDate) throws SQLException {
         PreparedStatement stmt = null;
         ResultSet rs = null;
-        String SQL_STATEMENT = "Select * from [IC_RATED_DESTINATION] where SYS_CREATION_DATE = ? order by SYS_CREATION_DATE";
+        String SQL_STATEMENT = "Select * from IC_RATED_DESTINATION where SYS_CREATION_DATE = ? order by SYS_CREATION_DATE";
         try {
-            stmt = conn.prepareStatement(SQL_STATEMENT);
+            stmt = getPrmConnection().prepareStatement(SQL_STATEMENT);
             stmt.setDate(1, sysCreationDate );
             rs = stmt.executeQuery();
             return fetchAll(rs);
@@ -323,12 +325,12 @@ public class IcRatedDestinationBaseDAO {
         }
         return null;
     }
-    public List findBySysUpdateDate( java.sql.Date sysUpdateDate, Connection conn) throws SQLException {
+    public List findBySysUpdateDate( java.sql.Date sysUpdateDate) throws SQLException {
         PreparedStatement stmt = null;
         ResultSet rs = null;
-        String SQL_STATEMENT = "Select * from [IC_RATED_DESTINATION] where SYS_UPDATE_DATE = ? order by SYS_UPDATE_DATE";
+        String SQL_STATEMENT = "Select * from IC_RATED_DESTINATION where SYS_UPDATE_DATE = ? order by SYS_UPDATE_DATE";
         try {
-            stmt = conn.prepareStatement(SQL_STATEMENT);
+            stmt = getPrmConnection().prepareStatement(SQL_STATEMENT);
             stmt.setDate(1, sysUpdateDate );
             rs = stmt.executeQuery();
             return fetchAll(rs);
@@ -342,12 +344,12 @@ public class IcRatedDestinationBaseDAO {
         }
         return null;
     }
-    public List findByOperatorId( java.math.BigDecimal operatorId, Connection conn) throws SQLException {
+    public List findByOperatorId( java.math.BigDecimal operatorId) throws SQLException {
         PreparedStatement stmt = null;
         ResultSet rs = null;
-        String SQL_STATEMENT = "Select * from [IC_RATED_DESTINATION] where OPERATOR_ID = ? order by OPERATOR_ID";
+        String SQL_STATEMENT = "Select * from IC_RATED_DESTINATION where OPERATOR_ID = ? order by OPERATOR_ID";
         try {
-            stmt = conn.prepareStatement(SQL_STATEMENT);
+            stmt = getPrmConnection().prepareStatement(SQL_STATEMENT);
             stmt.setBigDecimal(1, operatorId );
             rs = stmt.executeQuery();
             return fetchAll(rs);
@@ -361,12 +363,12 @@ public class IcRatedDestinationBaseDAO {
         }
         return null;
     }
-    public List findByApplicationId( String applicationId, Connection conn) throws SQLException {
+    public List findByApplicationId( String applicationId) throws SQLException {
         PreparedStatement stmt = null;
         ResultSet rs = null;
-        String SQL_STATEMENT = "Select * from [IC_RATED_DESTINATION] where APPLICATION_ID = ? order by APPLICATION_ID";
+        String SQL_STATEMENT = "Select * from IC_RATED_DESTINATION where APPLICATION_ID = ? order by APPLICATION_ID";
         try {
-            stmt = conn.prepareStatement(SQL_STATEMENT);
+            stmt = getPrmConnection().prepareStatement(SQL_STATEMENT);
             stmt.setString(1, applicationId );
             rs = stmt.executeQuery();
             return fetchAll(rs);
@@ -380,12 +382,12 @@ public class IcRatedDestinationBaseDAO {
         }
         return null;
     }
-    public List findByDlServiceCode( String dlServiceCode, Connection conn) throws SQLException {
+    public List findByDlServiceCode( String dlServiceCode) throws SQLException {
         PreparedStatement stmt = null;
         ResultSet rs = null;
-        String SQL_STATEMENT = "Select * from [IC_RATED_DESTINATION] where DL_SERVICE_CODE = ? order by DL_SERVICE_CODE";
+        String SQL_STATEMENT = "Select * from IC_RATED_DESTINATION where DL_SERVICE_CODE = ? order by DL_SERVICE_CODE";
         try {
-            stmt = conn.prepareStatement(SQL_STATEMENT);
+            stmt = getPrmConnection().prepareStatement(SQL_STATEMENT);
             stmt.setString(1, dlServiceCode );
             rs = stmt.executeQuery();
             return fetchAll(rs);
@@ -399,12 +401,12 @@ public class IcRatedDestinationBaseDAO {
         }
         return null;
     }
-    public List findByDlUpdateStamp( java.math.BigDecimal dlUpdateStamp, Connection conn) throws SQLException {
+    public List findByDlUpdateStamp( java.math.BigDecimal dlUpdateStamp) throws SQLException {
         PreparedStatement stmt = null;
         ResultSet rs = null;
-        String SQL_STATEMENT = "Select * from [IC_RATED_DESTINATION] where DL_UPDATE_STAMP = ? order by DL_UPDATE_STAMP";
+        String SQL_STATEMENT = "Select * from IC_RATED_DESTINATION where DL_UPDATE_STAMP = ? order by DL_UPDATE_STAMP";
         try {
-            stmt = conn.prepareStatement(SQL_STATEMENT);
+            stmt = getPrmConnection().prepareStatement(SQL_STATEMENT);
             stmt.setBigDecimal(1, dlUpdateStamp );
             rs = stmt.executeQuery();
             return fetchAll(rs);
@@ -418,12 +420,12 @@ public class IcRatedDestinationBaseDAO {
         }
         return null;
     }
-    public List findByQualParam1Id( java.math.BigDecimal qualParam1Id, Connection conn) throws SQLException {
+    public List findByQualParam1Id( java.math.BigDecimal qualParam1Id) throws SQLException {
         PreparedStatement stmt = null;
         ResultSet rs = null;
-        String SQL_STATEMENT = "Select * from [IC_RATED_DESTINATION] where QUAL_PARAM_1_ID = ? order by QUAL_PARAM_1_ID";
+        String SQL_STATEMENT = "Select * from IC_RATED_DESTINATION where QUAL_PARAM_1_ID = ? order by QUAL_PARAM_1_ID";
         try {
-            stmt = conn.prepareStatement(SQL_STATEMENT);
+            stmt = getPrmConnection().prepareStatement(SQL_STATEMENT);
             stmt.setBigDecimal(1, qualParam1Id );
             rs = stmt.executeQuery();
             return fetchAll(rs);
@@ -437,12 +439,12 @@ public class IcRatedDestinationBaseDAO {
         }
         return null;
     }
-    public List findByQualParam1SetCd( String qualParam1SetCd, Connection conn) throws SQLException {
+    public List findByQualParam1SetCd( String qualParam1SetCd) throws SQLException {
         PreparedStatement stmt = null;
         ResultSet rs = null;
-        String SQL_STATEMENT = "Select * from [IC_RATED_DESTINATION] where QUAL_PARAM_1_SET_CD = ? order by QUAL_PARAM_1_SET_CD";
+        String SQL_STATEMENT = "Select * from IC_RATED_DESTINATION where QUAL_PARAM_1_SET_CD = ? order by QUAL_PARAM_1_SET_CD";
         try {
-            stmt = conn.prepareStatement(SQL_STATEMENT);
+            stmt = getPrmConnection().prepareStatement(SQL_STATEMENT);
             stmt.setString(1, qualParam1SetCd );
             rs = stmt.executeQuery();
             return fetchAll(rs);
@@ -456,12 +458,12 @@ public class IcRatedDestinationBaseDAO {
         }
         return null;
     }
-    public List findByQualParam2Id( java.math.BigDecimal qualParam2Id, Connection conn) throws SQLException {
+    public List findByQualParam2Id( java.math.BigDecimal qualParam2Id) throws SQLException {
         PreparedStatement stmt = null;
         ResultSet rs = null;
-        String SQL_STATEMENT = "Select * from [IC_RATED_DESTINATION] where QUAL_PARAM_2_ID = ? order by QUAL_PARAM_2_ID";
+        String SQL_STATEMENT = "Select * from IC_RATED_DESTINATION where QUAL_PARAM_2_ID = ? order by QUAL_PARAM_2_ID";
         try {
-            stmt = conn.prepareStatement(SQL_STATEMENT);
+            stmt = getPrmConnection().prepareStatement(SQL_STATEMENT);
             stmt.setBigDecimal(1, qualParam2Id );
             rs = stmt.executeQuery();
             return fetchAll(rs);
@@ -475,12 +477,12 @@ public class IcRatedDestinationBaseDAO {
         }
         return null;
     }
-    public List findByQualParam2SetCd( String qualParam2SetCd, Connection conn) throws SQLException {
+    public List findByQualParam2SetCd( String qualParam2SetCd) throws SQLException {
         PreparedStatement stmt = null;
         ResultSet rs = null;
-        String SQL_STATEMENT = "Select * from [IC_RATED_DESTINATION] where QUAL_PARAM_2_SET_CD = ? order by QUAL_PARAM_2_SET_CD";
+        String SQL_STATEMENT = "Select * from IC_RATED_DESTINATION where QUAL_PARAM_2_SET_CD = ? order by QUAL_PARAM_2_SET_CD";
         try {
-            stmt = conn.prepareStatement(SQL_STATEMENT);
+            stmt = getPrmConnection().prepareStatement(SQL_STATEMENT);
             stmt.setString(1, qualParam2SetCd );
             rs = stmt.executeQuery();
             return fetchAll(rs);
@@ -494,12 +496,12 @@ public class IcRatedDestinationBaseDAO {
         }
         return null;
     }
-    public List findByQualParam3Id( java.math.BigDecimal qualParam3Id, Connection conn) throws SQLException {
+    public List findByQualParam3Id( java.math.BigDecimal qualParam3Id) throws SQLException {
         PreparedStatement stmt = null;
         ResultSet rs = null;
-        String SQL_STATEMENT = "Select * from [IC_RATED_DESTINATION] where QUAL_PARAM_3_ID = ? order by QUAL_PARAM_3_ID";
+        String SQL_STATEMENT = "Select * from IC_RATED_DESTINATION where QUAL_PARAM_3_ID = ? order by QUAL_PARAM_3_ID";
         try {
-            stmt = conn.prepareStatement(SQL_STATEMENT);
+            stmt = getPrmConnection().prepareStatement(SQL_STATEMENT);
             stmt.setBigDecimal(1, qualParam3Id );
             rs = stmt.executeQuery();
             return fetchAll(rs);
@@ -513,12 +515,12 @@ public class IcRatedDestinationBaseDAO {
         }
         return null;
     }
-    public List findByQualParam3SetCd( String qualParam3SetCd, Connection conn) throws SQLException {
+    public List findByQualParam3SetCd( String qualParam3SetCd) throws SQLException {
         PreparedStatement stmt = null;
         ResultSet rs = null;
-        String SQL_STATEMENT = "Select * from [IC_RATED_DESTINATION] where QUAL_PARAM_3_SET_CD = ? order by QUAL_PARAM_3_SET_CD";
+        String SQL_STATEMENT = "Select * from IC_RATED_DESTINATION where QUAL_PARAM_3_SET_CD = ? order by QUAL_PARAM_3_SET_CD";
         try {
-            stmt = conn.prepareStatement(SQL_STATEMENT);
+            stmt = getPrmConnection().prepareStatement(SQL_STATEMENT);
             stmt.setString(1, qualParam3SetCd );
             rs = stmt.executeQuery();
             return fetchAll(rs);
@@ -532,12 +534,12 @@ public class IcRatedDestinationBaseDAO {
         }
         return null;
     }
-    public List findByQualParam4Id( java.math.BigDecimal qualParam4Id, Connection conn) throws SQLException {
+    public List findByQualParam4Id( java.math.BigDecimal qualParam4Id) throws SQLException {
         PreparedStatement stmt = null;
         ResultSet rs = null;
-        String SQL_STATEMENT = "Select * from [IC_RATED_DESTINATION] where QUAL_PARAM_4_ID = ? order by QUAL_PARAM_4_ID";
+        String SQL_STATEMENT = "Select * from IC_RATED_DESTINATION where QUAL_PARAM_4_ID = ? order by QUAL_PARAM_4_ID";
         try {
-            stmt = conn.prepareStatement(SQL_STATEMENT);
+            stmt = getPrmConnection().prepareStatement(SQL_STATEMENT);
             stmt.setBigDecimal(1, qualParam4Id );
             rs = stmt.executeQuery();
             return fetchAll(rs);
@@ -551,12 +553,12 @@ public class IcRatedDestinationBaseDAO {
         }
         return null;
     }
-    public List findByQualParam4SetCd( String qualParam4SetCd, Connection conn) throws SQLException {
+    public List findByQualParam4SetCd( String qualParam4SetCd) throws SQLException {
         PreparedStatement stmt = null;
         ResultSet rs = null;
-        String SQL_STATEMENT = "Select * from [IC_RATED_DESTINATION] where QUAL_PARAM_4_SET_CD = ? order by QUAL_PARAM_4_SET_CD";
+        String SQL_STATEMENT = "Select * from IC_RATED_DESTINATION where QUAL_PARAM_4_SET_CD = ? order by QUAL_PARAM_4_SET_CD";
         try {
-            stmt = conn.prepareStatement(SQL_STATEMENT);
+            stmt = getPrmConnection().prepareStatement(SQL_STATEMENT);
             stmt.setString(1, qualParam4SetCd );
             rs = stmt.executeQuery();
             return fetchAll(rs);
@@ -570,12 +572,12 @@ public class IcRatedDestinationBaseDAO {
         }
         return null;
     }
-    public List findByQualParam5Id( java.math.BigDecimal qualParam5Id, Connection conn) throws SQLException {
+    public List findByQualParam5Id( java.math.BigDecimal qualParam5Id) throws SQLException {
         PreparedStatement stmt = null;
         ResultSet rs = null;
-        String SQL_STATEMENT = "Select * from [IC_RATED_DESTINATION] where QUAL_PARAM_5_ID = ? order by QUAL_PARAM_5_ID";
+        String SQL_STATEMENT = "Select * from IC_RATED_DESTINATION where QUAL_PARAM_5_ID = ? order by QUAL_PARAM_5_ID";
         try {
-            stmt = conn.prepareStatement(SQL_STATEMENT);
+            stmt = getPrmConnection().prepareStatement(SQL_STATEMENT);
             stmt.setBigDecimal(1, qualParam5Id );
             rs = stmt.executeQuery();
             return fetchAll(rs);
@@ -589,12 +591,12 @@ public class IcRatedDestinationBaseDAO {
         }
         return null;
     }
-    public List findByQualParam5SetCd( String qualParam5SetCd, Connection conn) throws SQLException {
+    public List findByQualParam5SetCd( String qualParam5SetCd) throws SQLException {
         PreparedStatement stmt = null;
         ResultSet rs = null;
-        String SQL_STATEMENT = "Select * from [IC_RATED_DESTINATION] where QUAL_PARAM_5_SET_CD = ? order by QUAL_PARAM_5_SET_CD";
+        String SQL_STATEMENT = "Select * from IC_RATED_DESTINATION where QUAL_PARAM_5_SET_CD = ? order by QUAL_PARAM_5_SET_CD";
         try {
-            stmt = conn.prepareStatement(SQL_STATEMENT);
+            stmt = getPrmConnection().prepareStatement(SQL_STATEMENT);
             stmt.setString(1, qualParam5SetCd );
             rs = stmt.executeQuery();
             return fetchAll(rs);
@@ -608,12 +610,12 @@ public class IcRatedDestinationBaseDAO {
         }
         return null;
     }
-    public List findByQualParam6Id( java.math.BigDecimal qualParam6Id, Connection conn) throws SQLException {
+    public List findByQualParam6Id( java.math.BigDecimal qualParam6Id) throws SQLException {
         PreparedStatement stmt = null;
         ResultSet rs = null;
-        String SQL_STATEMENT = "Select * from [IC_RATED_DESTINATION] where QUAL_PARAM_6_ID = ? order by QUAL_PARAM_6_ID";
+        String SQL_STATEMENT = "Select * from IC_RATED_DESTINATION where QUAL_PARAM_6_ID = ? order by QUAL_PARAM_6_ID";
         try {
-            stmt = conn.prepareStatement(SQL_STATEMENT);
+            stmt = getPrmConnection().prepareStatement(SQL_STATEMENT);
             stmt.setBigDecimal(1, qualParam6Id );
             rs = stmt.executeQuery();
             return fetchAll(rs);
@@ -627,12 +629,12 @@ public class IcRatedDestinationBaseDAO {
         }
         return null;
     }
-    public List findByQualParam6SetCd( String qualParam6SetCd, Connection conn) throws SQLException {
+    public List findByQualParam6SetCd( String qualParam6SetCd) throws SQLException {
         PreparedStatement stmt = null;
         ResultSet rs = null;
-        String SQL_STATEMENT = "Select * from [IC_RATED_DESTINATION] where QUAL_PARAM_6_SET_CD = ? order by QUAL_PARAM_6_SET_CD";
+        String SQL_STATEMENT = "Select * from IC_RATED_DESTINATION where QUAL_PARAM_6_SET_CD = ? order by QUAL_PARAM_6_SET_CD";
         try {
-            stmt = conn.prepareStatement(SQL_STATEMENT);
+            stmt = getPrmConnection().prepareStatement(SQL_STATEMENT);
             stmt.setString(1, qualParam6SetCd );
             rs = stmt.executeQuery();
             return fetchAll(rs);
@@ -646,12 +648,12 @@ public class IcRatedDestinationBaseDAO {
         }
         return null;
     }
-    public List findByQualParam7Id( java.math.BigDecimal qualParam7Id, Connection conn) throws SQLException {
+    public List findByQualParam7Id( java.math.BigDecimal qualParam7Id) throws SQLException {
         PreparedStatement stmt = null;
         ResultSet rs = null;
-        String SQL_STATEMENT = "Select * from [IC_RATED_DESTINATION] where QUAL_PARAM_7_ID = ? order by QUAL_PARAM_7_ID";
+        String SQL_STATEMENT = "Select * from IC_RATED_DESTINATION where QUAL_PARAM_7_ID = ? order by QUAL_PARAM_7_ID";
         try {
-            stmt = conn.prepareStatement(SQL_STATEMENT);
+            stmt = getPrmConnection().prepareStatement(SQL_STATEMENT);
             stmt.setBigDecimal(1, qualParam7Id );
             rs = stmt.executeQuery();
             return fetchAll(rs);
@@ -665,12 +667,12 @@ public class IcRatedDestinationBaseDAO {
         }
         return null;
     }
-    public List findByQualParam7SetCd( String qualParam7SetCd, Connection conn) throws SQLException {
+    public List findByQualParam7SetCd( String qualParam7SetCd) throws SQLException {
         PreparedStatement stmt = null;
         ResultSet rs = null;
-        String SQL_STATEMENT = "Select * from [IC_RATED_DESTINATION] where QUAL_PARAM_7_SET_CD = ? order by QUAL_PARAM_7_SET_CD";
+        String SQL_STATEMENT = "Select * from IC_RATED_DESTINATION where QUAL_PARAM_7_SET_CD = ? order by QUAL_PARAM_7_SET_CD";
         try {
-            stmt = conn.prepareStatement(SQL_STATEMENT);
+            stmt = getPrmConnection().prepareStatement(SQL_STATEMENT);
             stmt.setString(1, qualParam7SetCd );
             rs = stmt.executeQuery();
             return fetchAll(rs);
@@ -684,12 +686,12 @@ public class IcRatedDestinationBaseDAO {
         }
         return null;
     }
-    public List findByDestSortOrderCd( java.math.BigDecimal destSortOrderCd, Connection conn) throws SQLException {
+    public List findByDestSortOrderCd( java.math.BigDecimal destSortOrderCd) throws SQLException {
         PreparedStatement stmt = null;
         ResultSet rs = null;
-        String SQL_STATEMENT = "Select * from [IC_RATED_DESTINATION] where DEST_SORT_ORDER_CD = ? order by DEST_SORT_ORDER_CD";
+        String SQL_STATEMENT = "Select * from IC_RATED_DESTINATION where DEST_SORT_ORDER_CD = ? order by DEST_SORT_ORDER_CD";
         try {
-            stmt = conn.prepareStatement(SQL_STATEMENT);
+            stmt = getPrmConnection().prepareStatement(SQL_STATEMENT);
             stmt.setBigDecimal(1, destSortOrderCd );
             rs = stmt.executeQuery();
             return fetchAll(rs);
@@ -703,12 +705,12 @@ public class IcRatedDestinationBaseDAO {
         }
         return null;
     }
-    public List findByRatesPresInd( String ratesPresInd, Connection conn) throws SQLException {
+    public List findByRatesPresInd( String ratesPresInd) throws SQLException {
         PreparedStatement stmt = null;
         ResultSet rs = null;
-        String SQL_STATEMENT = "Select * from [IC_RATED_DESTINATION] where RATES_PRES_IND = ? order by RATES_PRES_IND";
+        String SQL_STATEMENT = "Select * from IC_RATED_DESTINATION where RATES_PRES_IND = ? order by RATES_PRES_IND";
         try {
-            stmt = conn.prepareStatement(SQL_STATEMENT);
+            stmt = getPrmConnection().prepareStatement(SQL_STATEMENT);
             stmt.setString(1, ratesPresInd );
             rs = stmt.executeQuery();
             return fetchAll(rs);
@@ -722,12 +724,12 @@ public class IcRatedDestinationBaseDAO {
         }
         return null;
     }
-    public List findByUom( String uom, Connection conn) throws SQLException {
+    public List findByUom( String uom) throws SQLException {
         PreparedStatement stmt = null;
         ResultSet rs = null;
-        String SQL_STATEMENT = "Select * from [IC_RATED_DESTINATION] where UOM = ? order by UOM";
+        String SQL_STATEMENT = "Select * from IC_RATED_DESTINATION where UOM = ? order by UOM";
         try {
-            stmt = conn.prepareStatement(SQL_STATEMENT);
+            stmt = getPrmConnection().prepareStatement(SQL_STATEMENT);
             stmt.setString(1, uom );
             rs = stmt.executeQuery();
             return fetchAll(rs);
@@ -741,12 +743,12 @@ public class IcRatedDestinationBaseDAO {
         }
         return null;
     }
-    public List findByMinChrgParam( java.math.BigDecimal minChrgParam, Connection conn) throws SQLException {
+    public List findByMinChrgParam( java.math.BigDecimal minChrgParam) throws SQLException {
         PreparedStatement stmt = null;
         ResultSet rs = null;
-        String SQL_STATEMENT = "Select * from [IC_RATED_DESTINATION] where MIN_CHRG_PARAM = ? order by MIN_CHRG_PARAM";
+        String SQL_STATEMENT = "Select * from IC_RATED_DESTINATION where MIN_CHRG_PARAM = ? order by MIN_CHRG_PARAM";
         try {
-            stmt = conn.prepareStatement(SQL_STATEMENT);
+            stmt = getPrmConnection().prepareStatement(SQL_STATEMENT);
             stmt.setBigDecimal(1, minChrgParam );
             rs = stmt.executeQuery();
             return fetchAll(rs);
@@ -760,12 +762,12 @@ public class IcRatedDestinationBaseDAO {
         }
         return null;
     }
-    public List findByRoundingUnit( java.math.BigDecimal roundingUnit, Connection conn) throws SQLException {
+    public List findByRoundingUnit( java.math.BigDecimal roundingUnit) throws SQLException {
         PreparedStatement stmt = null;
         ResultSet rs = null;
-        String SQL_STATEMENT = "Select * from [IC_RATED_DESTINATION] where ROUNDING_UNIT = ? order by ROUNDING_UNIT";
+        String SQL_STATEMENT = "Select * from IC_RATED_DESTINATION where ROUNDING_UNIT = ? order by ROUNDING_UNIT";
         try {
-            stmt = conn.prepareStatement(SQL_STATEMENT);
+            stmt = getPrmConnection().prepareStatement(SQL_STATEMENT);
             stmt.setBigDecimal(1, roundingUnit );
             rs = stmt.executeQuery();
             return fetchAll(rs);
@@ -779,12 +781,12 @@ public class IcRatedDestinationBaseDAO {
         }
         return null;
     }
-    public List findByRatingUnit( java.math.BigDecimal ratingUnit, Connection conn) throws SQLException {
+    public List findByRatingUnit( java.math.BigDecimal ratingUnit) throws SQLException {
         PreparedStatement stmt = null;
         ResultSet rs = null;
-        String SQL_STATEMENT = "Select * from [IC_RATED_DESTINATION] where RATING_UNIT = ? order by RATING_UNIT";
+        String SQL_STATEMENT = "Select * from IC_RATED_DESTINATION where RATING_UNIT = ? order by RATING_UNIT";
         try {
-            stmt = conn.prepareStatement(SQL_STATEMENT);
+            stmt = getPrmConnection().prepareStatement(SQL_STATEMENT);
             stmt.setBigDecimal(1, ratingUnit );
             rs = stmt.executeQuery();
             return fetchAll(rs);
@@ -798,12 +800,12 @@ public class IcRatedDestinationBaseDAO {
         }
         return null;
     }
-    public List findByRateSchemeInd( String rateSchemeInd, Connection conn) throws SQLException {
+    public List findByRateSchemeInd( String rateSchemeInd) throws SQLException {
         PreparedStatement stmt = null;
         ResultSet rs = null;
-        String SQL_STATEMENT = "Select * from [IC_RATED_DESTINATION] where RATE_SCHEME_IND = ? order by RATE_SCHEME_IND";
+        String SQL_STATEMENT = "Select * from IC_RATED_DESTINATION where RATE_SCHEME_IND = ? order by RATE_SCHEME_IND";
         try {
-            stmt = conn.prepareStatement(SQL_STATEMENT);
+            stmt = getPrmConnection().prepareStatement(SQL_STATEMENT);
             stmt.setString(1, rateSchemeInd );
             rs = stmt.executeQuery();
             return fetchAll(rs);
@@ -817,12 +819,12 @@ public class IcRatedDestinationBaseDAO {
         }
         return null;
     }
-    public List findByMinChrg( java.math.BigDecimal minChrg, Connection conn) throws SQLException {
+    public List findByMinChrg( java.math.BigDecimal minChrg) throws SQLException {
         PreparedStatement stmt = null;
         ResultSet rs = null;
-        String SQL_STATEMENT = "Select * from [IC_RATED_DESTINATION] where MIN_CHRG = ? order by MIN_CHRG";
+        String SQL_STATEMENT = "Select * from IC_RATED_DESTINATION where MIN_CHRG = ? order by MIN_CHRG";
         try {
-            stmt = conn.prepareStatement(SQL_STATEMENT);
+            stmt = getPrmConnection().prepareStatement(SQL_STATEMENT);
             stmt.setBigDecimal(1, minChrg );
             rs = stmt.executeQuery();
             return fetchAll(rs);
@@ -836,12 +838,12 @@ public class IcRatedDestinationBaseDAO {
         }
         return null;
     }
-    public List findByParamDspOrder( String paramDspOrder, Connection conn) throws SQLException {
+    public List findByParamDspOrder( String paramDspOrder) throws SQLException {
         PreparedStatement stmt = null;
         ResultSet rs = null;
-        String SQL_STATEMENT = "Select * from [IC_RATED_DESTINATION] where PARAM_DSP_ORDER = ? order by PARAM_DSP_ORDER";
+        String SQL_STATEMENT = "Select * from IC_RATED_DESTINATION where PARAM_DSP_ORDER = ? order by PARAM_DSP_ORDER";
         try {
-            stmt = conn.prepareStatement(SQL_STATEMENT);
+            stmt = getPrmConnection().prepareStatement(SQL_STATEMENT);
             stmt.setString(1, paramDspOrder );
             rs = stmt.executeQuery();
             return fetchAll(rs);
@@ -855,12 +857,12 @@ public class IcRatedDestinationBaseDAO {
         }
         return null;
     }
-    public List findByOneTimeChrg( java.math.BigDecimal oneTimeChrg, Connection conn) throws SQLException {
+    public List findByOneTimeChrg( java.math.BigDecimal oneTimeChrg) throws SQLException {
         PreparedStatement stmt = null;
         ResultSet rs = null;
-        String SQL_STATEMENT = "Select * from [IC_RATED_DESTINATION] where ONE_TIME_CHRG = ? order by ONE_TIME_CHRG";
+        String SQL_STATEMENT = "Select * from IC_RATED_DESTINATION where ONE_TIME_CHRG = ? order by ONE_TIME_CHRG";
         try {
-            stmt = conn.prepareStatement(SQL_STATEMENT);
+            stmt = getPrmConnection().prepareStatement(SQL_STATEMENT);
             stmt.setBigDecimal(1, oneTimeChrg );
             rs = stmt.executeQuery();
             return fetchAll(rs);
@@ -874,12 +876,12 @@ public class IcRatedDestinationBaseDAO {
         }
         return null;
     }
-    public List findByAccesChrg( java.math.BigDecimal accesChrg, Connection conn) throws SQLException {
+    public List findByAccesChrg( java.math.BigDecimal accesChrg) throws SQLException {
         PreparedStatement stmt = null;
         ResultSet rs = null;
-        String SQL_STATEMENT = "Select * from [IC_RATED_DESTINATION] where ACCES_CHRG = ? order by ACCES_CHRG";
+        String SQL_STATEMENT = "Select * from IC_RATED_DESTINATION where ACCES_CHRG = ? order by ACCES_CHRG";
         try {
-            stmt = conn.prepareStatement(SQL_STATEMENT);
+            stmt = getPrmConnection().prepareStatement(SQL_STATEMENT);
             stmt.setBigDecimal(1, accesChrg );
             rs = stmt.executeQuery();
             return fetchAll(rs);
@@ -893,12 +895,12 @@ public class IcRatedDestinationBaseDAO {
         }
         return null;
     }
-    public List findByExpirationDate( java.sql.Date expirationDate, Connection conn) throws SQLException {
+    public List findByExpirationDate( java.sql.Date expirationDate) throws SQLException {
         PreparedStatement stmt = null;
         ResultSet rs = null;
-        String SQL_STATEMENT = "Select * from [IC_RATED_DESTINATION] where EXPIRATION_DATE = ? order by EXPIRATION_DATE";
+        String SQL_STATEMENT = "Select * from IC_RATED_DESTINATION where EXPIRATION_DATE = ? order by EXPIRATION_DATE";
         try {
-            stmt = conn.prepareStatement(SQL_STATEMENT);
+            stmt = getPrmConnection().prepareStatement(SQL_STATEMENT);
             stmt.setDate(1, expirationDate );
             rs = stmt.executeQuery();
             return fetchAll(rs);
@@ -915,7 +917,7 @@ public class IcRatedDestinationBaseDAO {
 
 /*    
 
-    public List findByCriteriaOR( IcRatedDestination criteria, Connection conn) throws SQLException {
+    public List findByCriteriaOR( IcRatedDestination criteria) throws SQLException {
         PreparedStatement stmt = null;
         ResultSet rs = null;
         String SQL_STATEMENT = "";
@@ -1074,7 +1076,7 @@ public class IcRatedDestinationBaseDAO {
             return new ArrayList();
 
         try {
-            stmt = conn.prepareStatement(SQL_STATEMENT);
+            stmt = getPrmConnection().prepareStatement(SQL_STATEMENT);
             int index = 1;
             if (criteria.getString() != null) 
                 stmt.setString(index++, criteria.getString() );
@@ -1253,15 +1255,15 @@ public class IcRatedDestinationBaseDAO {
         return null;
     }
 
-    public void populateParent(IcRatedDestination icRatedDestination, Connection conn) throws SQLException {
+    public void populateParent(IcRatedDestination icRatedDestination) throws SQLException {
     }
 
-    public void populateChild(IcRatedDestination icRatedDestination, Connection conn) throws SQLException {
+    public void populateChild(IcRatedDestination icRatedDestination) throws SQLException {
     }
 
-    public void populateAll(IcRatedDestination icRatedDestination, Connection conn) throws SQLException {
-        populateParent(icRatedDestination, conn);
-        populateChild(icRatedDestination, conn);
+    public void populateAll(IcRatedDestination icRatedDestination) throws SQLException {
+        populateParent(icRatedDestination);
+        populateChild(icRatedDestination);
     }
 
 }
