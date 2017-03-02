@@ -6,7 +6,9 @@
 package truecorp.prm.model;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 /**
  *
@@ -14,10 +16,12 @@ import java.util.List;
  */
 public class TransactionPartner {
     
-    private String partnerCd;
-    private String prmCd; //From mappping of  partnerCd, first 2 word file name and Titic table
-    private String serviceType;
+    private boolean ealyMonth = false;
+    private String  partnerCd;
+    private String  prmCd; //From mappping of  partnerCd, first 2 word file name and Titic table
+    private String  serviceType;
     private List<RateSheet> rateSheetList = new ArrayList<RateSheet>();
+    private List<Destination> destinationList = new ArrayList<Destination>();
 
     public String getPartnerCd() {
         return partnerCd;
@@ -50,6 +54,24 @@ public class TransactionPartner {
     public void setServiceType(String serviceType) {
         this.serviceType = serviceType;
     }
+
+    public boolean isEalyMonth() {
+        return ealyMonth;
+    }
+
+    public void setEalyMonth(boolean ealyMonth) {
+        this.ealyMonth = ealyMonth;
+    }
+
+    public List<Destination> getDestinationList() {
+        return destinationList;
+    }
+
+    public void setDestinationList(List<Destination> destinationList) {
+        this.destinationList = destinationList;
+    }
+
+   
     
     
 }

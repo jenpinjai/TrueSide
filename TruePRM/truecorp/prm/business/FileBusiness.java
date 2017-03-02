@@ -25,13 +25,17 @@ import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.ss.usermodel.WorkbookFactory;
+import truecorp.prm.dao.IcDestinationDictBaseDAO;
 import truecorp.prm.dao.IcRateCodeBaseDAO;
 import truecorp.prm.dao.IcRatingDictBaseDAO;
 import truecorp.prm.dao.TiticPartnerRefBaseDAO;
+import truecorp.prm.model.Country;
+import truecorp.prm.model.Destination;
 import truecorp.prm.model.RateCodePack;
 import truecorp.prm.model.RateSheet;
 import truecorp.prm.model.TransactionPartner;
 import truecorp.prm.resource.setEnv;
+import truecorp.prm.table.IcDestinationDict;
 import truecorp.prm.table.TiticPartnerRef;
 
 /**
@@ -69,6 +73,10 @@ public class FileBusiness {
                         
                         partner.setPartnerCd(csvFile.getName().substring(0,3).trim());
                         partner.setPrmCd(partnerCdMap.get(csvFile.getName().substring(0,3).trim()));
+                        if(Integer.valueOf(csvFile.getName().substring(csvFile.getName().length()-6, csvFile.getName().length()-4))==1){
+                        
+                            partner.setEalyMonth(true);
+                        }
                         System.out.println("Partner code :"+partner.getPartnerCd());
                         System.out.println("PRM code :"+partner.getPrmCd());
                         String splitBy = ",";
@@ -98,19 +106,19 @@ public class FileBusiness {
                         System.out.println("Service type :"+partner.getServiceType());
                         br.close();
                         partnerList.add(partner);
-                        for(RateSheet rate  : partner.getRateSheetList()){
-                            
-                            System.out.println(rate.getPrmPartnerCd()+
-                                          "\t"+rate.getPrefix()+
-                                    "\t"+rate.getDescription()+
-                                    "\t"+rate.getCost()+
-                                    "\t"+new SimpleDateFormat("dd/MM/yyyy",Locale.US).format(rate.getEffective())+
-                                    "\t"+rate.getServiceType()+
-                                    "\t"+rate.getMinChrg()+
-                                    "\t"+rate.getRoundingUnit()+
-                                    "\t"+rate.getIsChange());
-                            
-                        }
+//                        for(RateSheet rate  : partner.getRateSheetList()){
+//                            
+//                            System.out.println(rate.getPrmPartnerCd()+
+//                                          "\t"+rate.getPrefix()+
+//                                    "\t"+rate.getDescription()+
+//                                    "\t"+rate.getCost()+
+//                                    "\t"+new SimpleDateFormat("dd/MM/yyyy",Locale.US).format(rate.getEffective())+
+//                                    "\t"+rate.getServiceType()+
+//                                    "\t"+rate.getMinChrg()+
+//                                    "\t"+rate.getRoundingUnit()+
+//                                    "\t"+rate.getIsChange());
+//                            
+//                        }
                        
                     }
                 
@@ -169,7 +177,7 @@ public class FileBusiness {
                     codePack.setDescriptionSeq(String.valueOf(descriptionSeq));
                     codePack.setText(tranPartner.getServiceType()+" "+tranPartner.getPartnerCd()+" Termination Rate "+codePack.getCd());
                     
-                    System.out.println("CD:"+codePack.getCd()+"\t\t"+codePack.getRate()+"\t\t"+codePack.getRateCd()+"\t\t"+codePack.getReteCdSeq()+"\t\t"+codePack.getDescriptionSeq());
+                    //System.out.println("CD:"+codePack.getCd()+"\t\t"+codePack.getRate()+"\t\t"+codePack.getRateCd()+"\t\t"+codePack.getReteCdSeq()+"\t\t"+codePack.getDescriptionSeq());
                     
                     descriptionSeq++;
                     rateCodeSeq++;
@@ -186,6 +194,103 @@ public class FileBusiness {
     
        
     }
+    public static List<Country> genCountryCdList(TransactionPartner tranPartner) throws Exception{
+        
+        try{
+               List<Country>  countryCdList = new ArrayList<Country>();
+               Set<String>    countryNameSet = new HashSet<String>();
+               
+               for(RateSheet rateSheet : tranPartner.getRateSheetList()){
+                   countryNameSet.add(rateSheet.getDescription());
+                   
+               }
+               for(String countryName:countryNameSet){
+                   Country country = new Country();
+                   country.setName(countryName);
+                   countryCdList.add(country);
+               
+               }
+               Comparator<Country>  countryComparetor = new Comparator<Country>() {
+
+                   @Override
+                   public int compare(Country o1, Country o2) {
+                       
+                       return o1.getName().compareTo(o2.getName());
+                   
+                   }
+               };
+               Collections.sort(countryCdList,countryComparetor);
+               System.out.println("-----Country name set sorted-----");
+               
+               int loopNum=1;
+               int codeNum=1;
+               int charNum=64;
+               for(Country coun : countryCdList){
+               
+                     String countryCd="";
+                     
+                     if(loopNum<=999){
+                            countryCd = String.format("%03d", codeNum);
+                     }else{
+                           if(codeNum>99){
+                               codeNum=1;
+                               charNum++;
+                           }
+                           countryCd = String.format("%c%02d", charNum,codeNum);
+                     }
+                     coun.setCd(countryCd);
+                     //System.out.println(coun.getCd()+"    "+coun.getName());
+                     codeNum++;
+                     loopNum++;
+               
+               }
+               return countryCdList;
+        }catch(Exception ex){
+        
+            ex.printStackTrace();
+            return null;
+        }
+    }
+    public static boolean generateDestinationCode(TransactionPartner tranPartner ,Map<String,Country> countryCdMapper ,Map<String,RateCodePack> rateCdMapper)throws Exception{
+        
+        try{
+            System.out.println("-----Start Generate Destination code-----");
+            int nextSequenceNo = new IcDestinationDictBaseDAO().getMaxSequenceNo()+1;
+            String destinationCdPreviuos="";
+            for(RateSheet rateSheet:tranPartner.getRateSheetList()){
+                   
+                   String destinationCd = tranPartner.getPrmCd()+countryCdMapper.get(rateSheet.getDescription().trim()).getCd()+rateCdMapper.get(rateSheet.getCost()).getCd();
+                   rateSheet.setDestinationCd(destinationCd);
+                   
+                   if(!destinationCdPreviuos.equals(destinationCd)){
+                       Destination dest = new Destination();
+                       dest.setCode(destinationCd);
+                       dest.setEffectiveDate(rateSheet.getEffective());
+                       dest.setSequenceNo(nextSequenceNo);
+                       dest.setCountry(countryCdMapper.get(rateSheet.getDescription().trim()));
+                       destinationCdPreviuos = destinationCd;
+                       tranPartner.getDestinationList().add(dest);
+                       nextSequenceNo++;
+                   }
+                  
+                   //System.out.println(rateSheet.getDestinationCd()+"\t"+rateSheet.getCost()+"\t"+rateSheet.getPrefix()+"\t\t"+rateSheet.getDescription()+"");
+                   
+                
+            }
+            
+            
+            System.out.println("-----Success Generate Destination code-----");
+            return true;
+        }catch(Exception ex){
+        
+            ex.printStackTrace();
+            return false;
+            
+        }
+        
+        
+    }
+    
     public static String genRateCd(int genNumLoop){
     
               int charLoop=65;

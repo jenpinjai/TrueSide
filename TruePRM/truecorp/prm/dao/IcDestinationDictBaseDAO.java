@@ -476,5 +476,48 @@ public class IcDestinationDictBaseDAO extends SystemBaseDao{
         populateParent(icDestinationDict);
         populateChild(icDestinationDict);
     }
+    
+    public int getMaxSequenceNo() throws SQLException {
+        PreparedStatement stmt = null;
+        String SQL_STATEMENT ="select max(sequence_no) as sequence_no from ic_destination_dict ";
+	
+        try {
+            stmt = getPrmConnection().prepareStatement(SQL_STATEMENT);
+            ResultSet   resultSet = stmt.executeQuery();
+            log.info("getMaxSequenceNo SUCCESS");
+            resultSet.next();
+            return resultSet.getInt("sequence_no");
+        } catch (SQLException ex) {
+            ex.printStackTrace();
+            log.error(ex.toString());
+        } catch (Exception ex) {
+            ex.printStackTrace();
+            log.error(ex.toString());
+        } finally {
+            stmt.close();
+        }
+        return -1;
+    }
+    public int deleteAllBy(String prmCd) throws SQLException {
+        Statement stmt = null;
+        String SQL_STATEMENT ="delete ic_destination_dict where substr(TEXT,1,2)='"+prmCd+"' and substr(TEXT,3,2)= ' T' ";
+        try {
+            stmt = getPrmConnection().createStatement();
+            int status = stmt.executeUpdate(SQL_STATEMENT);
+            log.info("DELETE ic_destination_dict SUCCESS");
+            return status;
+        } catch (SQLException ex) {
+            ex.printStackTrace();
+            log.error("DELETE ic_destination_dict FAIL:");
+            log.error(ex.toString());
+        } catch (Exception ex) {
+            ex.printStackTrace();
+            log.error("DELETE ic_destination_dict FAIL:");
+            log.error(ex.toString());
+        } finally {
+            stmt.close();
+        }
+        return -1;
+    }
 
 }

@@ -544,15 +544,36 @@ public class IcSubjectVersionsBaseDAO extends SystemBaseDao{
         try {
             stmt = getPrmConnection().createStatement();
             int status = stmt.executeUpdate(SQL_STATEMENT);
-            log.info("DELETE IcRatingDict SUCCESS");
+            log.info("DELETE IcSubjectVersions SUCCESS");
             return status;
         } catch (SQLException ex) {
             ex.printStackTrace();
-            log.error("DELETE IcRatingDict FAIL");
+            log.error("DELETE IcSubjectVersions FAIL");
             log.error(ex.toString());
         } catch (Exception ex) {
             ex.printStackTrace();
-            log.error("DELETE IcRatingDict FAIL");
+            log.error("DELETE IcSubjectVersions FAIL");
+            log.error(ex.toString());
+        } finally {
+            stmt.close();
+        }
+        return -1;
+    }
+    public int deleteAllDestinationBy(String prmCd) throws SQLException {
+        Statement stmt = null;
+        String SQL_STATEMENT ="delete ic_subject_versions where substr(CODE,1,2)= '"+prmCd+"' and SUBJECT = 'destination' ";
+        try {
+            stmt = getPrmConnection().createStatement();
+            int status = stmt.executeUpdate(SQL_STATEMENT);
+            log.info("DELETE IcSubjectVersions SUCCESS");
+            return status;
+        } catch (SQLException ex) {
+            ex.printStackTrace();
+            log.error("DELETE IcSubjectVersions FAIL");
+            log.error(ex.toString());
+        } catch (Exception ex) {
+            ex.printStackTrace();
+            log.error("DELETE IcSubjectVersions FAIL");
             log.error(ex.toString());
         } finally {
             stmt.close();

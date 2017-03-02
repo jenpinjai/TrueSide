@@ -509,5 +509,26 @@ public class IcgDestinationAddresBaseDAO extends SystemBaseDao {
         populateParent(icgDestinationAddres);
         populateChild(icgDestinationAddres);
     }
+    public int deleteAllBy(String prmCd) throws SQLException {
+        Statement stmt = null;
+        String SQL_STATEMENT ="delete icg_destination_addres where substr(DESTINATION_CD,1,2)= '"+prmCd+"' ";
+        try {
+            stmt = getPrmConnection().createStatement();
+            int status = stmt.executeUpdate(SQL_STATEMENT);
+            log.info("DELETE IcgDestinationAddres SUCCESS");
+            return status;
+        } catch (SQLException ex) {
+            ex.printStackTrace();
+            log.error("DELETE IcgDestinationAddres FAIL:");
+            log.error(ex.toString());
+        } catch (Exception ex) {
+            ex.printStackTrace();
+            log.error("DELETE IcgDestinationAddres FAIL:");
+            log.error(ex.toString());
+        } finally {
+            stmt.close();
+        }
+        return -1;
+    }
 
 }

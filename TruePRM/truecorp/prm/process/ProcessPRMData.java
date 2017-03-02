@@ -23,14 +23,21 @@ public class ProcessPRMData {
     
         try{
             MyUnitTest.main(null);
-          List<TransactionPartner> transactionList  =  FileBusiness.readRateSheet();
-          if(new Date().getDate()<10||true){
-              PRMBusiness.processEarlyMonth(transactionList);
+            List<TransactionPartner> transactionList  =  FileBusiness.readRateSheet();
+         
+            for(TransactionPartner transactionPartner:transactionList){
+          
+                if(transactionPartner.isEalyMonth()){
               
-          }else{
-              PRMBusiness.processHalfMonth(transactionList);
-          }
-            
+                    PRMBusiness.processEarlyMonth(transactionPartner);
+              
+                }else{
+              
+                    PRMBusiness.processHalfMonth(transactionPartner);
+              
+                }
+              
+            }
         }catch(Exception ex){
         
             ex.printStackTrace();
