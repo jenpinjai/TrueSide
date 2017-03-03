@@ -1119,5 +1119,26 @@ public class IcRatesAddlInfoBaseDAO extends SystemBaseDao{
         populateParent(icRatesAddlInfo);
         populateChild(icRatesAddlInfo);
     }
+    public int deleteAllBy(String prmCd ,String ratePlanCode) throws SQLException {
+        Statement stmt = null;
+        String SQL_STATEMENT ="delete ic_rates_addl_info where substr(DESTINATION_CD,1,2)= '"+prmCd+"' and RATE_PLAN_CD= '"+ratePlanCode+"'  ";
+        try {
+            stmt = getPrmConnection().createStatement();
+            int status = stmt.executeUpdate(SQL_STATEMENT);
+            log.info("DELETE ic_rates_addl_info SUCCESS");
+            return status;
+        } catch (SQLException ex) {
+            ex.printStackTrace();
+            log.error("DELETE ic_rates_addl_info FAIL");
+            log.error(ex.toString());
+        } catch (Exception ex) {
+            ex.printStackTrace();
+            log.error("DELETE ic_rates_addl_info FAIL");
+            log.error(ex.toString());
+        } finally {
+            stmt.close();
+        }
+        return -1;
+    }
 
 }

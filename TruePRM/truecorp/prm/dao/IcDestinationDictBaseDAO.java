@@ -169,7 +169,31 @@ public class IcDestinationDictBaseDAO extends SystemBaseDao{
         }
         return null;
     }
-    
+    public List getStringCountry(String prmCd) throws SQLException {
+        PreparedStatement stmt = null;
+        ResultSet rs = null;
+        String SQL_STATEMENT = "select substr(TEXT,9) as TEXT from ic_destination_dict where substr(TEXT,1,2)=? and substr(TEXT,3,2)= ' T' ";
+        try {
+            stmt = getPrmConnection().prepareStatement(SQL_STATEMENT);
+            stmt.setString(1, prmCd );
+            rs = stmt.executeQuery();
+            List<String>  addressList = new ArrayList<String>();
+            while (rs.next()){
+                
+                addressList.add(rs.getString("TEXT").trim());
+                
+            }
+            return addressList;
+        } catch (SQLException ex) {
+            ex.printStackTrace();
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        } finally {
+            stmt.close();
+            rs.close();
+        }
+        return null;
+    }
     public List findBySequenceNo( java.math.BigDecimal sequenceNo) throws SQLException {
         PreparedStatement stmt = null;
         ResultSet rs = null;

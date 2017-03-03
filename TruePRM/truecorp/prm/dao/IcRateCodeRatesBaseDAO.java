@@ -238,6 +238,31 @@ public class IcRateCodeRatesBaseDAO  extends SystemBaseDao{
         }
         return null;
     }
+    public List getRates(String prmCd) throws SQLException {
+        PreparedStatement stmt = null;
+        ResultSet rs = null;
+        String SQL_STATEMENT = "select RATE from ic_rate_code_rates where rate_class_set_cd like '%"+prmCd+"' ";
+        try {
+            stmt = getPrmConnection().prepareStatement(SQL_STATEMENT);
+            //stmt.setString(1, prmCd );
+            rs = stmt.executeQuery();
+            List<Double>  addressList = new ArrayList<Double>();
+            while (rs.next()){
+                
+                addressList.add(rs.getDouble("RATE"));
+                
+            }
+            return addressList;
+        } catch (SQLException ex) {
+            ex.printStackTrace();
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        } finally {
+            stmt.close();
+            rs.close();
+        }
+        return null;
+    }
     public List findBySysCreationDate( java.sql.Date sysCreationDate) throws SQLException {
         PreparedStatement stmt = null;
         ResultSet rs = null;

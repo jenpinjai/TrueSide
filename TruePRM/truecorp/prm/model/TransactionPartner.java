@@ -20,6 +20,9 @@ public class TransactionPartner {
     private String  partnerCd;
     private String  prmCd; //From mappping of  partnerCd, first 2 word file name and Titic table
     private String  serviceType;
+    private String  ratePlanCode;
+    private String  fileName;
+    private String  controlFileName;
     private List<RateSheet> rateSheetList = new ArrayList<RateSheet>();
     private List<Destination> destinationList = new ArrayList<Destination>();
 
@@ -71,7 +74,29 @@ public class TransactionPartner {
         this.destinationList = destinationList;
     }
 
-   
-    
+    public String getRatePlanCode() {
+        return ratePlanCode;
+    }
+
+    public void setRatePlanCode(String ratePlanCode) {
+        this.ratePlanCode = ratePlanCode;
+    }
+
+    public String getFileName() {
+        return fileName;
+    }
+
+    public void setFileName(String fileName) {
+        this.fileName = fileName;
+    }
+
+    public String getControlFileName() {
+        return controlFileName;
+    }
+
+    public void setControlFileName(String controlFileName) {
+        this.controlFileName = controlFileName;
+    }
+
     
 }

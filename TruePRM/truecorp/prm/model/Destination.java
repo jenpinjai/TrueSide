@@ -14,10 +14,13 @@ import java.util.Date;
 public class Destination {
     
     private String code;
+    private String ratePlanCode;
     private Date   effectiveDate;
     private int sequenceNo;
     private Country country;
-
+    private RateCodePack rateCodePack;
+    private String minCharge;
+    private String roundingUnit;
     public String getCode() {
         return code;
     }
@@ -48,6 +51,38 @@ public class Destination {
 
     public void setCountry(Country country) {
         this.country = country;
+    }
+
+    public RateCodePack getRateCodePack() {
+        return rateCodePack;
+    }
+
+    public void setRateCodePack(RateCodePack rateCodePack) {
+        this.rateCodePack = rateCodePack;
+    }
+
+    public String getRatePlanCode() {
+        return ratePlanCode;
+    }
+
+    public void setRatePlanCode(String ratePlanCode) {
+        this.ratePlanCode = ratePlanCode;
+    }
+
+    public String getMinCharge() {
+        return minCharge;
+    }
+
+    public void setMinCharge(String minCharge) {
+        this.minCharge = minCharge;
+    }
+
+    public String getRoundingUnit() {
+        return roundingUnit;
+    }
+
+    public void setRoundingUnit(String roundingUnit) {
+        this.roundingUnit = roundingUnit;
     }
     
     

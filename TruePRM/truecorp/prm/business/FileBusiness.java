@@ -44,11 +44,10 @@ import truecorp.prm.table.TiticPartnerRef;
  */
 public class FileBusiness {
     
-    public static List<TransactionPartner> readRateSheet() throws Exception{
+    public static TransactionPartner readRateSheet(File csvFile) throws Exception{
         String lineError="";
         try{
-            List<TransactionPartner>  partnerList = new ArrayList<TransactionPartner>();
-            File autoSheetFolder = new File(setEnv.EXCEL_RATESHEET_file_INPUT);
+            TransactionPartner  partner = new TransactionPartner();
             
             //////Mapping prmCd
             Map<String,String>    partnerCdMap  = new HashMap<String,String>(); /// <partnerCd,prmCd>
@@ -59,24 +58,11 @@ public class FileBusiness {
                 partnerCdMap.put(titic.getPartnerCd().trim(), titic.getPrmCd().trim());
             
             }
-            
-            for(File ctrlFile : autoSheetFolder.listFiles()){
-            
-            
-                    
-                    if(ctrlFile.getName().contains(".csv.ctrl")){
-                        TransactionPartner  partner = new TransactionPartner();
-                        
-                        System.out.println("Current file :"+ctrlFile.getName());
-                        File csvFile = new File(setEnv.EXCEL_RATESHEET_file_INPUT+"/"+ctrlFile.getName().replace(".ctrl", ""));
-                        System.out.println("Then read file :"+csvFile.getName());
-                        
                         partner.setPartnerCd(csvFile.getName().substring(0,3).trim());
+                        partner.setFileName(csvFile.getName());
+                        partner.setControlFileName(csvFile.getName()+".ctrl");
+                        System.out.println("Then read file :"+csvFile.getName());
                         partner.setPrmCd(partnerCdMap.get(csvFile.getName().substring(0,3).trim()));
-                        if(Integer.valueOf(csvFile.getName().substring(csvFile.getName().length()-6, csvFile.getName().length()-4))==1){
-                        
-                            partner.setEalyMonth(true);
-                        }
                         System.out.println("Partner code :"+partner.getPartnerCd());
                         System.out.println("PRM code :"+partner.getPrmCd());
                         String splitBy = ",";
@@ -103,9 +89,19 @@ public class FileBusiness {
                              partner.setServiceType(rateSheet.getServiceType());
                              partner.getRateSheetList().add(rateSheet);
                         }
+                        
+                        String ratePlanCode = "";
+                        if(partner.getServiceType().equals("IDD")){
+                       
+                           ratePlanCode = "ID01-"+partner.getPartnerCd()+" ";
+                           
+                        }else if(partner.getServiceType().equals("ISDN")){
+                       
+                           ratePlanCode = "ID06-"+partner.getPartnerCd()+" ";
+                        }
+                        partner.setRatePlanCode(ratePlanCode);
                         System.out.println("Service type :"+partner.getServiceType());
                         br.close();
-                        partnerList.add(partner);
 //                        for(RateSheet rate  : partner.getRateSheetList()){
 //                            
 //                            System.out.println(rate.getPrmPartnerCd()+
@@ -120,10 +116,95 @@ public class FileBusiness {
 //                            
 //                        }
                        
-                    }
+                    
                 
+            
+            return partner;
+                
+        }catch(Exception ex){
+        
+            ex.printStackTrace();
+            System.out.println("===================================LINE ERROR:"+lineError);
+            return null;
+        }
+    
+    }
+        public static TransactionPartner readRateSheetChanged(File csvFile) throws Exception{
+        String lineError="";
+        try{
+            TransactionPartner  partner = new TransactionPartner();
+            
+            //////Mapping prmCd
+            Map<String,String>    partnerCdMap  = new HashMap<String,String>(); /// <partnerCd,prmCd>
+            TiticPartnerRefBaseDAO  titicDao = new TiticPartnerRefBaseDAO();
+            
+            for(TiticPartnerRef titic:(List<TiticPartnerRef>)titicDao.findAll()){
+            
+                partnerCdMap.put(titic.getPartnerCd().trim(), titic.getPrmCd().trim());
+            
             }
-            return partnerList;
+                        partner.setPartnerCd(csvFile.getName().substring(0,3).trim());
+                        partner.setFileName(csvFile.getName());
+                        partner.setControlFileName(csvFile.getName()+".ctrl");
+                        partner.setPrmCd(partnerCdMap.get(csvFile.getName().substring(0,3).trim()));
+                        System.out.println("Then read file :"+csvFile.getName());
+                        System.out.println("Partner code :"+partner.getPartnerCd());
+                        System.out.println("PRM code :"+partner.getPrmCd());
+                        String splitBy = ",";
+                        String line;
+                        BufferedReader br = new BufferedReader(new FileReader(csvFile));
+                        int rowNum=0;
+                        while((line = br.readLine()) != null){
+                             rowNum++;
+                            // System.out.println("Line num:"+rowNum);
+                             String[] b = line.split(splitBy);
+                             lineError = line;
+                             if(rowNum==1||line.split(splitBy).length<2||Integer.valueOf(b[11])==0)continue;
+                             RateSheet  rateSheet = new RateSheet();
+                             //for(String text:b){ System.out.print(text+"\t\t");}
+                             rateSheet.setPrmPartnerCd(b[0]);
+                             rateSheet.setPrefix(b[1]);
+                             rateSheet.setDescription(b[2]);
+                             rateSheet.setCost(b[3]);
+                             rateSheet.setEffective(new SimpleDateFormat("dd-MM-yy",Locale.US).parse(b[4]));
+                             rateSheet.setServiceType(b[5]);
+                             rateSheet.setMinChrg(b[9]);
+                             rateSheet.setRoundingUnit(b[10]);
+                             rateSheet.setIsChange(b[11]);
+                             partner.setServiceType(rateSheet.getServiceType());
+                             partner.getRateSheetList().add(rateSheet);
+                        }
+                        
+                        String ratePlanCode = "";
+                        if(partner.getServiceType().equals("IDD")){
+                       
+                           ratePlanCode = "ID01-"+partner.getPartnerCd()+" ";
+                           
+                        }else if(partner.getServiceType().equals("ISDN")){
+                       
+                           ratePlanCode = "ID06-"+partner.getPartnerCd()+" ";
+                        }
+                        partner.setRatePlanCode(ratePlanCode);
+                        System.out.println("Service type :"+partner.getServiceType());
+                        br.close();
+//                        for(RateSheet rate  : partner.getRateSheetList()){
+//                            
+//                            System.out.println(rate.getPrmPartnerCd()+
+//                                          "\t"+rate.getPrefix()+
+//                                    "\t"+rate.getDescription()+
+//                                    "\t"+rate.getCost()+
+//                                    "\t"+new SimpleDateFormat("dd/MM/yyyy",Locale.US).format(rate.getEffective())+
+//                                    "\t"+rate.getServiceType()+
+//                                    "\t"+rate.getMinChrg()+
+//                                    "\t"+rate.getRoundingUnit()+
+//                                    "\t"+rate.getIsChange());
+//                            
+//                        }
+                       
+                    
+                
+            
+            return partner;
                 
         }catch(Exception ex){
         
@@ -268,6 +349,20 @@ public class FileBusiness {
                        dest.setEffectiveDate(rateSheet.getEffective());
                        dest.setSequenceNo(nextSequenceNo);
                        dest.setCountry(countryCdMapper.get(rateSheet.getDescription().trim()));
+                       dest.setRateCodePack(rateCdMapper.get(rateSheet.getCost()));
+                       dest.setMinCharge(rateSheet.getMinChrg());
+                       dest.setRoundingUnit(rateSheet.getRoundingUnit());
+                       String ratePlanCode = "";
+                       if(tranPartner.getServiceType().equals("IDD")){
+                       
+                           ratePlanCode = "ID01-"+tranPartner.getPartnerCd()+" ";
+                           
+                       }else if(tranPartner.getServiceType().equals("ISDN")){
+                       
+                           ratePlanCode = "ID06-"+tranPartner.getPartnerCd()+" ";
+                       }
+                       dest.setRatePlanCode(ratePlanCode);
+                       
                        destinationCdPreviuos = destinationCd;
                        tranPartner.getDestinationList().add(dest);
                        nextSequenceNo++;
@@ -288,6 +383,21 @@ public class FileBusiness {
             
         }
         
+        
+    }
+    public static  boolean moveFinshedFiile(String fileName){
+        try{
+        
+           moveFile(setEnv.EXCEL_RATESHEET_file_INPUT+"/"+fileName,setEnv.EXCEL_RATESHEET_OUTPUT);
+            
+            
+           return true;
+        }catch(Exception ex){
+        
+            ex.printStackTrace();
+            return false;
+        
+        }
         
     }
     
@@ -319,5 +429,36 @@ public class FileBusiness {
     
         return numgen;
     }
+    public static int moveFile(String filePath,String folderPath){
     
+        try{
+                File destinationFolder = new File(folderPath);
+                File file = new File(filePath);
+
+                if (!destinationFolder.exists())
+                {
+                    destinationFolder.mkdirs();
+                }
+                // Check weather source exists and it is folder.
+                if (file.exists())
+                {
+                    if (file != null)
+                    {
+                       
+                            // Move files to destination folder
+                            file.renameTo(new File(destinationFolder + "/" + file.getName()));
+                        
+                        // Add if you want to delete the source folder 
+                        file.delete();
+                    }
+                }
+                else
+                {
+                    System.out.println(file + "  Folder does not exists");
+                }
+        }catch(Exception ex){
+            ex.printStackTrace();
+        }
+        return 0;
+    }
 }

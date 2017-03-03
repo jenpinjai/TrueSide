@@ -7,6 +7,7 @@ import java.util.List;
 import org.apache.log4j.Logger;
 import truecorp.prm.core.dao.SystemBaseDao;
 import static truecorp.prm.core.dao.SystemBaseDao.getPrmConnection;
+import truecorp.prm.model.Address;
 import truecorp.prm.table.IcgDestinationAddres;
 import truecorp.prm.table.IcgDestinationAddresPK;
 
@@ -174,7 +175,72 @@ public class IcgDestinationAddresBaseDAO extends SystemBaseDao {
         }
         return null;
     }
-    
+    public List getAddrStringByPrmCd( String prmCd) throws SQLException {
+        PreparedStatement stmt = null;
+        ResultSet rs = null;
+        String SQL_STATEMENT = "select address from  icg_destination_addres where substr(DESTINATION_CD,1,2)= ? ";
+        try {
+            stmt = getPrmConnection().prepareStatement(SQL_STATEMENT);
+            stmt.setString(1, prmCd );
+            rs = stmt.executeQuery();
+            List<String>  addressList = new ArrayList<String>();
+            while (rs.next()){
+                
+                addressList.add(rs.getString("ADDRESS").trim());
+                
+            }
+            return addressList;
+        } catch (SQLException ex) {
+            ex.printStackTrace();
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        } finally {
+            stmt.close();
+            rs.close();
+        }
+        return null;
+    }
+     public List getAddressByPrmCd( String prmCd) throws SQLException {
+        PreparedStatement stmt = null;
+        ResultSet rs = null;
+        StringBuilder sql = new StringBuilder();
+        
+        sql.append("     select destAdd.ADDRESS , dest.BILLING_NAME_SEQ ,rates.RATE_PER_UNIT_SEQ, rcr.RATE, substr(destDict.TEXT,9) as COUNTRY from icg_destination_addres destAdd   ");
+
+        sql.append("     left join ICG_DESTINATION dest on dest.DESTINATION_CD = destAdd.DESTINATION_CD   ");
+
+        sql.append("     left join IC_DESTINATION_DICT destDict on destDict.SEQUENCE_NO = dest.BILLING_NAME_SEQ   ");
+
+        sql.append("     left join IC_RATES rates on rates.DESTINATION_CD = destAdd.DESTINATION_CD   ");
+        sql.append("     left join IC_RATE_CODE_RATES rcr on rcr.RATE_CD_SEQ = rates.RATE_PER_UNIT_SEQ   ");
+
+        sql.append("     where substr(destAdd.DESTINATION_CD,1,2)= '"+prmCd+"'   ");
+        
+        try {
+            stmt = getPrmConnection().prepareStatement(sql.toString());
+            //stmt.setString(1, prmCd );
+            rs = stmt.executeQuery();
+            List<Address>  addressList = new ArrayList<Address>();
+            while (rs.next()){
+                Address  addr = new Address();
+                
+                addr.setAddress(rs.getString("ADDRESS").trim());
+                addr.setDescription(rs.getString("COUNTRY").trim());
+                addr.setCost(rs.getString("RATE").trim());
+                addressList.add(addr);
+                
+            }
+            return addressList;
+        } catch (SQLException ex) {
+            ex.printStackTrace();
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        } finally {
+            stmt.close();
+            rs.close();
+        }
+        return null;
+    }
     public List findByDestinationCd( String destinationCd) throws SQLException {
         PreparedStatement stmt = null;
         ResultSet rs = null;
@@ -529,6 +595,31 @@ public class IcgDestinationAddresBaseDAO extends SystemBaseDao {
             stmt.close();
         }
         return -1;
+    }
+    public boolean contain(String address ,String prmCd) throws Exception{
+        
+        PreparedStatement stmt = null;
+        ResultSet rs = null;
+        String SQL_STATEMENT ="select ADDRESS from  icg_destination_addres where substr(DESTINATION_CD,1,2)= '"+prmCd+"'  and address = '"+address+"' ";
+        try {
+            stmt = getPrmConnection().prepareStatement(SQL_STATEMENT);
+            rs = stmt.executeQuery();
+            
+            if(rs.next()){
+                return true;
+            }else{
+                return false;
+            }
+        } catch (SQLException ex) {
+            ex.printStackTrace();
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        } finally {
+            stmt.close();
+            rs.close();
+        }
+        return false;
+        
     }
 
 }
