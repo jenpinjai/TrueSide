@@ -15,7 +15,7 @@ public class RateCodePack {
       String cd  ;
       String rateCd;
       String text;
-      String reteCdSeq;
+      String rateCdSeq;
       String descriptionSeq;
 
     public String getRate() {
@@ -50,14 +50,15 @@ public class RateCodePack {
         this.text = text;
     }
 
-    public String getReteCdSeq() {
-        return reteCdSeq;
+    public String getRateCdSeq() {
+        return rateCdSeq;
     }
 
-    public void setReteCdSeq(String reteCdSeq) {
-        this.reteCdSeq = reteCdSeq;
+    public void setRateCdSeq(String rateCdSeq) {
+        this.rateCdSeq = rateCdSeq;
     }
 
+   
     public String getDescriptionSeq() {
         return descriptionSeq;
     }

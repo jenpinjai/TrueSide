@@ -12,8 +12,11 @@ package truecorp.prm.model;
 public class Address {
     
     private String address;
+    private String destinationCd;
     private String description;
     private String cost;
+    private String rateCdSeq;
+    private String billingNameSeq; //Sequence_No
 
     public String getAddress() {
         return address;
@@ -37,6 +40,30 @@ public class Address {
 
     public void setCost(String cost) {
         this.cost = cost;
+    }
+
+    public String getDestinationCd() {
+        return destinationCd;
+    }
+
+    public void setDestinationCd(String destinationCd) {
+        this.destinationCd = destinationCd;
+    }
+
+    public String getRateCdSeq() {
+        return rateCdSeq;
+    }
+
+    public void setRateCdSeq(String rateCdSeq) {
+        this.rateCdSeq = rateCdSeq;
+    }
+
+    public String getBillingNameSeq() {
+        return billingNameSeq;
+    }
+
+    public void setBillingNameSeq(String billingNameSeq) {
+        this.billingNameSeq = billingNameSeq;
     }
     
     

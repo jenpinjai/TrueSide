@@ -2,8 +2,10 @@
 package truecorp.prm.dao;
 
 import java.sql.*;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 import org.apache.log4j.Logger;
 import truecorp.prm.core.dao.SystemBaseDao;
 import static truecorp.prm.core.dao.SystemBaseDao.getPrmConnection;
@@ -85,7 +87,29 @@ public class IcSubjectVersionsBaseDAO extends SystemBaseDao{
         }
         return -1;
     }    
-    
+           public int expireDestinationCd(String destinationCd,java.util.Date expireDate) throws SQLException {
+        Statement stmt = null;
+        String SQL_STATEMENT ="update IC_SUBJECT_VERSIONS set EXPIRATION_DATE = TO_DATE('"+new SimpleDateFormat("dd-MM-yyyy HH:mm:ss",Locale.US).format(expireDate)+"', 'dd-mm-yyyy HH24:MI:SS') "
+                            + " where CODE ='"+destinationCd+"' and  SUBJECT='destination' ";
+        try {
+                
+             stmt=  getPrmConnection().createStatement();
+             int status = stmt.executeUpdate(SQL_STATEMENT);
+            log.info("UPDATE expireDestinationCd SUCCESS:" + destinationCd);
+            return status;
+        } catch (SQLException ex) {
+            ex.printStackTrace();
+            log.error("UPDATE expireDestinationCd FAIL:" + destinationCd);
+            log.error(ex.toString());
+        } catch (Exception ex) {
+            ex.printStackTrace();
+            log.error("UPDATE expireDestinationCd FAIL:" + destinationCd);
+            log.error(ex.toString());
+        } finally {
+            stmt.close();
+        }
+        return -1;
+    }
     public int delete( IcSubjectVersions icSubjectVersions) throws SQLException {
         PreparedStatement stmt = null;
         String SQL_STATEMENT ="Delete from IC_SUBJECT_VERSIONS where SUBJECT = ?  and CODE = ?  and EFFECTIVE_DATE = ? ";

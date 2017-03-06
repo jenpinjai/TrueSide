@@ -254,7 +254,7 @@ public class FileBusiness {
                     rowNum++;
                     codePack.setCd(genRateCd(rowNum));
                     codePack.setRateCd(rateTypeMap.get(codePack.getRate())+""+tranPartner.getPrmCd()+""+codePack.getCd());
-                    codePack.setReteCdSeq(String.valueOf(rateCodeSeq));
+                    codePack.setRateCdSeq(String.valueOf(rateCodeSeq));
                     codePack.setDescriptionSeq(String.valueOf(descriptionSeq));
                     codePack.setText(tranPartner.getServiceType()+" "+tranPartner.getPartnerCd()+" Termination Rate "+codePack.getCd());
                     

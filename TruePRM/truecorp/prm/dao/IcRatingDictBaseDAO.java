@@ -7,6 +7,8 @@ import java.util.List;
 import org.apache.log4j.Logger;
 import truecorp.prm.core.dao.SystemBaseDao;
 import static truecorp.prm.core.dao.SystemBaseDao.getPrmConnection;
+import truecorp.prm.model.Address;
+import truecorp.prm.model.RateCodePack;
 import truecorp.prm.table.IcRatingDict;
 import truecorp.prm.table.IcRatingDictPK;
 
@@ -520,6 +522,48 @@ public class IcRatingDictBaseDAO extends SystemBaseDao{
             stmt.close();
         }
         return -1;
+    }
+    public List getRateCodePackByPrmCd( String prmCd) throws SQLException {
+        PreparedStatement stmt = null;
+        ResultSet rs = null;
+        StringBuilder sql = new StringBuilder();
+        
+        
+        sql.append("     select rcr.RATE ,substr(rc.RATE_CD,6,3)as cd, rc.RATE_CD , rd.TEXT , rc.RATE_CD_SEQ , rc.DESCRIPTION_SEQ from ic_rating_dict rd  ");
+
+        sql.append("     left join IC_RATE_CODE rc on rd.SEQUENCE_NO = rc.DESCRIPTION_SEQ  ");
+
+        sql.append("     left join IC_RATE_CODE_RATES rcr on rcr.RATE_CD_SEQ = rc.RATE_CD_SEQ  ");
+
+        sql.append("     where substr(rc.RATE_CD,4,2)='"+prmCd+"'  ");
+        
+        
+        try {
+            stmt = getPrmConnection().prepareStatement(sql.toString());
+            //stmt.setString(1, prmCd );
+            rs = stmt.executeQuery();
+            List<RateCodePack>  rateList = new ArrayList<RateCodePack>();
+            while (rs.next()){
+                RateCodePack  rate = new RateCodePack();
+                
+                rate.setCd(rs.getString("CD"));
+                rate.setRate(rs.getString("RATE"));
+                rate.setRateCd(rs.getString("RATE_CD"));
+                rate.setDescriptionSeq(rs.getString("DESCRIPTION_SEQ"));
+                rate.setRateCdSeq(rs.getString("RATE_CD_SEQ"));
+                rateList.add(rate);
+                
+            }
+            return rateList;
+        } catch (SQLException ex) {
+            ex.printStackTrace();
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        } finally {
+            stmt.close();
+            rs.close();
+        }
+        return null;
     }
 
 }

@@ -643,5 +643,26 @@ public class IcRateCodeRatesBaseDAO  extends SystemBaseDao{
         }
         return -1;
     }
-
+    
+    public int getCountRates(String prmCd) throws SQLException {
+        PreparedStatement stmt = null;
+        String SQL_STATEMENT ="select count(rownum) as count from ic_rate_code_rates where rate_class_set_cd like '%"+prmCd+"' ";
+	
+        try {
+            stmt = getPrmConnection().prepareStatement(SQL_STATEMENT);
+            ResultSet   resultSet = stmt.executeQuery();
+            log.info("getCountRates SUCCESS");
+            resultSet.next();
+            return resultSet.getInt("COUNT");
+        } catch (SQLException ex) {
+            ex.printStackTrace();
+            log.error(ex.toString());
+        } catch (Exception ex) {
+            ex.printStackTrace();
+            log.error(ex.toString());
+        } finally {
+            stmt.close();
+        }
+        return -1;
+    }
 }

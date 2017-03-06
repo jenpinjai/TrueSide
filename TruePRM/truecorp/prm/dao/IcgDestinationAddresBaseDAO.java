@@ -2,8 +2,10 @@
 package truecorp.prm.dao;
 
 import java.sql.*;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 import org.apache.log4j.Logger;
 import truecorp.prm.core.dao.SystemBaseDao;
 import static truecorp.prm.core.dao.SystemBaseDao.getPrmConnection;
@@ -83,7 +85,35 @@ public class IcgDestinationAddresBaseDAO extends SystemBaseDao {
         }
         return -1;
     }    
-    
+    public int expireDestinationCd(String destinationCd,String address,java.util.Date expireDate) throws SQLException {
+        Statement stmt = null;
+        String SQL_STATEMENT ="update ICG_DESTINATION_ADDRES set EXPIRATION_DATE = TO_DATE('"+new SimpleDateFormat("dd-MM-yyyy HH:mm:ss",Locale.US).format(expireDate)+"', 'dd-mm-yyyy HH24:MI:SS') "
+                            + " where DESTINATION_CD ='"+destinationCd+"' and ADDRESS ='"+address+"' ";
+	    //SQL_STATEMENT += "where DESTINATION_CD = ?  and ADDRESS = ?  ";
+        try {
+                
+//            stmt = getPrmConnection().prepareStatement(SQL_STATEMENT);
+//            stmt.setDate( 1, new Date(expireDate.getTime()));
+//            stmt.setString( 2, destinationCd);
+//            stmt.setString( 3, address);
+            
+             stmt=  getPrmConnection().createStatement();
+             int status = stmt.executeUpdate(SQL_STATEMENT);
+            log.info("UPDATE expireDestinationCd SUCCESS:" + destinationCd);
+            return status;
+        } catch (SQLException ex) {
+            ex.printStackTrace();
+            log.error("UPDATE expireDestinationCd FAIL:" + destinationCd);
+            log.error(ex.toString());
+        } catch (Exception ex) {
+            ex.printStackTrace();
+            log.error("UPDATE expireDestinationCd FAIL:" + destinationCd);
+            log.error(ex.toString());
+        } finally {
+            stmt.close();
+        }
+        return -1;
+    }   
     public int delete( IcgDestinationAddres icgDestinationAddres) throws SQLException {
         PreparedStatement stmt = null;
         String SQL_STATEMENT ="Delete from ICG_DESTINATION_ADDRES where DESTINATION_CD = ?  and ADDRESS = ?  and EFFECTIVE_DATE = ? ";
@@ -205,7 +235,7 @@ public class IcgDestinationAddresBaseDAO extends SystemBaseDao {
         ResultSet rs = null;
         StringBuilder sql = new StringBuilder();
         
-        sql.append("     select destAdd.ADDRESS , dest.BILLING_NAME_SEQ ,rates.RATE_PER_UNIT_SEQ, rcr.RATE, substr(destDict.TEXT,9) as COUNTRY from icg_destination_addres destAdd   ");
+        sql.append("     select destAdd.ADDRESS ,rates.DESTINATION_CD , dest.BILLING_NAME_SEQ ,rcr.RATE_CD_SEQ ,rates.RATE_PER_UNIT_SEQ, rcr.RATE, substr(destDict.TEXT,9) as COUNTRY from icg_destination_addres destAdd   ");
 
         sql.append("     left join ICG_DESTINATION dest on dest.DESTINATION_CD = destAdd.DESTINATION_CD   ");
 
@@ -214,7 +244,7 @@ public class IcgDestinationAddresBaseDAO extends SystemBaseDao {
         sql.append("     left join IC_RATES rates on rates.DESTINATION_CD = destAdd.DESTINATION_CD   ");
         sql.append("     left join IC_RATE_CODE_RATES rcr on rcr.RATE_CD_SEQ = rates.RATE_PER_UNIT_SEQ   ");
 
-        sql.append("     where substr(destAdd.DESTINATION_CD,1,2)= '"+prmCd+"'   ");
+        sql.append("     where substr(destAdd.DESTINATION_CD,1,2)= '"+prmCd+"'  and destAdd.EXPIRATION_DATE > TO_DATE('01-01-2999','dd-mm-yyyy')  ");
         
         try {
             stmt = getPrmConnection().prepareStatement(sql.toString());
@@ -225,8 +255,11 @@ public class IcgDestinationAddresBaseDAO extends SystemBaseDao {
                 Address  addr = new Address();
                 
                 addr.setAddress(rs.getString("ADDRESS").trim());
-                addr.setDescription(rs.getString("COUNTRY").trim());
-                addr.setCost(rs.getString("RATE").trim());
+                addr.setDescription(rs.getString("COUNTRY"));
+                addr.setDestinationCd(rs.getString("DESTINATION_CD"));
+                addr.setCost(rs.getString("RATE"));
+                addr.setRateCdSeq(rs.getString("RATE_CD_SEQ"));
+                addr.setBillingNameSeq(rs.getString("BILLING_NAME_SEQ"));
                 addressList.add(addr);
                 
             }

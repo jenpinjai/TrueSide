@@ -10,6 +10,7 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import truecorp.prm.business.FileBusiness;
 import truecorp.prm.core.dao.SystemBaseDao;
 import truecorp.prm.dao.*;
 import truecorp.prm.table.IcDestinationDict;
@@ -35,7 +36,7 @@ public class MyUnitTest {
     
     
     
-        System.out.println("=========Start My Unit test===========");
+        System.out.println("=============Start System Unit test===============");
         int sucessNum=0;
         int errorNum=0;
         int totalNum=0;
@@ -90,12 +91,19 @@ public class MyUnitTest {
         try{ testSelectMaxDescriptionSeq(); sucessNum++; }catch(Exception ex){ex.printStackTrace();errorNum++;}
         totalNum++;
         
+        try{ testgetCountRates(); sucessNum++; }catch(Exception ex){ex.printStackTrace();errorNum++;}
+        totalNum++;
+        
+        
+        try{ testgenRateCd(); sucessNum++; }catch(Exception ex){ex.printStackTrace();errorNum++;}
+        totalNum++;
+        
         
         
         ////////////////////////////////////////////////////////////////
         SystemBaseDao.getPrmConnection().close();
-        System.out.println("=========End My Unit test===========");
-        System.out.println("=========Test Result================");
+        System.out.println("=============End My Unit test===============");
+        System.out.println("=============Test Result====================");
         System.out.println("Success :"+sucessNum);
         System.out.println("Error :"+errorNum);
         System.out.println("Total :"+totalNum);
@@ -290,6 +298,32 @@ public class MyUnitTest {
         
         
          System.out.println("Success testSelectMaxDescriptionSeq :"+result);
+    }
+    
+    public static void testgetCountRates() throws SQLException{
+        //System.out.println("Start testSelectAllIcRateCode");
+    
+         
+         
+         IcRateCodeRatesBaseDAO   dao = new IcRateCodeRatesBaseDAO();
+         
+         int result = dao.getCountRates("L9");
+        
+        
+         System.out.println("Success testgetCountRates :"+result);
+    }
+    
+    public static void testgenRateCd() throws SQLException{
+        //System.out.println("Start testSelectAllIcRateCode");
+    
+         String  rateCd = FileBusiness.genRateCd(1100);
+         
+         IcRateCodeRatesBaseDAO   dao = new IcRateCodeRatesBaseDAO();
+         
+         int result = dao.getCountRates("L9");
+        
+        
+         System.out.println("Success testgenRateCd :"+rateCd);
     }
     
     

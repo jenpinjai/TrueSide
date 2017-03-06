@@ -55,7 +55,7 @@ public class ProcessPRMData {
             };
             Collections.sort(fileList,comFile);
             
-            
+            int processFileCount=0;
             for(File ctrlFile : fileList){
                     if(ctrlFile.getName().contains(".csv.ctrl")){
                         TransactionPartner  transactionPartner = new TransactionPartner();
@@ -63,28 +63,29 @@ public class ProcessPRMData {
                         System.out.println("Current file :"+ctrlFile.getName());
                         File csvFile = new File(setEnv.EXCEL_RATESHEET_file_INPUT+"/"+ctrlFile.getName().replace(".ctrl", ""));
                         
-                        
+                        processFileCount++;
                         if(Integer.valueOf(csvFile.getName().substring(csvFile.getName().length()-6, csvFile.getName().length()-4))==1){
-                              System.out.println(new Date().toLocaleString()+"\t"+"Begin process ErlyMonth file name :"+transactionPartner.getFileName());
+                              System.out.println(new Date().toLocaleString()+"\t"+"Begin process ErlyMonth file name :"+csvFile.getName());
                               transactionPartner = FileBusiness.readRateSheet(csvFile);
                               transactionPartner.setEalyMonth(true);
-//                              PRMBusiness.processEarlyMonth(transactionPartner);
-//                              FileBusiness.moveFinshedFiile(transactionPartner.getControlFileName());
-//                              FileBusiness.moveFinshedFiile(transactionPartner.getFileName());
-                              System.out.println(new Date().toLocaleString()+"\t"+"End process ErlyMonth file name :"+transactionPartner.getFileName());
+                              PRMBusiness.processEarlyMonth(transactionPartner);
+                              FileBusiness.moveFinshedFiile(transactionPartner.getControlFileName());
+                              FileBusiness.moveFinshedFiile(transactionPartner.getFileName());
+                              System.out.println(new Date().toLocaleString()+"\t"+"End process ErlyMonth <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<");
                         }else{
-                              System.out.println(new Date().toLocaleString()+"\t"+"Begin process HalfMonth file name :"+transactionPartner.getFileName());
+                              System.out.println(new Date().toLocaleString()+"\t"+"Begin process HalfMonth file name :"+csvFile.getName());
                               transactionPartner = FileBusiness.readRateSheetChanged(csvFile);
                               PRMBusiness.processHalfMonth(transactionPartner);
-                              //FileBusiness.moveFinshedFiile(transactionPartner.getControlFileName());
-                              //FileBusiness.moveFinshedFiile(transactionPartner.getFileName());
-                              System.out.println(new Date().toLocaleString()+"\t"+"End process HalfMonth file name :"+transactionPartner.getFileName());
+                              FileBusiness.moveFinshedFiile(transactionPartner.getControlFileName());
+                              FileBusiness.moveFinshedFiile(transactionPartner.getFileName());
+                              System.out.println(new Date().toLocaleString()+"\t"+"End process HalfMonth <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<");
                         }
                         
                         
                     }
             
             }
+            if(processFileCount==0)System.out.println(new Date().toLocaleString()+"\tDidn't have file for process !!!!!!!!");
             System.out.println(new Date().toLocaleString()+"\t"+"Success ProcessPRMData ");
         }catch(Exception ex){
             System.out.println(new Date().toLocaleString()+"\t"+"Exception ProcessPRMData :"+ex.getMessage());

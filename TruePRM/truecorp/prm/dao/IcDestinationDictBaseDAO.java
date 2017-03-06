@@ -6,6 +6,9 @@ import java.util.ArrayList;
 import java.util.List;
 import org.apache.log4j.Logger;
 import truecorp.prm.core.dao.SystemBaseDao;
+import static truecorp.prm.core.dao.SystemBaseDao.getPrmConnection;
+import truecorp.prm.model.Country;
+import truecorp.prm.model.RateCodePack;
 import truecorp.prm.table.*;
 
 
@@ -543,5 +546,57 @@ public class IcDestinationDictBaseDAO extends SystemBaseDao{
         }
         return -1;
     }
-
+    public int getCountCounties(String prmCd) throws SQLException {
+        PreparedStatement stmt = null;
+        String SQL_STATEMENT ="select count(rownum) as count from ic_rate_code_rates where rate_class_set_cd like '%"+prmCd+"' ";
+	
+        try {
+            stmt = getPrmConnection().prepareStatement(SQL_STATEMENT);
+            ResultSet   resultSet = stmt.executeQuery();
+            log.info("getCountRates SUCCESS");
+            resultSet.next();
+            return resultSet.getInt("COUNT");
+        } catch (SQLException ex) {
+            ex.printStackTrace();
+            log.error(ex.toString());
+        } catch (Exception ex) {
+            ex.printStackTrace();
+            log.error(ex.toString());
+        } finally {
+            stmt.close();
+        }
+        return -1;
+    }
+    public List getCountryByPrmCd( String prmCd) throws SQLException {
+        PreparedStatement stmt = null;
+        ResultSet rs = null;
+        StringBuilder sql = new StringBuilder();
+        
+        sql.append(" select substr(TEXT,9) as TEXT from ic_destination_dict where substr(TEXT,1,2)='"+prmCd+"'  order by sequence_no asc   ");
+        
+        
+        try {
+            stmt = getPrmConnection().prepareStatement(sql.toString());
+            //stmt.setString(1, prmCd );
+            rs = stmt.executeQuery();
+            List<Country>  countryList = new ArrayList<Country>();
+            while (rs.next()){
+                Country  country = new Country();
+                
+                
+                country.setName(rs.getString("TEXT"));
+                countryList.add(country);
+                
+            }
+            return countryList;
+        } catch (SQLException ex) {
+            ex.printStackTrace();
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        } finally {
+            stmt.close();
+            rs.close();
+        }
+        return null;
+    }
 }

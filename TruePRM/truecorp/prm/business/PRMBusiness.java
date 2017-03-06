@@ -8,11 +8,13 @@ package truecorp.prm.business;
 import java.math.BigDecimal;
 import java.sql.Date;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import sun.util.calendar.CalendarUtils;
 import truecorp.prm.dao.IcDestinationDictBaseDAO;
 import truecorp.prm.dao.IcRateCodeBaseDAO;
 import truecorp.prm.dao.IcRateCodeRatesBaseDAO;
@@ -47,8 +49,10 @@ import truecorp.prm.table.IcgDestinationAddres;
  * @author Jennarong Pinjai
  */
 public class PRMBusiness {
-    
-    
+        
+        public static Integer rateCodeSeq;
+        public static Integer descriptionSeq;
+        public static Integer destination_sequence_no ;
         public static void processEarlyMonth(TransactionPartner  tranPartner) throws Exception {
         
                     List<RateCodePack>  rateCodePackList = FileBusiness.genRateCodePackList(tranPartner);
@@ -163,65 +167,112 @@ public class PRMBusiness {
                 List<String> addrList = new IcgDestinationAddresBaseDAO().getAddrStringByPrmCd(tranPartner.getPrmCd());/// List of address(Prefix) on PrmCd for check contain
                 List<String> countryList = new IcDestinationDictBaseDAO().getStringCountry(tranPartner.getPrmCd());/// List of Country(Description) on PrmCd for check contain
                 List<Double> costList = new IcRateCodeRatesBaseDAO().getRates(tranPartner.getPrmCd()); /// List of Rate on PrmCd for check contain
-                List<Address>addressModelList = new IcgDestinationAddresBaseDAO().getAddressByPrmCd("L9");
-               
+                List<Address>addressModelList = new IcgDestinationAddresBaseDAO().getAddressByPrmCd(tranPartner.getPrmCd());
+                List<RateCodePack>  rateCodePackList = new IcRatingDictBaseDAO().getRateCodePackByPrmCd(tranPartner.getPrmCd());
+//                rateCodeSeq=new IcRateCodeBaseDAO().getMaxRateCdSeq()+1;
+//                descriptionSeq=new IcRatingDictBaseDAO().getMaxDescriptionSeq()+1;
+//                destination_sequence_no = new IcDestinationDictBaseDAO().getMaxSequenceNo()+1;
                 
+                rateCodeSeq=300000;
+                descriptionSeq=300000;
+                destination_sequence_no = 300000;
                 Map<String,Address>  addrCdMap = new HashMap<String,Address>(); ///AddressCode , Address Model
                 Map<String,Address>  countryAddressMap = new HashMap<String,Address>();///Country name , Address Model
-                
+                Map<String,Address>  countryRateMap = new HashMap<String,Address>();
+                Map<Double,RateCodePack>   rateMap   = new HashMap<Double,RateCodePack>();
+                Map<String,Integer>  countDestinationCdMap = new HashMap<String,Integer>();
                 for(Address address : addressModelList){ //Setup mapper
                         addrCdMap.put(address.getAddress(), address);
                         countryAddressMap.put(address.getDescription(), address);
+                        countryRateMap.put(address.getDescription().trim()+String.format("%.10f", Double.valueOf(address.getCost())), address);
+                        if(!countDestinationCdMap.containsKey(address.getDestinationCd())){
+                                int numOfDestinationCd=1;
+                                countDestinationCdMap.put(address.getDestinationCd(), numOfDestinationCd);
+                        }else{
+                                int numOfDestinationCd=countDestinationCdMap.get(address.getDestinationCd());
+                                numOfDestinationCd++;
+                                countDestinationCdMap.put(address.getDestinationCd(), numOfDestinationCd);
+                        }
+                        
+                        
+                }
+                //Setup rateMap
+                for(RateCodePack ratePack:rateCodePackList){
+                
+                        rateMap.put(Double.valueOf(ratePack.getRate()), ratePack);
                 }
                 
                 for(RateSheet rateSheet : tranPartner.getRateSheetList()){
                        
                         boolean oldAddress = addrList.contains(rateSheet.getPrefix().trim());
-                        System.out.println(""+rateSheet.getPrefix()+"\t"+rateSheet.getCost()+"\t"+rateSheet.getDescription());
+                        System.out.println("From Sheet    : "+rateSheet.getPrefix()+"\t"+rateSheet.getCost()+"\t"+rateSheet.getDescription());
+                        
                         if(oldAddress){
                                 //Old Address
                                 Address addr1 =addrCdMap.get(rateSheet.getPrefix().trim());//Get model for compare
+                                System.out.println("From DataBase : "+addr1.getAddress()+"\t"+addr1.getCost()+"\t"+addr1.getDescription());
                                 if(addr1.getDescription().equals(rateSheet.getDescription().trim())){
                                         //OldAddress and Old Description
-                                        if(Double.valueOf(addr1.getCost()) == Double.valueOf(rateSheet.getCost())){
+                                        if(Double.valueOf(addr1.getCost()).compareTo(Double.valueOf(rateSheet.getCost()))==0){
                                                 //Old Address and Old Description and Old Rate
                                                 //DO NOTHNIG!!!!
-
+                                                System.out.println("Old Address and Old Description and Old Rate DO NOTHNIG!!!!");
                                         }else{
                                                //Old Address and Old Description and Change Rate
+                                                System.out.print("Old Address and Old Description and Change Rate");
                                                 if(costList.contains(Double.valueOf(rateSheet.getCost()))){
                                                             //if  is have rate in Database
                                                            //Go generate new Destination code
-
-
+                                                           System.out.println(" and is have rate in Database");
+                                                           System.out.println("Continue generate new Destination code and update....");
+                                                           expireDestinationCode(countDestinationCdMap,addr1,rateSheet.getEffective());
+                                                           generateAndUpdateDestinationCode(countDestinationCdMap,rateMap,countryAddressMap,rateSheet,tranPartner);
                                                 }else{
                                                             //if isn't have rate  in Database
                                                             //Generate new Rate code then Go generate new Destination code
-
-                                                            costList = new IcRateCodeRatesBaseDAO().getRates(tranPartner.getPrmCd());//refresh costList
+                                                            System.out.println(" isn't have rate  in Database");
+                                                            System.out.println("Continue generate new Rate code then Go generate new Destination code and update....");
+                                                            RateCodePack ratePack = generateNewRateCode(rateMap,rateSheet, tranPartner);
+                                                            expireDestinationCode(countDestinationCdMap,addr1,rateSheet.getEffective());
+                                                            generateAndUpdateDestinationCode(countDestinationCdMap,rateMap,countryAddressMap,rateSheet,tranPartner);
+                                                            costList.add(Double.valueOf(ratePack.getRate())); //add new  costList
                                                 }
 
                                         }
                                 
                                 
                                 }else{
-                                        //OldAddress and new Description
-                                        if(Double.valueOf(addr1.getCost()) == Double.valueOf(rateSheet.getCost())){
-                                                //OldAddress and new Description and Old rate
+                                        //Old Address and new Description
+                                        if(Double.valueOf(addr1.getCost()).compareTo(Double.valueOf(rateSheet.getCost()))==0 ){
+                                                //Old Address and new Description and Old rate
                                                 //Go update only IC_destination_dict
-                                        
+                                                System.out.println("OldAddress and new Description and Old rate");
+                                                System.out.println("Continue update only IC_destination_dict...");
+                                                IcDestinationDictBaseDAO destDictDao = new IcDestinationDictBaseDAO();
+                                                IcDestinationDict  destDict = destDictDao.findByPK(BigDecimal.valueOf(Long.valueOf(addr1.getBillingNameSeq())), "E");
+                                                destDict.setText(destDict.getText().substring(0, 8)+rateSheet.getDescription());
+                                                destDictDao.update(destDict);
                                         }else{
                                                 //OldAddress and new Description and Change rate
+                                               System.out.print("OldAddress and new Description and Change rate");
                                                 if(costList.contains(Double.valueOf(rateSheet.getCost()))){
                                                        //if  is have rate in Database
                                                        //Go generate new Destination code
                                                        //Go insert ic_destinaion_dict 
+                                                       System.out.println(" and is have rate in Database");
+                                                       System.out.println("Continue generate new Destination code and update...");
+                                                       expireDestinationCode(countDestinationCdMap,addr1,rateSheet.getEffective());
+                                                       generateAndUpdateDestinationCode(countDestinationCdMap,rateMap,countryAddressMap,rateSheet,tranPartner);
                                                     
                                                 }else{
                                                        //if isn't have rate  in Database
                                                        //Generate new Rate code then Go generate new Destination code and Insert IC_DESTINATION_ADDRES
-
-                                                       costList = new IcRateCodeRatesBaseDAO().getRates(tranPartner.getPrmCd());//refresh costList 
+                                                       System.out.println(" and isn't have rate  in Database"); 
+                                                       System.out.println("Continue generate new Rate code then go generate new Destination code and Insert and update...");
+                                                       RateCodePack ratePack = generateNewRateCode(rateMap,rateSheet, tranPartner);
+                                                       expireDestinationCode(countDestinationCdMap,addr1,rateSheet.getEffective());
+                                                       generateAndUpdateDestinationCode(countDestinationCdMap,rateMap,countryAddressMap,rateSheet,tranPartner);
+                                                       costList.add(Double.valueOf(ratePack.getRate())); //add new  costList
                                                 }
                                         
                                         }
@@ -235,37 +286,71 @@ public class PRMBusiness {
                                 if(oldDescription){
                                         //new Address and Old Description
                                         Address addr1 =countryAddressMap.get(rateSheet.getDescription().trim());//Get model for compare
-                                        if(Double.valueOf(addr1.getCost())==Double.valueOf(rateSheet.getCost())){
+                                        System.out.println("From DataBase : "+addr1.getAddress()+"\t"+addr1.getCost()+"\t"+addr1.getDescription());
+                                        if(countryRateMap.containsKey(rateSheet.getDescription().trim()+String.format("%.10f", Double.valueOf(rateSheet.getCost())))){
                                                 //new Address and Old Description and Old Rate
                                                 //Go insert only IC_DESTINATION_ADDRES
+                                                System.out.println("new Address and Old Description and Old Rate");
+                                                System.out.println("Continue insert only IC_DESTINATION_ADDRES...");
+                                                Address newAddress = countryRateMap.get(rateSheet.getDescription().trim()+String.format("%.10f", Double.valueOf(rateSheet.getCost())));
                                                 
-                                        
+                                                IcgDestinationAddresBaseDAO  destAddDao = new IcgDestinationAddresBaseDAO();
+                                                IcgDestinationAddres  destAdd = new IcgDestinationAddres();
+                    
+                                                destAdd.setDestinationCd(newAddress.getDestinationCd());
+                                                destAdd.setAddress(rateSheet.getPrefix().trim());
+                                                destAdd.setEffectiveDate(new Date(rateSheet.getEffective().getTime()));
+                                                destAdd.setSysCreationDate(new Date(new java.util.Date().getTime()));
+                                                destAdd.setOperatorId(BigDecimal.valueOf(41l));
+                                                destAdd.setDlServiceCode("BASE");
+                                                destAdd.setDlUpdateStamp(BigDecimal.ZERO);
+                                                long expirationTime = new SimpleDateFormat("dd-MM-yyyy",Locale.US).parse("31-12-3000").getTime();
+                                                destAdd.setExpirationDate(new Date(expirationTime));
+
+                                                destAddDao.insert(destAdd);
+                                                ///Add numOf DestinationCode's Children (Address Code)
+                                                int numOfDestinationCd=countDestinationCdMap.get(newAddress.getDestinationCd());
+                                                numOfDestinationCd++;
+                                                countDestinationCdMap.put(newAddress.getDestinationCd(), numOfDestinationCd);
+                                                
                                         }else{
                                                 //new Address and Old Description and Change Rate
+                                                System.out.print("new Address and Old Description and Change Rate");
                                                 if(costList.contains(Double.valueOf(rateSheet.getCost()))){
                                                         //if  is have rate in Database
                                                        //Go generate new Destination code
-                                                    
+                                                       System.out.println(" and is have rate in Database");
+                                                       System.out.println("Continue generate new Destination code and update...");
+                                                       generateAndUpdateDestinationCode(countDestinationCdMap,rateMap,countryAddressMap,rateSheet,tranPartner);
                                                 }else{
                                                         //if isn't have rate  in Database
                                                         //Generate new Rate code then Go generate new Destination code
-                                                    
-                                                        costList = new IcRateCodeRatesBaseDAO().getRates(tranPartner.getPrmCd());//refresh costList
+                                                        System.out.println(" and isn't have rate  in Database");
+                                                        System.out.println("Continue generate new Rate code then go generate new Destination code and update...");
+                                                        
+                                                        RateCodePack ratePack = generateNewRateCode(rateMap,rateSheet, tranPartner);
+                                                        generateAndUpdateDestinationCode(countDestinationCdMap,rateMap,countryAddressMap,rateSheet,tranPartner);
+                                                        costList.add(Double.valueOf(ratePack.getRate())); //add new  costList
                                                 }
                                         
                                         }
                                     
                                 }else{
                                         //new Address and new Description
+                                        System.out.print("new Address and new Description then ignore rate");
                                         if(costList.contains(Double.valueOf(rateSheet.getCost()))){
                                                         //if  is have rate in Database
                                                        //Go generate new Destination code
-                                                    
+                                                       System.out.println(" and is have rate in Database");
+                                                       System.out.println("Continue go generate new Destination code and update...");
+                                                       generateAndUpdateDestinationCode(countDestinationCdMap,rateMap,countryAddressMap,rateSheet,tranPartner);
                                         }else{
                                                         //if isn't have rate  in Database
                                                         //Generate new Rate code then Go generate new Destination code and Insert IC_DESTINATION_ADDRES
-                                            
-                                            
+                                                        System.out.println(" and isn't have rate  in Database");
+                                                        System.out.println("Continue generate new Rate code then go generate new Destination cod and update...");
+                                                        generateNewRateCode(rateMap,rateSheet, tranPartner);
+                                                        generateAndUpdateDestinationCode(countDestinationCdMap,rateMap,countryAddressMap,rateSheet,tranPartner);
                                         }
                                     
                                 
@@ -284,13 +369,13 @@ public class PRMBusiness {
             for(RateCodePack ratePack:rateCodePackList){
             
                 IcRateCode  icRateCode = new IcRateCode();
-                icRateCode.setRateCdSeq(BigDecimal.valueOf(Long.valueOf(ratePack.getReteCdSeq())));
+                icRateCode.setRateCdSeq(BigDecimal.valueOf(Long.valueOf(ratePack.getRateCdSeq())));
                 long effectiveTime = new SimpleDateFormat("dd-MM-yyyy",Locale.US).parse("01-01-2002").getTime();
                 icRateCode.setEffectiveDate(new Date(effectiveTime));
                 icRateCode.setSysCreationDate(new Date(new java.util.Date().getTime()));
                 icRateCode.setOperatorId(BigDecimal.valueOf(41l));
                 icRateCode.setDlServiceCode("BASE");
-                icRateCode.setRateCd(ratePack.getRateCd());
+                icRateCode.setRateCd(ratePack.getRateCd().trim());
                 icRateCode.setDescriptionSeq(BigDecimal.valueOf(Long.valueOf(ratePack.getDescriptionSeq())));
                 long expirationTime = new SimpleDateFormat("dd-MM-yyyy",Locale.US).parse("31-12-3000").getTime();
                 icRateCode.setExpirationDate(new Date(expirationTime));
@@ -308,7 +393,7 @@ public class PRMBusiness {
                     IcRateCodeRates rcr = new IcRateCodeRates();
                     
                     rcr.setRateClassSetCd(tranPartner.getServiceType().substring(0,2)+tranPartner.getPrmCd());
-                    rcr.setRateCdSeq(BigDecimal.valueOf(Long.valueOf(ratePack.getReteCdSeq())));
+                    rcr.setRateCdSeq(BigDecimal.valueOf(Long.valueOf(ratePack.getRateCdSeq())));
                     long effectiveTime = new SimpleDateFormat("dd-MM-yyyy",Locale.US).parse("01-01-2002").getTime();
                     rcr.setEffectiveDate(new Date(effectiveTime));
                     rcr.setSysCreationDate(new Date(new java.util.Date().getTime()));
@@ -337,7 +422,7 @@ public class PRMBusiness {
                     dict.setSysCreationDate(new Date(new java.util.Date().getTime()));
                     dict.setOperatorId(BigDecimal.valueOf(41l));
                     dict.setDlServiceCode("BASE");
-                    dict.setText(ratePack.getText());
+                    dict.setText(ratePack.getText().trim());
             
                     dao.insert(dict);
             }
@@ -352,7 +437,7 @@ public class PRMBusiness {
                 IcSubjectVersions sub = new IcSubjectVersions();
                 
                 sub.setSubject("global rate");
-                sub.setCode(ratePack.getRateCd());
+                sub.setCode(ratePack.getRateCd().trim());
                 long effectiveTime = new SimpleDateFormat("dd-MM-yyyy",Locale.US).parse("01-01-2002").getTime();
                 sub.setEffectiveDate(new Date(effectiveTime));
                 sub.setSysCreationDate(new Date(new java.util.Date().getTime()));
@@ -374,7 +459,7 @@ public class PRMBusiness {
             
                 IcgDestination   icDest = new IcgDestination();
                 
-                icDest.setDestinationCd(dest.getCode());
+                icDest.setDestinationCd(dest.getCode().trim());
                 icDest.setEffectiveDate(new Date(dest.getEffectiveDate().getTime()));
                 icDest.setSysCreationDate(new Date(new java.util.Date().getTime()));
                 icDest.setDlServiceCode("BASE");
@@ -398,8 +483,8 @@ public class PRMBusiness {
             
                     IcgDestinationAddres destAdd = new IcgDestinationAddres();
                     
-                    destAdd.setDestinationCd(rateSheet.getDestinationCd());
-                    destAdd.setAddress(rateSheet.getPrefix());
+                    destAdd.setDestinationCd(rateSheet.getDestinationCd().trim());
+                    destAdd.setAddress(rateSheet.getPrefix().trim());
                     destAdd.setEffectiveDate(new Date(rateSheet.getEffective().getTime()));
                     destAdd.setSysCreationDate(new Date(new java.util.Date().getTime()));
                     destAdd.setOperatorId(BigDecimal.valueOf(41l));
@@ -444,7 +529,7 @@ public class PRMBusiness {
                 IcSubjectVersions sub = new IcSubjectVersions();
             
                 sub.setSubject("destination");
-                sub.setCode(dest.getCode());
+                sub.setCode(dest.getCode().trim());
                 sub.setEffectiveDate(new Date(dest.getEffectiveDate().getTime()));
                 sub.setSysCreationDate(new Date(new java.util.Date().getTime()));
                 sub.setOperatorId(BigDecimal.valueOf(41l));
@@ -468,7 +553,7 @@ public class PRMBusiness {
                 IcRatedDestination  ratedDest = new IcRatedDestination();
                 
                 ratedDest.setRatePlanCd(tranPartner.getRatePlanCode());
-                ratedDest.setDestinationCd(dest.getCode());
+                ratedDest.setDestinationCd(dest.getCode().trim());
                 ratedDest.setChrgParamId(BigDecimal.valueOf(16l));
                 ratedDest.setEffectiveDate(new Date(dest.getEffectiveDate().getTime()));
                 ratedDest.setSysCreationDate(new Date(new java.util.Date().getTime()));
@@ -505,7 +590,7 @@ public class PRMBusiness {
                 
                 IcRates   rates = new IcRates();
                 rates.setRatePlanCd(tranPartner.getRatePlanCode());
-                rates.setDestinationCd(dest.getCode());
+                rates.setDestinationCd(dest.getCode().trim());
                 rates.setChrgParamId(BigDecimal.valueOf(16l));
                 rates.setEffectiveDate(new Date(dest.getEffectiveDate().getTime()));
                 rates.setSysCreationDate(new Date(new java.util.Date().getTime()));
@@ -530,7 +615,7 @@ public class PRMBusiness {
                 rates.setRatingUnit(BigDecimal.ONE);
                 rates.setRatePerUnit(BigDecimal.ZERO);
                 rates.setRatingUnit(BigDecimal.ONE);
-                rates.setRatePerUnitSeq(BigDecimal.valueOf(Long.valueOf(dest.getRateCodePack().getReteCdSeq())));
+                rates.setRatePerUnitSeq(BigDecimal.valueOf(Long.valueOf(dest.getRateCodePack().getRateCdSeq())));
                 rates.setOneTimeChrg(BigDecimal.ZERO);
                 rates.setOneTimeChrgSeq(BigDecimal.ZERO);
                 long expirationTime = new SimpleDateFormat("dd-MM-yyyy",Locale.US).parse("31-12-3000").getTime();
@@ -549,7 +634,7 @@ public class PRMBusiness {
             
                      IcRatesAddlInfo ratesAd = new IcRatesAddlInfo();
                         ratesAd.setRatePlanCd(tranPartner.getRatePlanCode());
-                        ratesAd.setDestinationCd(dest.getCode());
+                        ratesAd.setDestinationCd(dest.getCode().trim());
                         ratesAd.setChrgParamId(BigDecimal.valueOf(16l));
                         ratesAd.setEffectiveDate(new Date(dest.getEffectiveDate().getTime()));
                         ratesAd.setSysCreationDate(new Date(new java.util.Date().getTime()));
@@ -594,7 +679,7 @@ public class PRMBusiness {
             
                      IcRatesSlabs slabs = new IcRatesSlabs();
                         slabs.setRatePlanCd(tranPartner.getRatePlanCode());
-                        slabs.setDestinationCd(dest.getCode());
+                        slabs.setDestinationCd(dest.getCode().trim());
                         slabs.setChrgParamId(BigDecimal.valueOf(16l));
                         slabs.setSlabNum(BigDecimal.ONE);
                         slabs.setOperatorId(BigDecimal.valueOf(41l));
@@ -613,5 +698,226 @@ public class PRMBusiness {
        
             System.out.println("Success addIcRatesSlabs");
         }
+        public static RateCodePack generateNewRateCode(Map<Double,RateCodePack>   rateMap,RateSheet rateSheet ,TransactionPartner tranPartner ) throws Exception{
+            
+            try{
+                  RateCodePack rateCode = new RateCodePack();
+                  int  rateCount       = rateMap.size();
+                  String rateCd        = FileBusiness.genRateCd(rateCount+1);
+                  rateCode.setCd(rateCd);
+                  rateCode.setRateCd(rateSheet.getServiceType()+tranPartner.getPrmCd()+rateCode.getCd());
+                  rateCode.setRateCdSeq(String.valueOf(rateCodeSeq));
+                  rateCode.setDescriptionSeq(String.valueOf(descriptionSeq));
+                  rateCode.setRate(rateSheet.getCost());
+                  rateCode.setText(tranPartner.getServiceType()+" "+tranPartner.getPartnerCd()+" Termination Rate "+rateCode.getCd());
+                  
+                  
+                 List<RateCodePack>  rateCodePackList = new ArrayList<RateCodePack>();
+                 rateCodePackList.add(rateCode);
+                   
+                 //// Add new IcRateCode
+                 addIcRateCode(rateCodePackList); 
+                 
+                 //// Add new IcRateCodeRates
+                 addIcRateCodeRates(rateCodePackList, tranPartner);
+                           
+                 ////Add new IcRatingDict
+                 addIcRatingDict(rateCodePackList);
+                        
+                 ////Add new IcSubjectVersions
+                 addIcSubjectVersions(rateCodePackList);
+                  
+                 System.out.println("Success generate RateCd:"+rateCode.getRate()+" "+rateCode.getText());
+                 rateCodeSeq=rateCodeSeq+1;
+                 descriptionSeq=descriptionSeq+1;
+                  
+                 rateMap.put(Double.valueOf(rateCode.getRate()), rateCode);
+                 return rateCode;
+            }catch(Exception ex){
+            
+                ex.printStackTrace();
+                return null;
+            
+            }
+           
+        }
+        public static Destination generateAndUpdateDestinationCode(Map<String,Integer>  countDestinationCdMap,Map<Double,RateCodePack>   rateMap,Map<String,Address>  countryAddressMap,RateSheet rateSheet ,TransactionPartner tranPartner) throws Exception{
+        
+            try{
+                    
+                    String countryCd="";
+                    boolean isNewCountry=false;
+                    if(countryAddressMap.containsKey(rateSheet.getDescription().trim())){
+                    
+                            countryCd = countryAddressMap.get(rateSheet.getDescription().trim()).getDestinationCd().substring(2, 5);
+                        
+                    }else{
+                            int nextCountryNumber = countryAddressMap.size()+1;
+                            isNewCountry=true;
+                            //new CountryCode
+                            int loopNum=1;
+                            int codeNum=1;
+                            int charNum=64;
+                            for(int i=1;i<=nextCountryNumber;i++){
+                                  if(loopNum<=999){
+                                         countryCd = String.format("%03d", codeNum);
+                                  }else{
+                                        if(codeNum>99){
+                                            codeNum=1;
+                                            charNum++;
+                                        }
+                                        countryCd = String.format("%c%02d", charNum,codeNum);
+                                  }
+                                  //System.out.println(coun.getCd()+"    "+coun.getName());
+                                  codeNum++;
+                                  loopNum++;
+                            }
+                        
+                    }
+                    String rateCd    = rateMap.get(Double.valueOf(rateSheet.getCost())).getCd();
+                    String newDestinationCd = tranPartner.getPrmCd()+countryCd+rateCd;
+                    
+                    boolean  isDuplicateDestination=false;
+                    if(countDestinationCdMap.containsKey(newDestinationCd)){
+                            isDuplicateDestination=true;
+                    }
+                    
+                    Destination dest = new Destination();
+                    
+                    Country     country = new Country();
+                    country.setCd(countryCd);
+                    country.setName(rateSheet.getDescription());
+                    dest.setCountry(country);
+                    
+                    RateCodePack  rateCodePack = new RateCodePack();
+                    rateCodePack.setCd(rateCd);
+                    rateCodePack.setRate(rateSheet.getCost());
+                    rateCodePack.setRateCdSeq(rateMap.get(Double.valueOf(rateSheet.getCost())).getRateCdSeq());
+                    rateCodePack.setDescriptionSeq(rateMap.get(Double.valueOf(rateSheet.getCost())).getDescriptionSeq());
+                    dest.setRateCodePack(rateCodePack);
+                    
+                    dest.setCode(newDestinationCd);
+                    dest.setEffectiveDate(rateSheet.getEffective());
+                    dest.setMinCharge(rateSheet.getMinChrg());
+                    dest.setRoundingUnit(rateSheet.getRoundingUnit());
+                    dest.setSequenceNo(destination_sequence_no);
+                    
+                    TransactionPartner  insertTranTemp = new TransactionPartner();
+                    rateSheet.setDestinationCd(newDestinationCd);
+                    insertTranTemp.getDestinationList().add(dest);
+                    insertTranTemp.getRateSheetList().add(rateSheet);
+                    insertTranTemp.setPrmCd(tranPartner.getPrmCd());
+                    insertTranTemp.setPartnerCd(tranPartner.getPartnerCd());
+                    insertTranTemp.setEalyMonth(tranPartner.isEalyMonth());
+                    insertTranTemp.setServiceType(tranPartner.getServiceType());
+                    insertTranTemp.setRatePlanCode(tranPartner.getRatePlanCode());
+                    insertTranTemp.setFileName(tranPartner.getFileName());
+                    
+                    ////Add new ICG_Destination
+                    if(!isDuplicateDestination)addIcgDestination(insertTranTemp);
+
+                    ////Add new Icg Destination Addres
+                    addIcgDestinationAddres(insertTranTemp);
+
+                    ////Add new IcDestinaionDict
+                    if(!isDuplicateDestination)addIcDestinationDict(insertTranTemp);
+
+                    ////Add new Ic Subjct versions
+                    if(!isDuplicateDestination)addIcSubjectVersions(insertTranTemp);
+
+                    ////Add new IcRatedDestination
+                    if(!isDuplicateDestination)addIcRatedDestination(insertTranTemp);
+
+                    ////Add new IcRates
+                    if(!isDuplicateDestination)addIcRates(insertTranTemp);
+
+                    ////Add new Ic Rated Addl Info
+                    if(!isDuplicateDestination)addIcRatesAddlInfo(insertTranTemp);
+
+                    ////Add new Ic Rates Slabs
+                    if(!isDuplicateDestination)addIcRatesSlabs(insertTranTemp);
+                    
+                    
+                    if(isNewCountry){
+                    
+                        Address  newAddress = new Address();
+                        
+                        newAddress.setAddress(rateSheet.getPrefix().trim());
+                        newAddress.setBillingNameSeq(String.valueOf(destination_sequence_no));
+                        newAddress.setCost(rateSheet.getCost());
+                        newAddress.setDescription(rateSheet.getDescription());
+                        newAddress.setDestinationCd(newDestinationCd);
+                        newAddress.setRateCdSeq(rateCodePack.getRateCdSeq());
+                        
+                        countryAddressMap.put(rateSheet.getDescription().trim(), newAddress);
+                        
+                    }
+                    if(!isDuplicateDestination){
+                    
+                        int countDestinationCd = 1;
+                        countDestinationCdMap.put(newDestinationCd, countDestinationCd);
+                        destination_sequence_no=destination_sequence_no+1;
+                    }else{
+                    
+                        int countDestinationCd = countDestinationCdMap.get(newDestinationCd);
+                        countDestinationCd++;
+                        countDestinationCdMap.put(newDestinationCd, countDestinationCd);
+                    
+                    }
+                    
+                    return dest;
+            }catch(Exception ex){
+            
+                ex.printStackTrace();
+                return null;
+            
+            }
+        
+            
+        }
+        public static void expireDestinationCode(Map<String,Integer>  countDestinationCdMap,Address addr1,java.util.Date expireDate) throws Exception{
+        
+                Calendar cal = Calendar.getInstance();
+                cal.setTime(expireDate);
+                cal.add(Calendar.DATE, -1);
+                java.util.Date beforeExpireDate = cal.getTime();
+            
+                beforeExpireDate.setHours(23);
+                beforeExpireDate.setMinutes(59);
+                beforeExpireDate.setSeconds(59);
+                int destinationCdCount = countDestinationCdMap.get(addr1.getDestinationCd())==null?0:countDestinationCdMap.get(addr1.getDestinationCd());
+                if(destinationCdCount>1){
+                    //Only expire at Icg destination address
+                    new IcgDestinationAddresBaseDAO().expireDestinationCd(addr1.getDestinationCd(), addr1.getAddress(), beforeExpireDate);
+                
+                
+                    destinationCdCount--;
+                    countDestinationCdMap.put(addr1.getDestinationCd(), destinationCdCount);
+                }else if(destinationCdCount==1){
+                    new IcgDestinationAddresBaseDAO().expireDestinationCd(addr1.getDestinationCd(), addr1.getAddress(), beforeExpireDate);
+                
+                    new IcgDestinationBaseDAO().expireDestinationCd(addr1.getDestinationCd(), beforeExpireDate);
+                    
+                    new IcSubjectVersionsBaseDAO().expireDestinationCd(addr1.getDestinationCd(), beforeExpireDate);
+                    
+                    new IcRatedDestinationBaseDAO().expireDestinationCd(addr1.getDestinationCd(), beforeExpireDate);
+                    
+                    new IcRatesBaseDAO().expireDestinationCd(addr1.getDestinationCd(), beforeExpireDate);
+                    
+                    new IcRatesAddlInfoBaseDAO().expireDestinationCd(addr1.getDestinationCd(), beforeExpireDate);
+                    
+                    new IcRatesSlabsBaseDAO().expireDestinationCd(addr1.getDestinationCd(), beforeExpireDate);
+                    
+                    destinationCdCount--;
+                    countDestinationCdMap.put(addr1.getDestinationCd(), destinationCdCount);
+                }else if(destinationCdCount==0){
+                    //nothing
+                }
+                //new IcgDestinationBaseDAO().expireDestinationCd(addr1.getDestinationCd(), expireDate);
+                
+                
+                
+        }
+
     
 }
