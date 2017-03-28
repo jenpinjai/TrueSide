@@ -44,27 +44,28 @@ import truecorp.prm.table.TiticPartnerRef;
  */
 public class FileBusiness {
     
-    public static TransactionPartner readRateSheet(File csvFile) throws Exception{
+    public static TransactionPartner readRateSheet(File csvFile,TransactionPartner  partner ) throws Exception{
         String lineError="";
         try{
-            TransactionPartner  partner = new TransactionPartner();
+            
             
             //////Mapping prmCd
             Map<String,String>    partnerCdMap  = new HashMap<String,String>(); /// <partnerCd,prmCd>
             TiticPartnerRefBaseDAO  titicDao = new TiticPartnerRefBaseDAO();
+            List<String> addressList = new ArrayList<String>();
             
-            for(TiticPartnerRef titic:(List<TiticPartnerRef>)titicDao.findAll()){
-            
-                partnerCdMap.put(titic.getPartnerCd().trim(), titic.getPrmCd().trim());
-            
-            }
-                        partner.setPartnerCd(csvFile.getName().substring(0,3).trim());
+                        partner.setPartnerCd(csvFile.getName().substring(0,2).trim());
+                        if(isNumber(String.valueOf(csvFile.getName().charAt(2)))){
+                        
+                            partner.setPartnerCd(csvFile.getName().substring(0,3).trim());
+                        
+                        }
                         partner.setFileName(csvFile.getName());
                         partner.setControlFileName(csvFile.getName()+".ctrl");
                         System.out.println("Then read file :"+csvFile.getName());
-                        partner.setPrmCd(partnerCdMap.get(csvFile.getName().substring(0,3).trim()));
+                        
                         System.out.println("Partner code :"+partner.getPartnerCd());
-                        System.out.println("PRM code :"+partner.getPrmCd());
+                        
                         String splitBy = ",";
                         String line;
                         BufferedReader br = new BufferedReader(new FileReader(csvFile));
@@ -79,17 +80,36 @@ public class FileBusiness {
                              //for(String text:b){ System.out.print(text+"\t\t");}
                              rateSheet.setPrmPartnerCd(b[0]);
                              rateSheet.setPrefix(b[1]);
-                             rateSheet.setDescription(b[2]);
+                             rateSheet.setDescription(b[2].trim());
                              rateSheet.setCost(b[3]);
-                             rateSheet.setEffective(new SimpleDateFormat("dd-MM-yy",Locale.US).parse(b[4]));
+                             rateSheet.setEffective(new SimpleDateFormat("yyyy-MM-dd",Locale.US).parse(b[4]));
                              rateSheet.setServiceType(b[5]);
                              rateSheet.setMinChrg(b[9]);
                              rateSheet.setRoundingUnit(b[10]);
                              rateSheet.setIsChange(b[11]);
                              partner.setServiceType(rateSheet.getServiceType());
                              partner.getRateSheetList().add(rateSheet);
+                             
+                             if(addressList.contains(rateSheet.getPrefix())){
+                                 throw new Exception("ADDRDUP");
+                             
+                             }else{
+                                 addressList.add(rateSheet.getPrefix());
+                             }
+                             
+                        }
+                        List<TiticPartnerRef>  titicPartnerRefList = titicDao.findByProductCd(partner.getServiceType());
+                        
+                        if(titicPartnerRefList==null||titicPartnerRefList.isEmpty()){
+                                titicPartnerRefList = titicDao.findByProductCd(String.format("%-4s", partner.getServiceType()));
                         }
                         
+                        for(TiticPartnerRef titic:titicPartnerRefList){
+            
+                            partnerCdMap.put(titic.getPartnerCd().trim(), titic.getPrmCd().trim());
+                        }      
+                        partner.setPrmCd(partnerCdMap.get(partner.getPartnerCd()));
+                        System.out.println("PRM code :"+partner.getPrmCd());
                         String ratePlanCode = "";
                         if(partner.getServiceType().equals("IDD")){
                        
@@ -116,40 +136,46 @@ public class FileBusiness {
 //                            
 //                        }
                        
-                    
+                        Comparator<RateSheet> rateCompare = new Comparator<RateSheet>() {
+
+                            @Override
+                            public int compare(RateSheet o1, RateSheet o2) {
+                                
+                                return o1.getDescription().compareTo(o2.getDescription());
+                            
+                            }
+                        };
+                        Collections.sort(partner.getRateSheetList(),rateCompare);
                 
             
             return partner;
                 
         }catch(Exception ex){
-        
-            ex.printStackTrace();
             System.out.println("===================================LINE ERROR:"+lineError);
-            return null;
+            throw ex;
         }
     
     }
-        public static TransactionPartner readRateSheetChanged(File csvFile) throws Exception{
+        public static TransactionPartner readRateSheetChanged(File csvFile, TransactionPartner  partner ) throws Exception{
         String lineError="";
         try{
-            TransactionPartner  partner = new TransactionPartner();
+           
             
             //////Mapping prmCd
             Map<String,String>    partnerCdMap  = new HashMap<String,String>(); /// <partnerCd,prmCd>
             TiticPartnerRefBaseDAO  titicDao = new TiticPartnerRefBaseDAO();
-            
-            for(TiticPartnerRef titic:(List<TiticPartnerRef>)titicDao.findAll()){
-            
-                partnerCdMap.put(titic.getPartnerCd().trim(), titic.getPrmCd().trim());
-            
+            partner.setPartnerCd(csvFile.getName().substring(0,2).trim());
+            if(isNumber(String.valueOf(csvFile.getName().charAt(2)))){
+                        
+                            partner.setPartnerCd(csvFile.getName().substring(0,3).trim());
+                        
             }
-                        partner.setPartnerCd(csvFile.getName().substring(0,3).trim());
+            
                         partner.setFileName(csvFile.getName());
                         partner.setControlFileName(csvFile.getName()+".ctrl");
-                        partner.setPrmCd(partnerCdMap.get(csvFile.getName().substring(0,3).trim()));
                         System.out.println("Then read file :"+csvFile.getName());
                         System.out.println("Partner code :"+partner.getPartnerCd());
-                        System.out.println("PRM code :"+partner.getPrmCd());
+                        
                         String splitBy = ",";
                         String line;
                         BufferedReader br = new BufferedReader(new FileReader(csvFile));
@@ -174,6 +200,21 @@ public class FileBusiness {
                              partner.setServiceType(rateSheet.getServiceType());
                              partner.getRateSheetList().add(rateSheet);
                         }
+                        if(partner.getRateSheetList().isEmpty()){
+                                throw new Exception("NOCHANGE");
+                        }
+                        List<TiticPartnerRef>  titicPartnerRefList = titicDao.findByProductCd(partner.getServiceType());
+                        
+                        if(titicPartnerRefList==null||titicPartnerRefList.isEmpty()){
+                                titicPartnerRefList = titicDao.findByProductCd(String.format("%-4s", partner.getServiceType()));
+                        }
+                        
+                        for(TiticPartnerRef titic:titicPartnerRefList){
+            
+                            partnerCdMap.put(titic.getPartnerCd().trim(), titic.getPrmCd().trim());
+                        }      
+                        partner.setPrmCd(partnerCdMap.get(partner.getPartnerCd()));
+                        System.out.println("PRM code :"+partner.getPrmCd());
                         
                         String ratePlanCode = "";
                         if(partner.getServiceType().equals("IDD")){
@@ -207,10 +248,9 @@ public class FileBusiness {
             return partner;
                 
         }catch(Exception ex){
-        
-            ex.printStackTrace();
             System.out.println("===================================LINE ERROR:"+lineError);
-            return null;
+            throw ex;
+            
         }
     
     }
@@ -219,11 +259,11 @@ public class FileBusiness {
         try{
             List<RateCodePack> rateCodePackList = new ArrayList<RateCodePack>();
             Set<Double>        rateCostSet      = new HashSet<Double>();
-            Map<String,String> rateTypeMap      = new HashMap<String,String>();
+            Map<Double,String> rateTypeMap      = new HashMap<Double,String>();
             for(RateSheet rateSheet :tranPartner.getRateSheetList()){
                 
                 rateCostSet.add(Double.valueOf(rateSheet.getCost()));
-                rateTypeMap.put(rateSheet.getCost().trim(), rateSheet.getServiceType());
+                rateTypeMap.put(Double.valueOf(rateSheet.getCost()), rateSheet.getServiceType());
                 
             }
             System.out.println("------Rate cost sorted------");
@@ -253,7 +293,7 @@ public class FileBusiness {
             for(RateCodePack codePack : rateCodePackList){
                     rowNum++;
                     codePack.setCd(genRateCd(rowNum));
-                    codePack.setRateCd(rateTypeMap.get(codePack.getRate())+""+tranPartner.getPrmCd()+""+codePack.getCd());
+                    codePack.setRateCd(rateTypeMap.get(Double.valueOf(codePack.getRate()))+""+tranPartner.getPrmCd()+""+codePack.getCd());
                     codePack.setRateCdSeq(String.valueOf(rateCodeSeq));
                     codePack.setDescriptionSeq(String.valueOf(descriptionSeq));
                     codePack.setText(tranPartner.getServiceType()+" "+tranPartner.getPartnerCd()+" Termination Rate "+codePack.getCd());
@@ -332,7 +372,7 @@ public class FileBusiness {
             return null;
         }
     }
-    public static boolean generateDestinationCode(TransactionPartner tranPartner ,Map<String,Country> countryCdMapper ,Map<String,RateCodePack> rateCdMapper)throws Exception{
+    public static boolean generateDestinationCode(TransactionPartner tranPartner ,Map<String,Country> countryCdMapper ,Map<Double,RateCodePack> rateCdMapper)throws Exception{
         
         try{
             System.out.println("-----Start Generate Destination code-----");
@@ -340,7 +380,11 @@ public class FileBusiness {
             String destinationCdPreviuos="";
             for(RateSheet rateSheet:tranPartner.getRateSheetList()){
                    
-                   String destinationCd = tranPartner.getPrmCd()+countryCdMapper.get(rateSheet.getDescription().trim()).getCd()+rateCdMapper.get(rateSheet.getCost()).getCd();
+                    
+                  String countryCode =countryCdMapper.get(rateSheet.getDescription().trim()).getCd();
+                  String rateCode =rateCdMapper.get(Double.valueOf(rateSheet.getCost())).getCd();
+                
+                   String destinationCd = tranPartner.getPrmCd()+countryCode+rateCode;
                    rateSheet.setDestinationCd(destinationCd);
                    
                    if(!destinationCdPreviuos.equals(destinationCd)){
@@ -349,7 +393,7 @@ public class FileBusiness {
                        dest.setEffectiveDate(rateSheet.getEffective());
                        dest.setSequenceNo(nextSequenceNo);
                        dest.setCountry(countryCdMapper.get(rateSheet.getDescription().trim()));
-                       dest.setRateCodePack(rateCdMapper.get(rateSheet.getCost()));
+                       dest.setRateCodePack(rateCdMapper.get(Double.valueOf(rateSheet.getCost())));
                        dest.setMinCharge(rateSheet.getMinChrg());
                        dest.setRoundingUnit(rateSheet.getRoundingUnit());
                        String ratePlanCode = "";
@@ -366,10 +410,11 @@ public class FileBusiness {
                        destinationCdPreviuos = destinationCd;
                        tranPartner.getDestinationList().add(dest);
                        nextSequenceNo++;
+                         System.out.println(rateSheet.getDestinationCd()+"\t"+rateSheet.getCost()+"\t"+rateSheet.getPrefix()+"\t\t"+rateSheet.getDescription()+"");
+               
                    }
                   
-                   //System.out.println(rateSheet.getDestinationCd()+"\t"+rateSheet.getCost()+"\t"+rateSheet.getPrefix()+"\t\t"+rateSheet.getDescription()+"");
-                   
+                     
                 
             }
             
@@ -460,5 +505,20 @@ public class FileBusiness {
             ex.printStackTrace();
         }
         return 0;
+    }
+    public static boolean isNumber(String text){
+    
+        try{
+            
+            Double test = Double.valueOf(text);
+        
+            return true;
+        }catch(Exception ex){
+        
+            return false;
+            
+        }
+        
+        
     }
 }

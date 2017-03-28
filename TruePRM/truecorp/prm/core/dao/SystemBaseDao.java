@@ -21,8 +21,10 @@ public class SystemBaseDao {
         public static Connection openConnectPRMDB()throws  IOException {
 		
 		String ipBILL=System.getenv("ipPRM");
-		String userBILL=System.getenv("userPRM");
-		String passwordBILL=System.getenv("passwordPRM");
+//		String userBILL=System.getenv("userPRM");
+//		String passwordBILL=System.getenv("passwordPRM");
+		String userBILL="prmuatref";
+		String passwordBILL="prmdb#01";
         Connection result;
         try {
         	Class.forName("oracle.jdbc.driver.OracleDriver");

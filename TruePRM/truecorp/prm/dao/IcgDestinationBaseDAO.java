@@ -9,6 +9,7 @@ import java.util.Locale;
 import org.apache.log4j.Logger;
 import truecorp.prm.core.dao.SystemBaseDao;
 import static truecorp.prm.core.dao.SystemBaseDao.getPrmConnection;
+import static truecorp.prm.process.ProcessPRMData.logWriter;
 import truecorp.prm.table.IcgDestination;
 import truecorp.prm.table.IcgDestinationPK;
 
@@ -44,6 +45,9 @@ public class IcgDestinationBaseDAO extends SystemBaseDao{
         } catch (SQLException ex) {
             ex.printStackTrace();
             log.error("INSERT IcgDestination FAIL:" + icgDestination);
+            try{ logWriter.write("Insert IcgDestination fail:"+icgDestination.getDestinationCd()+"\t "+icgDestination.getBillingNameSeq()+"\r\n"); } catch(Exception ex2){}
+           
+            System.out.println("INSERT IcgDestination FAIL:" + icgDestination);
             log.error(ex.toString());
         } catch (Exception ex) {
             ex.printStackTrace();

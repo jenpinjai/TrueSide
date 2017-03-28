@@ -9,6 +9,7 @@ import truecorp.prm.core.dao.SystemBaseDao;
 import static truecorp.prm.core.dao.SystemBaseDao.getPrmConnection;
 import truecorp.prm.model.Country;
 import truecorp.prm.model.RateCodePack;
+import static truecorp.prm.process.ProcessPRMData.logWriter;
 import truecorp.prm.table.*;
 
 
@@ -41,6 +42,8 @@ public class IcDestinationDictBaseDAO extends SystemBaseDao{
         } catch (SQLException ex) {
             ex.printStackTrace();
             log.error("INSERT IcDestinationDict FAIL:" + icDestinationDict);
+            try{ logWriter.write("Insert IcDestinationDict fail:"+icDestinationDict.getText()+"\t "+icDestinationDict.getSequenceNo()+"\r\n"); } catch(Exception ex2){}
+           
             log.error(ex.toString());
         } catch (Exception ex) {
             ex.printStackTrace();

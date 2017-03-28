@@ -9,6 +9,7 @@ import truecorp.prm.core.dao.SystemBaseDao;
 import static truecorp.prm.core.dao.SystemBaseDao.getPrmConnection;
 import truecorp.prm.model.Address;
 import truecorp.prm.model.RateCodePack;
+import static truecorp.prm.process.ProcessPRMData.logWriter;
 import truecorp.prm.table.IcRatingDict;
 import truecorp.prm.table.IcRatingDictPK;
 
@@ -41,6 +42,8 @@ public class IcRatingDictBaseDAO extends SystemBaseDao{
         } catch (SQLException ex) {
             ex.printStackTrace();
             log.error("INSERT IcRatingDict FAIL:" + icRatingDict);
+            try{ logWriter.write("Insert IcRatingDict fail:"+icRatingDict.getText()+"\t "+icRatingDict.getSequenceNo()+"\r\n"); } catch(Exception ex2){}
+            
             log.error(ex.toString());
         } catch (Exception ex) {
             ex.printStackTrace();
@@ -504,7 +507,7 @@ public class IcRatingDictBaseDAO extends SystemBaseDao{
     
     public int deleteAllBy(String serviceType,String partnerCode) throws SQLException {
         Statement stmt = null;
-        String SQL_STATEMENT ="delete ic_rating_dict where substr(TEXT,1,8)='"+serviceType+" "+partnerCode+" '  ";
+        String SQL_STATEMENT ="delete ic_rating_dict where substr(TEXT,1,8)='"+serviceType+" "+partnerCode+" ' or substr(TEXT,1,7)='"+serviceType.substring(0, 3)+" "+partnerCode+" '  ";
         try {
             stmt = getPrmConnection().createStatement();
             int status = stmt.executeUpdate(SQL_STATEMENT);
@@ -523,7 +526,7 @@ public class IcRatingDictBaseDAO extends SystemBaseDao{
         }
         return -1;
     }
-    public List getRateCodePackByPrmCd( String prmCd) throws SQLException {
+    public List getRateCodePackByPrmCd(String serviceType, String prmCd) throws SQLException {
         PreparedStatement stmt = null;
         ResultSet rs = null;
         StringBuilder sql = new StringBuilder();
@@ -535,7 +538,7 @@ public class IcRatingDictBaseDAO extends SystemBaseDao{
 
         sql.append("     left join IC_RATE_CODE_RATES rcr on rcr.RATE_CD_SEQ = rc.RATE_CD_SEQ  ");
 
-        sql.append("     where substr(rc.RATE_CD,4,2)='"+prmCd+"'  ");
+        sql.append("     where rc.RATE_CD like '"+serviceType+""+prmCd+"%'   ");
         
         
         try {

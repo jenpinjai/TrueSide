@@ -7,6 +7,7 @@ import java.util.List;
 import org.apache.log4j.Logger;
 import truecorp.prm.core.dao.SystemBaseDao;
 import static truecorp.prm.core.dao.SystemBaseDao.getPrmConnection;
+import static truecorp.prm.process.ProcessPRMData.logWriter;
 import truecorp.prm.table.*;
 
 
@@ -41,6 +42,8 @@ public class IcRateCodeBaseDAO extends SystemBaseDao{
         } catch (SQLException ex) {
             ex.printStackTrace();
             log.error("INSERT IcRateCode FAIL:" + icRateCode);
+            try{ logWriter.write("Insert IcRateCode fail:"+icRateCode.getRateCd()+"\r\n"); } catch(Exception ex2){}
+            System.out.println("INSERT IcRateCode FAIL:" + icRateCode);
             log.error(ex.toString());
         } catch (Exception ex) {
             ex.printStackTrace();
@@ -563,7 +566,7 @@ public class IcRateCodeBaseDAO extends SystemBaseDao{
     }
     public int deleteAllBy(String serviceType,String prmCd) throws SQLException {
         Statement stmt = null;
-        String SQL_STATEMENT ="delete ic_rate_code where substr(RATE_CD,1,3)= '"+serviceType+"' and substr(RATE_CD,4,2)='"+prmCd+"' ";
+        String SQL_STATEMENT ="delete ic_rate_code where substr(RATE_CD,1,3)= '"+serviceType.substring(0,3)+"' and substr(RATE_CD,4,2)='"+prmCd+"' ";
         try {
             stmt = getPrmConnection().createStatement();
             int status = stmt.executeUpdate(SQL_STATEMENT);

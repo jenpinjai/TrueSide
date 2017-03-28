@@ -7,6 +7,7 @@ import java.util.List;
 import org.apache.log4j.Logger;
 import truecorp.prm.core.dao.SystemBaseDao;
 import static truecorp.prm.core.dao.SystemBaseDao.getPrmConnection;
+import static truecorp.prm.process.ProcessPRMData.logWriter;
 import truecorp.prm.table.*;
 
 
@@ -43,6 +44,8 @@ public class IcRateCodeRatesBaseDAO  extends SystemBaseDao{
         } catch (SQLException ex) {
             ex.printStackTrace();
             log.error("INSERT IcRateCodeRates FAIL:" + icRateCodeRates);
+            try{ logWriter.write("Insert IcRateCodeRates fail:"+icRateCodeRates.getRateCdSeq()+"\t "+icRateCodeRates.getRateClassSetCd()+"\r\n"); } catch(Exception ex2){}
+            System.out.println("INSERT IcRateCodeRates FAIL:" + icRateCodeRates);
             log.error(ex.toString());
         } catch (Exception ex) {
             ex.printStackTrace();

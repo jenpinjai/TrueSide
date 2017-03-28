@@ -56,9 +56,9 @@ public class PRMBusiness {
         public static void processEarlyMonth(TransactionPartner  tranPartner) throws Exception {
         
                     List<RateCodePack>  rateCodePackList = FileBusiness.genRateCodePackList(tranPartner);
-                    Map<String,RateCodePack>  rateCodeMapper   = new HashMap<String,RateCodePack>();
+                    Map<Double,RateCodePack>  rateCodeMapper   = new HashMap<Double,RateCodePack>();
                     ////Set rateCode Mapper
-                    for(RateCodePack rateCode : rateCodePackList){rateCodeMapper.put(rateCode.getRate().trim(),rateCode);}
+                    for(RateCodePack rateCode : rateCodePackList){rateCodeMapper.put(Double.valueOf(rateCode.getRate()),rateCode);}
                           
                   
                   //// Clear IcRateCode
@@ -168,33 +168,40 @@ public class PRMBusiness {
                 List<String> countryList = new IcDestinationDictBaseDAO().getStringCountry(tranPartner.getPrmCd());/// List of Country(Description) on PrmCd for check contain
                 List<Double> costList = new IcRateCodeRatesBaseDAO().getRates(tranPartner.getPrmCd()); /// List of Rate on PrmCd for check contain
                 List<Address>addressModelList = new IcgDestinationAddresBaseDAO().getAddressByPrmCd(tranPartner.getPrmCd());
-                List<RateCodePack>  rateCodePackList = new IcRatingDictBaseDAO().getRateCodePackByPrmCd(tranPartner.getPrmCd());
-//                rateCodeSeq=new IcRateCodeBaseDAO().getMaxRateCdSeq()+1;
-//                descriptionSeq=new IcRatingDictBaseDAO().getMaxDescriptionSeq()+1;
-//                destination_sequence_no = new IcDestinationDictBaseDAO().getMaxSequenceNo()+1;
+                List<RateCodePack>  rateCodePackList = new IcRatingDictBaseDAO().getRateCodePackByPrmCd(tranPartner.getServiceType(),tranPartner.getPrmCd());
+                rateCodeSeq=new IcRateCodeBaseDAO().getMaxRateCdSeq()+1;
+                descriptionSeq=new IcRatingDictBaseDAO().getMaxDescriptionSeq()+1;
+                destination_sequence_no = new IcDestinationDictBaseDAO().getMaxSequenceNo()+1;
                 
-                rateCodeSeq=300000;
-                descriptionSeq=300000;
-                destination_sequence_no = 300000;
+//                rateCodeSeq=300000;
+//                descriptionSeq=300000;
+//                destination_sequence_no = 300000;
                 Map<String,Address>  addrCdMap = new HashMap<String,Address>(); ///AddressCode , Address Model
                 Map<String,Address>  countryAddressMap = new HashMap<String,Address>();///Country name , Address Model
                 Map<String,Address>  countryRateMap = new HashMap<String,Address>();
                 Map<Double,RateCodePack>   rateMap   = new HashMap<Double,RateCodePack>();
                 Map<String,Integer>  countDestinationCdMap = new HashMap<String,Integer>();
                 for(Address address : addressModelList){ //Setup mapper
-                        addrCdMap.put(address.getAddress(), address);
-                        countryAddressMap.put(address.getDescription(), address);
-                        countryRateMap.put(address.getDescription().trim()+String.format("%.10f", Double.valueOf(address.getCost())), address);
-                        if(!countDestinationCdMap.containsKey(address.getDestinationCd())){
-                                int numOfDestinationCd=1;
-                                countDestinationCdMap.put(address.getDestinationCd(), numOfDestinationCd);
-                        }else{
-                                int numOfDestinationCd=countDestinationCdMap.get(address.getDestinationCd());
-                                numOfDestinationCd++;
-                                countDestinationCdMap.put(address.getDestinationCd(), numOfDestinationCd);
-                        }
+                    
+                    try{
+                            addrCdMap.put(address.getAddress(), address);
+                            countryAddressMap.put(address.getDescription(), address);
+                            countryRateMap.put(address.getDescription().trim()+String.format("%.10f", Double.valueOf(address.getCost())), address);
+                            if(!countDestinationCdMap.containsKey(address.getDestinationCd())){
+                                    int numOfDestinationCd=1;
+                                    countDestinationCdMap.put(address.getDestinationCd(), numOfDestinationCd);
+                            }else{
+                                    int numOfDestinationCd=countDestinationCdMap.get(address.getDestinationCd());
+                                    numOfDestinationCd++;
+                                    countDestinationCdMap.put(address.getDestinationCd(), numOfDestinationCd);
+                            }
                         
+                    }catch(Exception ex){
+                    
+                        System.out.println("Error Intitail Address Mapper.");
+                        throw ex; 
                         
+                    }    
                 }
                 //Setup rateMap
                 for(RateCodePack ratePack:rateCodePackList){

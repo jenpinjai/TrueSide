@@ -9,6 +9,7 @@ import java.util.Locale;
 import org.apache.log4j.Logger;
 import truecorp.prm.core.dao.SystemBaseDao;
 import static truecorp.prm.core.dao.SystemBaseDao.getPrmConnection;
+import static truecorp.prm.process.ProcessPRMData.logWriter;
 import truecorp.prm.table.IcSubjectVersions;
 import truecorp.prm.table.IcSubjectVersionsPK;
 
@@ -43,10 +44,13 @@ public class IcSubjectVersionsBaseDAO extends SystemBaseDao{
             return status;
         } catch (SQLException ex) {
             ex.printStackTrace();
+            System.out.println("CODE ="+icSubjectVersions.getCode()+" ,Subject ="+icSubjectVersions.getSubject());
+            try{ logWriter.write("Insert IcSubjectVersions fail:"+icSubjectVersions.getCode()+"\t "+icSubjectVersions.getSubject()+"\r\n"); } catch(Exception ex2){}
             log.error("INSERT IcSubjectVersions FAIL:" + icSubjectVersions);
             log.error(ex.toString());
         } catch (Exception ex) {
             ex.printStackTrace();
+            System.out.println("CODE ="+icSubjectVersions.getCode()+" ,Subject ="+icSubjectVersions.getSubject());
             log.error("INSERT IcSubjectVersions FAIL:" + icSubjectVersions);
             log.error(ex.toString());
         } finally {
@@ -564,7 +568,7 @@ public class IcSubjectVersionsBaseDAO extends SystemBaseDao{
     }
     public int deleteAllBy(String serviceType,String prmCd) throws SQLException {
         Statement stmt = null;
-        String SQL_STATEMENT ="delete ic_subject_versions where substr(CODE,1,3)= '"+serviceType+"' and substr(CODE,4,2)='"+prmCd+"' and SUBJECT = 'global rate' ";
+        String SQL_STATEMENT ="delete ic_subject_versions where SUBJECT = 'global rate' and (code like '"+serviceType.substring(0, 3)+prmCd+"%' or code like '"+serviceType+prmCd+"%' ) ";
         try {
             stmt = getPrmConnection().createStatement();
             int status = stmt.executeUpdate(SQL_STATEMENT);

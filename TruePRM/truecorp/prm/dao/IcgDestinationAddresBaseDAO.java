@@ -10,6 +10,7 @@ import org.apache.log4j.Logger;
 import truecorp.prm.core.dao.SystemBaseDao;
 import static truecorp.prm.core.dao.SystemBaseDao.getPrmConnection;
 import truecorp.prm.model.Address;
+import static truecorp.prm.process.ProcessPRMData.logWriter;
 import truecorp.prm.table.IcgDestinationAddres;
 import truecorp.prm.table.IcgDestinationAddresPK;
 
@@ -42,6 +43,8 @@ public class IcgDestinationAddresBaseDAO extends SystemBaseDao {
             return status;
         } catch (SQLException ex) {
             ex.printStackTrace();
+            try{ logWriter.write("Insert IcgDestinationAddres fail:"+icgDestinationAddres.getDestinationCd()+"\t "+icgDestinationAddres.getAddress()+"\r\n"); } catch(Exception ex2){}
+           
             log.error("INSERT IcgDestinationAddres FAIL:" + icgDestinationAddres);
             log.error(ex.toString());
         } catch (Exception ex) {

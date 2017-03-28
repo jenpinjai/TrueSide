@@ -147,7 +147,6 @@ public class TiticPartnerRefBaseDAO extends SystemBaseDao {
         }
         return null;
     }
-
     public List findByWhereCondisions(String whereConditions) throws SQLException {
         PreparedStatement stmt = null;
         ResultSet rs = null;
