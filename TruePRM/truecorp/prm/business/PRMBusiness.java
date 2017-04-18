@@ -356,8 +356,10 @@ public class PRMBusiness {
                                                         //Generate new Rate code then Go generate new Destination code and Insert IC_DESTINATION_ADDRES
                                                         System.out.println(" and isn't have rate  in Database");
                                                         System.out.println("Continue generate new Rate code then go generate new Destination cod and update...");
-                                                        generateNewRateCode(rateMap,rateSheet, tranPartner);
+                                                        RateCodePack ratePack = generateNewRateCode(rateMap,rateSheet, tranPartner);
                                                         generateAndUpdateDestinationCode(countDestinationCdMap,rateMap,countryAddressMap,rateSheet,tranPartner);
+                                                        ////////////////////
+                                                        costList.add(Double.valueOf(ratePack.getRate())); //add new  costList
                                         }
                                     
                                 

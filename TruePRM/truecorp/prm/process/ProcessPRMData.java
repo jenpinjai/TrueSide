@@ -20,6 +20,7 @@ import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import truecorp.prm.business.FileBusiness;
 import truecorp.prm.business.PRMBusiness;
@@ -38,9 +39,9 @@ import truecorp.prm.test.MyUnitTest;
 public class ProcessPRMData {
     
     public static  Writer logWriter = createLogWriter();
-    
+    public static  SimpleDateFormat sysDateForm = new SimpleDateFormat("dd-MM-yyyy HH:mm:ss",Locale.US);
     public static void main(String[] args) throws Exception {
-        System.out.println(new Date().toLocaleString()+"\t"+"Start ProcessPRMData");
+        System.out.println(sysDateForm.format(new Date())+"\t"+"Start ProcessPRMData");
         try{
             MyUnitTest.main(null);
             //List<TransactionPartner> transactionList  =  FileBusiness.readRateSheet();
@@ -48,6 +49,7 @@ public class ProcessPRMData {
             File[] fileArray      = autoSheetFolder.listFiles();
             List<File>     fileList= new ArrayList<File>();
             List<String> partnerCdErrorList = new ArrayList<String>();
+            
             for(File file : fileArray){if(file.isFile())fileList.add(file);}
             ///Sort file
             Comparator<File>  comFile = new Comparator<File>() {
@@ -77,19 +79,19 @@ public class ProcessPRMData {
                         processFileCount++;
                         if(!csvFile.isFile())continue;
                         if(Integer.valueOf(csvFile.getName().substring(csvFile.getName().length()-13, csvFile.getName().length()-11))==1){
-                              System.out.println(new Date().toLocaleString()+"\t"+"Begin process ErlyMonth file name :"+csvFile.getName());
+                              System.out.println(sysDateForm.format(new Date())+"\t"+"Begin process ErlyMonth file name :"+csvFile.getName());
                               try{
                                     FileBusiness.readRateSheet(csvFile,transactionPartner);
-                                    if(partnerCdErrorList.contains(transactionPartner.getPartnerCd())){
-                                            System.out.println(new Date().toLocaleString()+"\t"+"Skip file :"+csvFile.getName());
+                                    if(partnerCdErrorList.contains(transactionPartner.getPartnerCd()+transactionPartner.getServiceType())){
+                                            System.out.println(sysDateForm.format(new Date())+"\t"+"Skip file :"+csvFile.getName());
                                             continue;
                                     }
                               }catch(Exception ex){
                                     if(ex.getMessage().equals("ADDRDUP")){
                                         logWriter.write("ERROR "+csvFile.getName()+"_adddup"+"\r\n");
-                                        System.out.println(new Date().toLocaleString()+"ERROR "+csvFile.getName()+"_adddup");
-                                        System.out.println(new Date().toLocaleString()+"\t"+"Skip file :"+csvFile.getName());
-                                        partnerCdErrorList.add(transactionPartner.getPartnerCd());
+                                        System.out.println(sysDateForm.format(new Date())+"ERROR "+csvFile.getName()+"_adddup");
+                                        System.out.println(sysDateForm.format(new Date())+"\t"+"Skip file :"+csvFile.getName());
+                                        partnerCdErrorList.add(transactionPartner.getPartnerCd()+transactionPartner.getServiceType());
                                         continue;
                                         
                                     }else{
@@ -100,32 +102,32 @@ public class ProcessPRMData {
                                   
                               }
                               if(transactionPartner.getPrmCd()==null){
-                                  System.out.println(new Date().toLocaleString()+"\t"+"ERROR PRMCD not found ,file name :"+csvFile.getName());
-                                  logWriter.write("ERROR"+csvFile.getName()+"_nomatch"+"\r\n");
-                                  System.out.println(new Date().toLocaleString()+"\t"+"Skip file :"+csvFile.getName());
-                                  partnerCdErrorList.add(transactionPartner.getPartnerCd());
+                                  System.out.println(sysDateForm.format(new Date())+"\t"+"ERROR PRMCD not found ,file name :"+csvFile.getName());
+                                  logWriter.write("ERROR "+csvFile.getName()+"_nomatch"+"\r\n");
+                                  System.out.println(sysDateForm.format(new Date())+"\t"+"Skip file :"+csvFile.getName());
+                                  partnerCdErrorList.add(transactionPartner.getPartnerCd()+transactionPartner.getServiceType());
                                   continue;
                               }
                               transactionPartner.setEalyMonth(true);
                               PRMBusiness.processEarlyMonth(transactionPartner);
                               FileBusiness.moveFinshedFiile(transactionPartner.getControlFileName());
                               FileBusiness.moveFinshedFiile(transactionPartner.getFileName());
-                              System.out.println(new Date().toLocaleString()+"\t"+"End process ErlyMonth <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<");
+                              System.out.println(sysDateForm.format(new Date())+"\t"+"End process ErlyMonth <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<");
                               
                         }else{
-                              System.out.println(new Date().toLocaleString()+"\t"+"Begin process HalfMonth file name :"+csvFile.getName());
+                              System.out.println(sysDateForm.format(new Date())+"\t"+"Begin process HalfMonth file name :"+csvFile.getName());
                               
                               try{      
                                     FileBusiness.readRateSheetChanged(csvFile,transactionPartner);
-                                    if(partnerCdErrorList.contains(transactionPartner.getPartnerCd())){
-                                            System.out.println(new Date().toLocaleString()+"\t"+"Skip file :"+csvFile.getName());
+                                    if(partnerCdErrorList.contains(transactionPartner.getPartnerCd()+transactionPartner.getServiceType())){
+                                            System.out.println(sysDateForm.format(new Date())+"\t"+"Skip file :"+csvFile.getName());
                                             continue;
                                     }
                               }catch(Exception ex){
                                     ex.printStackTrace();
                                     if(ex.getMessage().equals("NOCHANGE")){
                                          logWriter.write("INFORM "+csvFile.getName()+"_nochange"+"\r\n");
-                                         System.out.println(new Date().toLocaleString()+"\t"+"Skip file :"+csvFile.getName());
+                                         System.out.println(sysDateForm.format(new Date())+"\t"+"Skip file :"+csvFile.getName());
                                          continue;
                                     }else{
                                         throw ex;
@@ -133,30 +135,30 @@ public class ProcessPRMData {
                               }
                               if(transactionPartner.getRateSheetList().isEmpty()){
                                     logWriter.write("INFORM "+csvFile.getName()+"_nochange"+"\r\n");
-                                    System.out.println(new Date().toLocaleString()+"\t"+"Skip file :"+csvFile.getName());
+                                    System.out.println(sysDateForm.format(new Date())+"\t"+"Skip file :"+csvFile.getName());
                                     continue;
                               }
                               if(transactionPartner.getPrmCd()==null){
-                                  System.out.println(new Date().toLocaleString()+"\t"+"ERROR PRMCD not found file name :"+csvFile.getName());
+                                  System.out.println(sysDateForm.format(new Date())+"\t"+"ERROR PRMCD not found file name :"+csvFile.getName());
                                   logWriter.write("ERROR "+csvFile.getName()+"_nomatch"+"\r\n");
-                                  System.out.println(new Date().toLocaleString()+"\t"+"Skip file :"+csvFile.getName());
-                                  partnerCdErrorList.add(transactionPartner.getPartnerCd());
+                                  System.out.println(sysDateForm.format(new Date())+"\t"+"Skip file :"+csvFile.getName());
+                                  partnerCdErrorList.add(transactionPartner.getPartnerCd()+transactionPartner.getServiceType());
                                   continue;
                               }
                               PRMBusiness.processHalfMonth(transactionPartner);
                               FileBusiness.moveFinshedFiile(transactionPartner.getControlFileName());
                               FileBusiness.moveFinshedFiile(transactionPartner.getFileName());
-                              System.out.println(new Date().toLocaleString()+"\t"+"End process HalfMonth <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<");
+                              System.out.println(sysDateForm.format(new Date())+"\t"+"End process HalfMonth <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<");
                         }
                         
                         
                     }
             
             }
-            if(processFileCount==0)System.out.println(new Date().toLocaleString()+"\tDidn't have file for process !!!!!!!!");
-            System.out.println(new Date().toLocaleString()+"\t"+"Success ProcessPRMData ");
+            if(processFileCount==0)System.out.println(sysDateForm.format(new Date())+"\tDidn't have file for process !!!!!!!!");
+            System.out.println(sysDateForm.format(new Date())+"\t"+"Success ProcessPRMData ");
         }catch(Exception ex){
-            System.out.println(new Date().toLocaleString()+"\t"+"Exception ProcessPRMData :"+ex.getMessage());
+            System.out.println(sysDateForm.format(new Date())+"\t"+"Exception ProcessPRMData :"+ex.getMessage());
             ex.printStackTrace();
         
         }finally{

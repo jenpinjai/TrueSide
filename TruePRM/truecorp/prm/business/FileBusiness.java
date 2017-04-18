@@ -192,7 +192,7 @@ public class FileBusiness {
                              rateSheet.setPrefix(b[1]);
                              rateSheet.setDescription(b[2]);
                              rateSheet.setCost(b[3]);
-                             rateSheet.setEffective(new SimpleDateFormat("dd-MM-yy",Locale.US).parse(b[4]));
+                             rateSheet.setEffective(new SimpleDateFormat("yyyy-MM-dd",Locale.US).parse(b[4]));
                              rateSheet.setServiceType(b[5]);
                              rateSheet.setMinChrg(b[9]);
                              rateSheet.setRoundingUnit(b[10]);
