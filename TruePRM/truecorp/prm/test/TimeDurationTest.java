@@ -106,10 +106,19 @@ public class TimeDurationTest {
 //           files.add("D:/OnSide/TRUE/visualHome/var/tea/AUTO_RATESHEET/TestSendMail.txt");
 //           MailService.sentToSMTP( "jen_2835@hotmail.co.th", "jen_2835@hotmail.co.th", null, "PRM Process Log file", "File at attach", files);
 //        
-            String test = "2012-12-01";
-            Date date = new SimpleDateFormat("dd-MM-yy",Locale.US).parse(test);
-    
-            System.out.println(date.toGMTString());
+        
+            Calendar cal1 = Calendar.getInstance();
+            cal1.setTime(new SimpleDateFormat("dd/MM/yyyy").parse("01/11/2016"));
+            
+            Calendar cal2 = Calendar.getInstance();
+            cal2.setTime(new SimpleDateFormat("dd/MM/yyyy").parse("31/01/2017"));
+            
+            int yearDiff  =  cal2.get(Calendar.YEAR) - cal1.get(Calendar.YEAR);
+            int dayDiff   =  cal2.get(Calendar.DAY_OF_MONTH) - cal1.get(Calendar.DAY_OF_MONTH);
+            int monthDiff =  yearDiff*12 +  cal2.get(Calendar.MONTH) - cal1.get(Calendar.MONTH) + (dayDiff/25);
+            
+            System.out.println(monthDiff);
+                   
     }
     
 }
