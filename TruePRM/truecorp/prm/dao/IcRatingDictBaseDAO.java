@@ -437,8 +437,8 @@ public class IcRatingDictBaseDAO extends SystemBaseDao{
 
 */
 
-    public List fetchAll(ResultSet rs) throws SQLException{
-        List list = new ArrayList();
+    public List<IcRatingDict> fetchAll(ResultSet rs) throws SQLException{
+        List<IcRatingDict> list = new ArrayList<IcRatingDict>();
         while (rs.next()){
             IcRatingDict icRatingDict = new IcRatingDict();
             icRatingDict.setSequenceNo(rs.getBigDecimal("SEQUENCE_NO"));

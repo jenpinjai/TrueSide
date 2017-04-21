@@ -791,8 +791,8 @@ public class IotAccrueBaseDAO  extends SystemBaseDao{
 
 */
 
-    public List fetchAll(ResultSet rs) throws SQLException{
-        List list = new ArrayList();
+    public List<IotAccrue> fetchAll(ResultSet rs) throws SQLException{
+        List<IotAccrue> list = new ArrayList<IotAccrue>();
         while (rs.next()){
             IotAccrue iotAccrue = new IotAccrue();
             iotAccrue.setDirection(rs.getString("DIRECTION"));

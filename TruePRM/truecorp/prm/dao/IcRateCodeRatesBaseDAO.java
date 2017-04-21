@@ -570,8 +570,8 @@ public class IcRateCodeRatesBaseDAO  extends SystemBaseDao{
 
 */
 
-    public List fetchAll(ResultSet rs) throws SQLException{
-        List list = new ArrayList();
+    public List<IcRateCodeRates> fetchAll(ResultSet rs) throws SQLException{
+        List<IcRateCodeRates> list = new ArrayList<IcRateCodeRates>();
         while (rs.next()){
             IcRateCodeRates icRateCodeRates = new IcRateCodeRates();
             icRateCodeRates.setRateClassSetCd(rs.getString("RATE_CLASS_SET_CD"));

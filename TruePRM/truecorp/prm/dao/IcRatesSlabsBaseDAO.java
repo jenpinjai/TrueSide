@@ -600,8 +600,8 @@ public class IcRatesSlabsBaseDAO extends SystemBaseDao{
 
 */
 
-    public List fetchAll(ResultSet rs) throws SQLException{
-        List list = new ArrayList();
+    public List<IcRatesSlabs> fetchAll(ResultSet rs) throws SQLException{
+        List<IcRatesSlabs> list = new ArrayList<IcRatesSlabs>();
         while (rs.next()){
             IcRatesSlabs icRatesSlabs = new IcRatesSlabs();
             icRatesSlabs.setRatePlanCd(rs.getString("RATE_PLAN_CD"));

@@ -490,7 +490,7 @@ public class IcRateCodeBaseDAO extends SystemBaseDao{
 */
 
     public List fetchAll(ResultSet rs) throws SQLException{
-        List list = new ArrayList();
+        List<IcRateCode> list = new ArrayList<IcRateCode>();
         while (rs.next()){
             IcRateCode icRateCode = new IcRateCode();
             icRateCode.setRateCdSeq(rs.getBigDecimal("RATE_CD_SEQ"));

@@ -487,8 +487,8 @@ public class IotSdrRateBaseDAO  extends SystemBaseDao{
 
 */
 
-    public List fetchAll(ResultSet rs) throws SQLException{
-        List list = new ArrayList();
+    public List<IotSdrRate> fetchAll(ResultSet rs) throws SQLException{
+        List<IotSdrRate> list = new ArrayList<IotSdrRate>();
         while (rs.next()){
             IotSdrRate iotSdrRate = new IotSdrRate();
             iotSdrRate.setCurrencyCd(rs.getString("CURRENCY_CD"));

@@ -1058,8 +1058,8 @@ public class IcRatesAddlInfoBaseDAO extends SystemBaseDao{
 
 */
 
-    public List fetchAll(ResultSet rs) throws SQLException{
-        List list = new ArrayList();
+    public List<IcRatesAddlInfo> fetchAll(ResultSet rs) throws SQLException{
+        List<IcRatesAddlInfo> list = new ArrayList<IcRatesAddlInfo>();
         while (rs.next()){
             IcRatesAddlInfo icRatesAddlInfo = new IcRatesAddlInfo();
             icRatesAddlInfo.setRatePlanCd(rs.getString("RATE_PLAN_CD"));

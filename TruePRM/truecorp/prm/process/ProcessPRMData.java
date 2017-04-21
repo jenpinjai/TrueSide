@@ -18,18 +18,13 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
-import java.util.Map;
 import truecorp.prm.business.FileBusiness;
 import truecorp.prm.business.PRMBusiness;
 import truecorp.prm.core.dao.SystemBaseDao;
-import truecorp.prm.dao.TiticPartnerRefBaseDAO;
 import truecorp.prm.model.TransactionPartner;
 import truecorp.prm.resource.setEnv;
-import truecorp.prm.service.MailService;
-import truecorp.prm.table.TiticPartnerRef;
 import truecorp.prm.test.MyUnitTest;
 
 /**

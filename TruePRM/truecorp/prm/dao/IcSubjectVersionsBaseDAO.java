@@ -517,8 +517,8 @@ public class IcSubjectVersionsBaseDAO extends SystemBaseDao{
 
 */
 
-    public List fetchAll(ResultSet rs) throws SQLException{
-        List list = new ArrayList();
+    public List<IcSubjectVersions> fetchAll(ResultSet rs) throws SQLException{
+        List<IcSubjectVersions> list = new ArrayList<IcSubjectVersions>();
         while (rs.next()){
             IcSubjectVersions icSubjectVersions = new IcSubjectVersions();
             icSubjectVersions.setSubject(rs.getString("SUBJECT"));

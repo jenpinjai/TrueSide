@@ -352,8 +352,8 @@ public class TiticPartnerRefBaseDAO extends SystemBaseDao {
 
 */
 
-    public List fetchAll(ResultSet rs) throws SQLException{
-        List list = new ArrayList();
+    public List<TiticPartnerRef> fetchAll(ResultSet rs) throws SQLException{
+        List<TiticPartnerRef> list = new ArrayList<TiticPartnerRef>();
         while (rs.next()){
             TiticPartnerRef titicPartnerRef = new TiticPartnerRef();
             titicPartnerRef.setProductCd(rs.getString("PRODUCT_CD"));

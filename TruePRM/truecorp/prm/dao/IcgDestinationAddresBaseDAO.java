@@ -563,8 +563,8 @@ public class IcgDestinationAddresBaseDAO extends SystemBaseDao {
 
 */
 
-    public List fetchAll(ResultSet rs) throws SQLException{
-        List list = new ArrayList();
+    public List<IcgDestinationAddres> fetchAll(ResultSet rs) throws SQLException{
+        List<IcgDestinationAddres> list = new ArrayList<IcgDestinationAddres>();
         while (rs.next()){
             IcgDestinationAddres icgDestinationAddres = new IcgDestinationAddres();
             icgDestinationAddres.setDestinationCd(rs.getString("DESTINATION_CD"));

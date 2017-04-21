@@ -138,7 +138,7 @@ public class IcDestinationDictBaseDAO extends SystemBaseDao{
         return null;
     }
 
-    public List findAll() throws SQLException {
+    public List<IcDestinationDict> findAll() throws SQLException {
         PreparedStatement stmt = null;
         ResultSet rs = null;
         String SQL_STATEMENT ="Select * from IC_DESTINATION_DICT";
@@ -157,7 +157,7 @@ public class IcDestinationDictBaseDAO extends SystemBaseDao{
         return null;
     }
 
-    public List findByWhereCondisions(String whereConditions) throws SQLException {
+    public List<IcDestinationDict> findByWhereCondisions(String whereConditions) throws SQLException {
         PreparedStatement stmt = null;
         ResultSet rs = null;
         String SQL_STATEMENT ="Select * from IC_DESTINATION_DICT where " + whereConditions;
@@ -175,7 +175,7 @@ public class IcDestinationDictBaseDAO extends SystemBaseDao{
         }
         return null;
     }
-    public List getStringCountry(String prmCd) throws SQLException {
+    public List<String> getStringCountry(String prmCd) throws SQLException {
         PreparedStatement stmt = null;
         ResultSet rs = null;
         String SQL_STATEMENT = "select substr(TEXT,9) as TEXT from ic_destination_dict where substr(TEXT,1,2)=? and substr(TEXT,3,2)= ' T' ";
@@ -200,7 +200,7 @@ public class IcDestinationDictBaseDAO extends SystemBaseDao{
         }
         return null;
     }
-    public List findBySequenceNo( java.math.BigDecimal sequenceNo) throws SQLException {
+    public List<IcDestinationDict> findBySequenceNo( java.math.BigDecimal sequenceNo) throws SQLException {
         PreparedStatement stmt = null;
         ResultSet rs = null;
         String SQL_STATEMENT = "Select * from IC_DESTINATION_DICT where SEQUENCE_NO = ? order by SEQUENCE_NO";
@@ -219,7 +219,7 @@ public class IcDestinationDictBaseDAO extends SystemBaseDao{
         }
         return null;
     }
-    public List findByLanguageCode( String languageCode) throws SQLException {
+    public List<IcDestinationDict> findByLanguageCode( String languageCode) throws SQLException {
         PreparedStatement stmt = null;
         ResultSet rs = null;
         String SQL_STATEMENT = "Select * from IC_DESTINATION_DICT where LANGUAGE_CODE = ? order by LANGUAGE_CODE";
@@ -238,7 +238,7 @@ public class IcDestinationDictBaseDAO extends SystemBaseDao{
         }
         return null;
     }
-    public List findBySysCreationDate( java.sql.Date sysCreationDate) throws SQLException {
+    public List<IcDestinationDict> findBySysCreationDate( java.sql.Date sysCreationDate) throws SQLException {
         PreparedStatement stmt = null;
         ResultSet rs = null;
         String SQL_STATEMENT = "Select * from IC_DESTINATION_DICT where SYS_CREATION_DATE = ? order by SYS_CREATION_DATE";
@@ -257,7 +257,7 @@ public class IcDestinationDictBaseDAO extends SystemBaseDao{
         }
         return null;
     }
-    public List findBySysUpdateDate( java.sql.Date sysUpdateDate) throws SQLException {
+    public List<IcDestinationDict> findBySysUpdateDate( java.sql.Date sysUpdateDate) throws SQLException {
         PreparedStatement stmt = null;
         ResultSet rs = null;
         String SQL_STATEMENT = "Select * from IC_DESTINATION_DICT where SYS_UPDATE_DATE = ? order by SYS_UPDATE_DATE";
@@ -276,7 +276,7 @@ public class IcDestinationDictBaseDAO extends SystemBaseDao{
         }
         return null;
     }
-    public List findByOperatorId( java.math.BigDecimal operatorId) throws SQLException {
+    public List<IcDestinationDict> findByOperatorId( java.math.BigDecimal operatorId) throws SQLException {
         PreparedStatement stmt = null;
         ResultSet rs = null;
         String SQL_STATEMENT = "Select * from IC_DESTINATION_DICT where OPERATOR_ID = ? order by OPERATOR_ID";
@@ -295,7 +295,7 @@ public class IcDestinationDictBaseDAO extends SystemBaseDao{
         }
         return null;
     }
-    public List findByApplicationId( String applicationId) throws SQLException {
+    public List<IcDestinationDict> findByApplicationId( String applicationId) throws SQLException {
         PreparedStatement stmt = null;
         ResultSet rs = null;
         String SQL_STATEMENT = "Select * from IC_DESTINATION_DICT where APPLICATION_ID = ? order by APPLICATION_ID";
@@ -314,7 +314,7 @@ public class IcDestinationDictBaseDAO extends SystemBaseDao{
         }
         return null;
     }
-    public List findByDlServiceCode( String dlServiceCode) throws SQLException {
+    public List<IcDestinationDict> findByDlServiceCode( String dlServiceCode) throws SQLException {
         PreparedStatement stmt = null;
         ResultSet rs = null;
         String SQL_STATEMENT = "Select * from IC_DESTINATION_DICT where DL_SERVICE_CODE = ? order by DL_SERVICE_CODE";
@@ -333,7 +333,7 @@ public class IcDestinationDictBaseDAO extends SystemBaseDao{
         }
         return null;
     }
-    public List findByDlUpdateStamp( java.math.BigDecimal dlUpdateStamp) throws SQLException {
+    public List<IcDestinationDict> findByDlUpdateStamp( java.math.BigDecimal dlUpdateStamp) throws SQLException {
         PreparedStatement stmt = null;
         ResultSet rs = null;
         String SQL_STATEMENT = "Select * from IC_DESTINATION_DICT where DL_UPDATE_STAMP = ? order by DL_UPDATE_STAMP";
@@ -352,7 +352,7 @@ public class IcDestinationDictBaseDAO extends SystemBaseDao{
         }
         return null;
     }
-    public List findByText( String text) throws SQLException {
+    public List<IcDestinationDict> findByText( String text) throws SQLException {
         PreparedStatement stmt = null;
         ResultSet rs = null;
         String SQL_STATEMENT = "Select * from IC_DESTINATION_DICT where TEXT = ? order by TEXT";
@@ -461,8 +461,8 @@ public class IcDestinationDictBaseDAO extends SystemBaseDao{
 
 */
 
-    public List fetchAll(ResultSet rs) throws SQLException{
-        List list = new ArrayList();
+    public List<IcDestinationDict> fetchAll(ResultSet rs) throws SQLException{
+        List<IcDestinationDict> list = new ArrayList<IcDestinationDict>();
         while (rs.next()){
             IcDestinationDict icDestinationDict = new IcDestinationDict();
             icDestinationDict.setSequenceNo(rs.getBigDecimal("SEQUENCE_NO"));
@@ -570,7 +570,7 @@ public class IcDestinationDictBaseDAO extends SystemBaseDao{
         }
         return -1;
     }
-    public List getCountryByPrmCd( String prmCd) throws SQLException {
+    public List<Country> getCountryByPrmCd( String prmCd) throws SQLException {
         PreparedStatement stmt = null;
         ResultSet rs = null;
         StringBuilder sql = new StringBuilder();

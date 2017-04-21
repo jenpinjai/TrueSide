@@ -257,6 +257,7 @@ public class IotMasterBaseDAO  extends SystemBaseDao{
                 IotMaster iotMaster = new IotMaster();
                 iotMaster.setDirection(rs.getString("DIRECTION"));
                 iotMaster.setGroupTadig(rs.getString("GROUP_TADIG"));
+                iotMaster.setOperatorName(rs.getString("OPERATOR_NAME"));
                 iotMaster.setMyTadig(rs.getString("MY_TADIG"));
                 iotMaster.setCountryName(rs.getString("COUNTRY_NAME"));
                 iotMaster.setAgreementId(rs.getString("AGREEMENT_ID"));
@@ -1410,7 +1411,7 @@ public class IotMasterBaseDAO  extends SystemBaseDao{
 */
 
     public List<IotMaster> fetchAll(ResultSet rs) throws SQLException{
-        List list = new ArrayList();
+        List<IotMaster> list = new ArrayList<IotMaster>();
         while (rs.next()){
             IotMaster iotMaster = new IotMaster();
             iotMaster.setDirection(rs.getString("DIRECTION"));
