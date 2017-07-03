@@ -130,14 +130,19 @@ public class AccrueBusiness {
                         int dayDiffCurrent  =  cal3.get(Calendar.DAY_OF_MONTH) - cal1.get(Calendar.DAY_OF_MONTH);
 
                         int monthDiffExpire =  yearDiffExpire*12 +  cal2.get(Calendar.MONTH) - cal1.get(Calendar.MONTH) + (dayDiffExpire/25);//____1
-                        int monthDiffCurrent =  yearDiffCurrent*12 +  cal3.get(Calendar.MONTH) - cal1.get(Calendar.MONTH) + (dayDiffCurrent/25);//____2
-                        double ib_commitment_amt = agreement.getIbCommitmentAmt()==null?0d:agreement.getIbCommitmentAmt().doubleValue();//____4
+                        int monthDiffCurrent =  yearDiffCurrent*12 +  cal3.get(Calendar.MONTH) - cal1.get(Calendar.MONTH) ;//____2
+                        double ib_commitment_amt =0;
+                        if(direction.equals("INBOUND")){
+                                ib_commitment_amt =   agreement.getIbCommitmentAmt()==null?0d:agreement.getIbCommitmentAmt().doubleValue();//____4
+                        }else if(direction.equals("OUTBOUND")){
+                                ib_commitment_amt =   agreement.getObCommitmentAmt()==null?0d:agreement.getObCommitmentAmt().doubleValue();//____4
+                        }
                         if(agreement.getIbCurrencyCd()!=null&&!agreement.getIbCurrencyCd().equals("THB")){
 
                             double sdrTHB=0;
                             double sdrOther=0;
                             double sdrRateResult =0;
-                            String sdrWhereCon = "currency_cd in ('THB','"+agreement.getIbCurrencyCd()+"') and sdr_year = '"+systemYear+"' and sdr_month = '"+(Integer.valueOf(systemMonth)-1)+"' ";
+                            String sdrWhereCon = "currency_cd in ('THB','"+agreement.getIbCurrencyCd()+"') and sdr_year = '"+systemYear+"' and sdr_month = '"+(Integer.valueOf(systemMonth))+"' ";
                             List<IotSdrRate> sdrRatePack = new IotSdrRateBaseDAO().findByWhereCondisions(sdrWhereCon);
                             for(IotSdrRate sdrRate : sdrRatePack){
                                  if(sdrRate.getCurrencyCd()!=null&&sdrRate.getCurrencyCd().equals("THB")){
@@ -150,6 +155,9 @@ public class AccrueBusiness {
                             ib_commitment_amt = sdrRateResult*ib_commitment_amt;
                         }else{
 
+                        }
+                        if(monthDiffCurrent==0){
+                            monthDiffCurrent = 1 ;
                         }
                         ib_commitment_amt = (ib_commitment_amt/monthDiffExpire)*monthDiffCurrent;
                         

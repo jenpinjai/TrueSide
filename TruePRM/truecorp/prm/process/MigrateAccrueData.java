@@ -9,6 +9,7 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
 import truecorp.prm.business.AccrueBusiness;
+import truecorp.prm.core.dao.SystemBaseDao;
 
 /**
  *
@@ -30,6 +31,8 @@ public class MigrateAccrueData {
         }catch(Exception ex){
             System.out.println(currentTime()+"Exception MigrateAccrueData :"+ex.getMessage());
             ex.printStackTrace();
+        }finally{
+            SystemBaseDao.getPrmAppConnection().close();
         }    
         
         System.out.println(currentTime()+"End MigrateAccrueData");

@@ -18,6 +18,7 @@ public class SystemBaseDao {
     
         public static Connection prmConnection;
         public static Connection prmAppConnection;
+        public static Connection billingConnection;
     public static Connection openConnectPRMDB()throws  IOException {
 		
                     String ipBILL=System.getenv("ipPRM");
@@ -52,6 +53,41 @@ public class SystemBaseDao {
             setPrmAppConnection(result);
             return result;
     }
+    public static Connection openConnectBillDB()throws  IOException {
+		
+		String ipBILL=System.getenv("ipBILL");
+		String userBILL=System.getenv("userBILL");
+		String passwordBILL=System.getenv("passwordBILL");
+        Connection result;
+        try {
+        	Class.forName("oracle.jdbc.driver.OracleDriver");
+        	result = DriverManager.getConnection(ipBILL, userBILL,passwordBILL);
+        } catch (Exception e) {
+        	throw new RuntimeException(e.getMessage(), e);
+        }
+        setBillingConnection(result);
+        return result;
+    }
+
+    public static Connection getBillingConnection()throws Exception {
+        
+        if(billingConnection==null){
+            openConnectBillDB();
+            return billingConnection;
+        }else if(billingConnection.isClosed()){
+            openConnectBillDB();
+            return billingConnection;
+        }else{
+            return billingConnection;
+        }
+        
+        
+    }
+
+    public static void setBillingConnection(Connection billingConnection) {
+        SystemBaseDao.billingConnection = billingConnection;
+    }
+    
     public static Connection getPrmConnection() throws SQLException, IOException {
         
         if(prmConnection == null){

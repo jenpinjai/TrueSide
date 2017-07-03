@@ -6,14 +6,19 @@
 package truecorp.prm.business;
 
 import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.FileReader;
+import java.io.OutputStreamWriter;
+import java.io.Writer;
 import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -25,12 +30,16 @@ import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.ss.usermodel.WorkbookFactory;
+import truecorp.prm.dao.CustomerAccountDAO;
 import truecorp.prm.dao.IcDestinationDictBaseDAO;
 import truecorp.prm.dao.IcRateCodeBaseDAO;
 import truecorp.prm.dao.IcRatingDictBaseDAO;
+import truecorp.prm.dao.PaymentDAO;
+import truecorp.prm.dao.ProdLookupDAO;
 import truecorp.prm.dao.TiticPartnerRefBaseDAO;
 import truecorp.prm.model.Country;
 import truecorp.prm.model.Destination;
+import truecorp.prm.model.PRMInterface;
 import truecorp.prm.model.RateCodePack;
 import truecorp.prm.model.RateSheet;
 import truecorp.prm.model.TransactionPartner;
@@ -429,6 +438,146 @@ public class FileBusiness {
         }
         
         
+    }
+    public static void readPRMInterfaceFile(File file,List<PRMInterface>  prmInterfaceList) throws Exception{
+            try{
+                 BufferedReader br = new BufferedReader(new FileReader(file));
+                 int rowNum=0;
+                 String line;
+                 SimpleDateFormat dateForm = new SimpleDateFormat("yyyyMMdd",Locale.US);
+                 while((line = br.readLine()) != null&&!line.trim().isEmpty()){
+                 
+                        String[] array = line.split("\\|");
+                        PRMInterface  prmInterface = new PRMInterface();
+                        prmInterface.setAccountId(array[0]);
+                        prmInterface.setProductType(array[1]);
+                        prmInterface.setProductId(array[2]);
+                        prmInterface.setPymSeqNo(array[3]);
+                        prmInterface.setFeatureCode(array[4]);
+                        prmInterface.setRevenueCode(array[5]);
+                        prmInterface.setActvDate(dateForm.parse(array[6]));
+                        prmInterface.setActvCode(array[7]);
+                        prmInterface.setActvAmt(array[8]);
+                        prmInterface.setTaxAmt(array[9]);
+                        //prmInterface.setPhaseCode(array[10]);
+                        prmInterfaceList.add(prmInterface);
+                 }
+                br.close();
+            }catch(Exception ex){
+                throw ex;
+            }
+    
+        
+        
+        
+    }
+    
+    public static SimpleDateFormat prmActvDateFileFormat = new SimpleDateFormat("yyyyMMdd",Locale.US);
+    public static ProdLookupDAO prodLookupDao = new ProdLookupDAO();
+    public static CustomerAccountDAO cusDao = new CustomerAccountDAO();
+    public static PaymentDAO payDao = new PaymentDAO();
+    public static boolean convertPRMInterfaceToIEFile(PRMInterface prmInterface,Writer writerOutputFile){
+           
+        try{
+            
+            //String payType = getPRMInterfaceTypeDesc(prmInterface.getActvCode());
+          
+            String resultParam1 =prodLookupDao.getResultParam1(prmInterface.getProductId());
+            String pymMtd = cusDao.getPymMtd(prmInterface.getAccountId());
+            String bankCode= cusDao.getBankCode(prmInterface.getAccountId());
+            String pymSubMtd = cusDao.getPymSubMtd(prmInterface.getAccountId());
+            String drPymSrcCd = getSrcCd(payDao.getSourceId(prmInterface.getAccountId(), prmInterface.getPymSeqNo()));
+            String taxCode = cusDao.getTaxCode(prmInterface.getAccountId());
+            String partnerCd="     ";
+            String amt      = formatAmt(prmInterface);
+            String paymentDate = payDao.getPaymentDate(prmInterface.getAccountId(), prmInterface.getPymSeqNo());
+            String billMonth = payDao.getBillMonth(prmInterface.getAccountId(), prmInterface.getPymSeqNo());
+            String outletCode=payDao.getOutletCode(prmInterface.getAccountId(), prmInterface.getPymSeqNo());
+            String dcpNo = payDao.getDCPNo(prmInterface.getAccountId(), prmInterface.getPymSeqNo());
+            String pymChrgInd = "Y";
+            String accFullType = cusDao.getAccountFullType(prmInterface.getAccountId());
+            String recSeqNo =String.format("%-4s",prmInterface.getActvCode())+String.format("%-12s",prmInterface.getPymSeqNo()+"00");
+            String callDuration="0000000000000";
+            String firstField =prmActvDateFileFormat.format(prmInterface.getActvDate()) + String.format("%-12s", prmInterface.getAccountId() ) + String.format("%-16s", prmInterface.getProductId()) +
+                               String.format("%-3s",prmInterface.getProductType())+String.format("%-1s",resultParam1)+String.format("%-6s",prmInterface.getFeatureCode())+
+                               String.format("%-3s",prmInterface.getRevenueCode())+String.format("%-2s",pymMtd)+String.format("%-10s",bankCode)+String.format("%-2s",pymSubMtd)+
+                               String.format("%-1s",drPymSrcCd)+String.format("%-1s",taxCode)+partnerCd+String.format("%-6s",prmInterface.getFeatureCode())+
+                               String.format("%-3s",prmInterface.getRevenueCode())+String.format("%-2s",pymMtd)+String.format("%-10s",bankCode)+String.format("%-2s",pymSubMtd)+
+                               String.format("%-1s",drPymSrcCd)+String.format("%-1s",taxCode)+partnerCd+String.format("%-4s",prmInterface.getActvCode())+
+                               amt+String.format("%-8s",paymentDate)+String.format("%-8s",paymentDate)+String.format("%-6s", billMonth)+
+                               String.format("%-4s", outletCode)+String.format("%-7s", dcpNo)+pymChrgInd+String.format("%-3s", accFullType)+
+                               recSeqNo+callDuration+"";
+            
+            
+            String vatAmtPos =String.format("%-11s", prmInterface.getTaxAmt());
+            String glCode =payDao.getGLCode(prmInterface.getAccountId(), prmInterface.getPymSeqNo());
+            String receiptNumPos = payDao.getReceiptNumPos(prmInterface.getAccountId(), prmInterface.getPymSeqNo());
+            String batchNo =payDao.getBatchNo(prmInterface.getAccountId(), prmInterface.getPymSeqNo());
+            String batchType=payDao.getBatchType(prmInterface.getAccountId(), prmInterface.getPymSeqNo());
+            String zonePos=payDao.getZone(prmInterface.getAccountId(), prmInterface.getPymSeqNo());
+            String IE20Form =firstField+"01;   ;          ; ;  ;      ;      ;      ;      ;         ;"
+                                      + "      ;          ;  ;          ;      ; ;          ; ;  ;      ;      ;"
+                    + "      ;      ;         ;      ;          ;  ;          ;      ; ; ; ;        ;   ;"
+                    + "            ;               ;  ;           ;           ;     ; ;   ;        ;            ;"
+                    + "                ;   ; ;          ; ;  ;      ;      ;      ;      ;      ;   ;         ;      ;  ;"
+                    + "          ;          ;  ;  ; ;          ; ;      ; ;     ;          ; ;  ;      ;      ;      ;      ;"
+                    + "      ;   ;         ;      ;  ;          ;          ;  ;  ; ;          ; ;      ; ;     ;    ;         ;   ;"
+                    + "              ;              ;         ;      ;     ;    ;"+String.format("%-11s", vatAmtPos)+"; ; ;        ;   ;"
+                    + "            ;               ;  ;           ;           ;     ;             ;"+String.format("%-10s", glCode)+String.format("%-7s", receiptNumPos)+String.format("%-5s", batchNo)+String.format("%-1s", batchType)+
+                    String.format("%-1s", zonePos)+";"
+                    + "                                                                                                          "
+                    + "                                                                                                           "
+                    + "                                                                                                            "
+                    + "                         ;";
+            
+            writerOutputFile.write(IE20Form);
+             return true;
+        }catch(Exception ex){
+            ex.printStackTrace();
+            return false;
+        }
+        
+    }
+    public static String getSrcCd(String sourceId){
+            String srcCd="";
+            try{
+                if(sourceId.equals("POSO")){
+                    srcCd="O";
+                }else{
+                    srcCd="B";
+                }
+                
+            }catch(Exception ex){
+                ex.printStackTrace();
+            }
+            return srcCd;
+    }
+    public static String getPRMInterfaceTypeDesc(String ActcCode){
+            String payType="";
+            if(ActcCode.trim().equals("PYM")){
+                   payType ="payment";
+            }else if(ActcCode.trim().equals("BCK")){
+                    payType ="backout";
+            }else if(!ActcCode.trim().equals("null")&&!ActcCode.trim().equals("NULL")){
+                    payType =ActcCode;
+            }
+            return payType;
+    }
+    public static String formatAmt(PRMInterface prm){
+            String amtFormat="";
+            try{
+                if(prm.getActvCode().trim().equals("PYM")){
+                       amtFormat="+"+prm.getActvAmt();
+                }else if(prm.getActvCode().trim().equals("BCK")){
+                     amtFormat="-"+prm.getActvAmt();
+                }else{
+                    amtFormat=" "+prm.getActvAmt();
+                }
+                
+            }catch(Exception ex){
+                ex.printStackTrace();
+            }
+            return amtFormat;
     }
     public static  boolean moveFinshedFiile(String fileName){
         try{

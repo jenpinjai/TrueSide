@@ -13,10 +13,13 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.GregorianCalendar;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.net.ssl.HttpsURLConnection;
 import static truecorp.prm.business.PRMBusiness.descriptionSeq;
 import static truecorp.prm.business.PRMBusiness.rateCodeSeq;
@@ -106,19 +109,95 @@ public class TimeDurationTest {
 //           files.add("D:/OnSide/TRUE/visualHome/var/tea/AUTO_RATESHEET/TestSendMail.txt");
 //           MailService.sentToSMTP( "jen_2835@hotmail.co.th", "jen_2835@hotmail.co.th", null, "PRM Process Log file", "File at attach", files);
 //        
+//        
+//            Calendar cal1 = Calendar.getInstance();
+//            cal1.setTime(new SimpleDateFormat("dd/MM/yyyy").parse("01/11/2016"));
+//            
+//            Calendar cal2 = Calendar.getInstance();
+//            cal2.setTime(new SimpleDateFormat("dd/MM/yyyy").parse("31/01/2017"));
+//            
+//            int yearDiff  =  cal2.get(Calendar.YEAR) - cal1.get(Calendar.YEAR);
+//            int dayDiff   =  cal2.get(Calendar.DAY_OF_MONTH) - cal1.get(Calendar.DAY_OF_MONTH);
+//            int monthDiff =  yearDiff*12 +  cal2.get(Calendar.MONTH) - cal1.get(Calendar.MONTH) + (dayDiff/25);
+//            
+//            System.out.println(monthDiff);
+//        List<String> testList = new ArrayList<String>();
+//        
+//        testList.add("AA");
+//        testList.add("BB");
+//        testList.add("CC");
+//        testList.add("DD");
+//        testList.add("EE");
+//        testList.add("FF");
+//        testList.add("GG");
+//        testList.add("HH");
+//        testList.add("II");
+//        testList.add("JJ");
+//        testList.add("KK");
+//        testList.add("LL");
+//        testList.add("MM");
+//        testList.add("NN");
+//        testList.add("OO");
+//        testList.add("PP");
+//        testList.add("QQ");
+//        int numSplit=5;
+//        int headIndex=0;
+//        int tailIndex=0;
+//        int size = testList.size()/numSplit;
+//        
+//        if(testList.size()%numSplit!=0){
+//            size++;
+//        }
+//        System.out.println("Size :"+testList.size());
+//        for(int i=0;i<numSplit;i++){
+//                
+//                headIndex=i*size;
+//                tailIndex=headIndex+size;
+//                if(tailIndex >testList.size()){
+//                    tailIndex=testList.size();
+//                }
+//                final List<String> subList = testList.subList(headIndex, tailIndex);
+//                
+//                Runnable run = new Runnable() {
+//
+//                    @Override
+//                    public void run() {
+//                  
+//                                for(String word: subList){
+//
+//                                    System.out.println(word);
+//                                    try {
+//                                        Thread.currentThread().sleep(1000);
+//                                    } catch (InterruptedException ex) {
+//                                        Logger.getLogger(TimeDurationTest.class.getName()).log(Level.SEVERE, null, ex);
+//                                    }
+//                                }
+//                            }
+//                    };
+//                
+//                Thread thread = new Thread(run);
+//                thread.start();
+//                if(tailIndex==testList.size()){
+//                    break;
+//                }
+//        
+//        }
+       
         
-            Calendar cal1 = Calendar.getInstance();
-            cal1.setTime(new SimpleDateFormat("dd/MM/yyyy").parse("01/11/2016"));
-            
-            Calendar cal2 = Calendar.getInstance();
-            cal2.setTime(new SimpleDateFormat("dd/MM/yyyy").parse("31/01/2017"));
-            
-            int yearDiff  =  cal2.get(Calendar.YEAR) - cal1.get(Calendar.YEAR);
-            int dayDiff   =  cal2.get(Calendar.DAY_OF_MONTH) - cal1.get(Calendar.DAY_OF_MONTH);
-            int monthDiff =  yearDiff*12 +  cal2.get(Calendar.MONTH) - cal1.get(Calendar.MONTH) + (dayDiff/25);
-            
-            System.out.println(monthDiff);
-                   
+        
+        System.out.println(String.format("%014d",-156));
     }
+     public static String toAmountTailFormat(double amount){
     
+                String formated="";
+                
+                String fixDecimal = String.format("%.2f", amount);
+                String clearDot   = fixDecimal.replace(".", "");
+                int    intNum     = Integer.valueOf(clearDot);
+                String addedZero  = String.format("%014d",intNum);
+     
+                formated          = String.format("%14s", addedZero);
+                return formated;
+    }
+
 }

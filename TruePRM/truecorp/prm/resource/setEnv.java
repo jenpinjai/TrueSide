@@ -76,6 +76,12 @@ public class setEnv {
         public static String EXCEL_RATESHEET_OUTPUT=System.getenv("HOME")+"/var/tea/AUTO_RATESHEET/BK_SHEET";
         public static String folderRATESHEET_file_input="/"; 
         
+        // PRM Interface
+	public static String AR_file_INPUT=System.getenv("HOME")+"/var/ARPayment/prm";
+        public static String PRM_OUTPUT=System.getenv("HOME")+"/var/tea/PRM_Interface/ARtoPRM";
+        public static String PRM_OLD_FILES =System.getenv("HOME")+"/var/tea/PRM_Interface/OldProcessedFiles";
+        public static String folderAR_file_input="/"; 
+        
 	public static String AFP_Config_file=System.getenv("HOME")+"/var/tea/AFP/ConfigAFP.txt";
 	
 	public static String homePath=System.getenv("HOME")+"/";
