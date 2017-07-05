@@ -459,7 +459,7 @@ public class FileBusiness {
                         prmInterface.setActvCode(array[7]);
                         prmInterface.setActvAmt(array[8]);
                         prmInterface.setTaxAmt(array[9]);
-                        //prmInterface.setPhaseCode(array[10]);
+                        prmInterface.setPhaseCode(array[10]);
                         prmInterfaceList.add(prmInterface);
                  }
                 br.close();
@@ -482,7 +482,8 @@ public class FileBusiness {
             
             //String payType = getPRMInterfaceTypeDesc(prmInterface.getActvCode());
           
-            String resultParam1 =prodLookupDao.getResultParam1(prmInterface.getProductId());
+            //String resultParam1 =prodLookupDao.getResultParam1(prmInterface.getProductId());
+            String resultParam1 =prmInterface.getPhaseCode();
             String pymMtd = cusDao.getPymMtd(prmInterface.getAccountId());
             String bankCode= cusDao.getBankCode(prmInterface.getAccountId());
             String pymSubMtd = cusDao.getPymSubMtd(prmInterface.getAccountId());
@@ -509,7 +510,7 @@ public class FileBusiness {
                                recSeqNo+callDuration+"";
             
             
-            String vatAmtPos =String.format("%-11s", prmInterface.getTaxAmt());
+            String vatAmtPos =String.format("%011d", Integer.valueOf(prmInterface.getTaxAmt().replace(".", "")));
             String glCode =payDao.getGLCode(prmInterface.getAccountId(), prmInterface.getPymSeqNo());
             String receiptNumPos = payDao.getReceiptNumPos(prmInterface.getAccountId(), prmInterface.getPymSeqNo());
             String batchNo =payDao.getBatchNo(prmInterface.getAccountId(), prmInterface.getPymSeqNo());
@@ -567,11 +568,11 @@ public class FileBusiness {
             String amtFormat="";
             try{
                 if(prm.getActvCode().trim().equals("PYM")){
-                       amtFormat="+"+prm.getActvAmt();
+                       amtFormat="+"+String.format("%010d", Integer.valueOf(prm.getActvAmt().replace(".", "")));
                 }else if(prm.getActvCode().trim().equals("BCK")){
-                     amtFormat="-"+prm.getActvAmt();
+                     amtFormat="-"+String.format("%010d", Integer.valueOf(prm.getActvAmt().replace(".", "")));
                 }else{
-                    amtFormat=" "+prm.getActvAmt();
+                    amtFormat=" "+String.format("%010d", Integer.valueOf(prm.getActvAmt().replace(".", "")));
                 }
                 
             }catch(Exception ex){

@@ -44,6 +44,7 @@ public class ProdLookupDAO extends SystemBaseDao{
                 ex.printStackTrace();
             } finally {
                 rs.close();
+                stmt.close();
             }
             return resultParam1;
     }

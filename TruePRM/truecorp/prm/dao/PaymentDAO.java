@@ -43,6 +43,7 @@ public class PaymentDAO extends SystemBaseDao{
                     ex.printStackTrace();
                 } finally {
                     rs.close();
+                    stmt.close();
                 }
                 return result;
     
@@ -73,6 +74,7 @@ public class PaymentDAO extends SystemBaseDao{
                     ex.printStackTrace();
                 } finally {
                     rs.close();
+                    stmt.close();
                 }
                 return result;
 
@@ -103,6 +105,7 @@ public class PaymentDAO extends SystemBaseDao{
                     ex.printStackTrace();
                 } finally {
                     rs.close();
+                    stmt.close();
                 }
                 return result;
 
@@ -133,6 +136,7 @@ public class PaymentDAO extends SystemBaseDao{
                     ex.printStackTrace();
                 } finally {
                     rs.close();
+                    stmt.close();
                 }
                 return result;
     }
@@ -161,6 +165,7 @@ public class PaymentDAO extends SystemBaseDao{
                     ex.printStackTrace();
                 } finally {
                     rs.close();
+                    stmt.close();
                 }
                 return result;
     }
@@ -189,6 +194,7 @@ public class PaymentDAO extends SystemBaseDao{
                     ex.printStackTrace();
                 } finally {
                     rs.close();
+                    stmt.close();
                 }
                 return result;
     }
@@ -217,6 +223,7 @@ public class PaymentDAO extends SystemBaseDao{
                     ex.printStackTrace();
                 } finally {
                     rs.close();
+                    stmt.close();
                 }
                 return result;
     }
@@ -245,6 +252,7 @@ public class PaymentDAO extends SystemBaseDao{
                     ex.printStackTrace();
                 } finally {
                     rs.close();
+                    stmt.close();
                 }
                 return result;
     }
@@ -273,6 +281,7 @@ public class PaymentDAO extends SystemBaseDao{
                     ex.printStackTrace();
                 } finally {
                     rs.close();
+                    stmt.close();
                 }
                 return result;
     }
@@ -303,6 +312,7 @@ public class PaymentDAO extends SystemBaseDao{
                     ex.printStackTrace();
                 } finally {
                     rs.close();
+                    stmt.close();
                 }
                 return result;
     }
