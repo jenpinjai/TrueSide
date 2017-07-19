@@ -566,7 +566,7 @@ public class IcRateCodeBaseDAO extends SystemBaseDao{
     }
     public int deleteAllBy(String serviceType,String prmCd) throws SQLException {
         Statement stmt = null;
-        String SQL_STATEMENT ="delete ic_rate_code where substr(RATE_CD,1,3)= '"+serviceType.substring(0,3)+"' and substr(RATE_CD,4,2)='"+prmCd+"' ";
+        String SQL_STATEMENT ="delete ic_rate_code where substr(RATE_CD,1,3)= '"+serviceType+"' and substr(RATE_CD,4,2)='"+prmCd+"' ";
         try {
             stmt = getPrmConnection().createStatement();
             int status = stmt.executeUpdate(SQL_STATEMENT);

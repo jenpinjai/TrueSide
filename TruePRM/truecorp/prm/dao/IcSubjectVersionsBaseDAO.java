@@ -568,7 +568,7 @@ public class IcSubjectVersionsBaseDAO extends SystemBaseDao{
     }
     public int deleteAllBy(String serviceType,String prmCd) throws SQLException {
         Statement stmt = null;
-        String SQL_STATEMENT ="delete ic_subject_versions where SUBJECT = 'global rate' and (code like '"+serviceType.substring(0, 3)+prmCd+"%' or code like '"+serviceType+prmCd+"%' ) ";
+        String SQL_STATEMENT ="delete ic_subject_versions where SUBJECT = 'global rate' and (code like '"+serviceType+prmCd+"%' or code like '"+serviceType+prmCd+"%' ) ";
         try {
             stmt = getPrmConnection().createStatement();
             int status = stmt.executeUpdate(SQL_STATEMENT);
