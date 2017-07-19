@@ -93,9 +93,9 @@ public class FileBusiness {
                              rateSheet.setCost(b[3]);
                              rateSheet.setEffective(new SimpleDateFormat("yyyy-MM-dd",Locale.US).parse(b[4]));
                              rateSheet.setServiceType(b[5]);
-                             rateSheet.setMinChrg(b[9]);
-                             rateSheet.setRoundingUnit(b[10]);
-                             rateSheet.setIsChange(b[11]);
+                             rateSheet.setMinChrg(b[7]);
+                             rateSheet.setRoundingUnit(b[8]);
+                             rateSheet.setIsChange(b[9]);
                              partner.setServiceType(rateSheet.getServiceType());
                              partner.getRateSheetList().add(rateSheet);
                              
@@ -194,7 +194,7 @@ public class FileBusiness {
                             // System.out.println("Line num:"+rowNum);
                              String[] b = line.split(splitBy);
                              lineError = line;
-                             if(rowNum==1||line.split(splitBy).length<2||Integer.valueOf(b[11])==0)continue;
+                             if(rowNum==1||line.split(splitBy).length<2||Integer.valueOf(b[9])==0)continue;
                              RateSheet  rateSheet = new RateSheet();
                              //for(String text:b){ System.out.print(text+"\t\t");}
                              rateSheet.setPrmPartnerCd(b[0]);
@@ -203,9 +203,9 @@ public class FileBusiness {
                              rateSheet.setCost(b[3]);
                              rateSheet.setEffective(new SimpleDateFormat("yyyy-MM-dd",Locale.US).parse(b[4]));
                              rateSheet.setServiceType(b[5]);
-                             rateSheet.setMinChrg(b[9]);
-                             rateSheet.setRoundingUnit(b[10]);
-                             rateSheet.setIsChange(b[11]);
+                             rateSheet.setMinChrg(b[7]);
+                             rateSheet.setRoundingUnit(b[8]);
+                             rateSheet.setIsChange(b[9]);
                              partner.setServiceType(rateSheet.getServiceType());
                              partner.getRateSheetList().add(rateSheet);
                         }
@@ -278,7 +278,7 @@ public class FileBusiness {
             System.out.println("------Rate cost sorted------");
             //Add rate set
             DecimalFormat df = new DecimalFormat("#.##");
-            df.setMaximumFractionDigits(10);
+            df.setMaximumFractionDigits(20);
            for(Double rateCost : rateCostSet){
                RateCodePack  codePack = new RateCodePack();
                codePack.setRate(df.format(rateCost));
