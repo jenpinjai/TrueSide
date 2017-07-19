@@ -11,8 +11,6 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.io.Writer;
-import java.nio.file.Files;
-import java.nio.file.Paths;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -26,7 +24,6 @@ import truecorp.prm.core.dao.SystemBaseDao;
 import truecorp.prm.model.TransactionPartner;
 import truecorp.prm.resource.setEnv;
 import truecorp.prm.test.MyUnitTest;
-
 /**
  *
  * @author Jennarong Pinjai
@@ -168,9 +165,14 @@ public class ProcessPRMData {
          Writer writerOutputFile=null;
          try {
                 String dateSystem = new SimpleDateFormat("dd-MM-yyyy").format(new Date());
-        	if(Files.exists(Paths.get(setEnv.EXCEL_RATESHEET_OUTPUT+"/"+"error"+dateSystem+".log"))){
-        		Files.delete(Paths.get(setEnv.EXCEL_RATESHEET_OUTPUT+"/"+"error"+dateSystem+".log"));
-        	}
+                
+                File outFile =  new File(setEnv.EXCEL_RATESHEET_OUTPUT+"/"+"error"+dateSystem+".log");
+                if(outFile.isFile()){
+                    outFile.delete();
+                }
+//        	if(Files.exists(Paths.get(setEnv.EXCEL_RATESHEET_OUTPUT+"/"+"error"+dateSystem+".log"))){
+//        		Files.delete(Paths.get(setEnv.EXCEL_RATESHEET_OUTPUT+"/"+"error"+dateSystem+".log"));
+//        	}
         	writerOutputFile = new BufferedWriter(new OutputStreamWriter(
         			new FileOutputStream(setEnv.EXCEL_RATESHEET_OUTPUT+"/"+"error"+dateSystem+".log"),"TIS620")); 
             return writerOutputFile;
