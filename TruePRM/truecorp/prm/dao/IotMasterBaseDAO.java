@@ -241,12 +241,61 @@ public class IotMasterBaseDAO  extends SystemBaseDao{
         
         try {
             
-            sql.append("    select direction,group_tadig,MY_TADIG,COUNTRY_NAME,OPERATOR_NAME,agreement_id,plmn_group_id,sum(CALL_TADIG),sum(charge_local),sum(net)  ");
-            sql.append("    from iot_master   ");
-            sql.append("    where direction = '"+direction+"'   ");
-            sql.append("       ");
-            sql.append("    group by direction,group_tadig,MY_TADIG,COUNTRY_NAME,OPERATOR_NAME,agreement_id,plmn_group_id   ");
-            sql.append("    order by direction,group_tadig asc   ");
+//            sql.append("    select direction,group_tadig,MY_TADIG,COUNTRY_NAME,OPERATOR_NAME,agreement_id,plmn_group_id,sum(CALL_TADIG),sum(charge_local),sum(net)  ");
+//            sql.append("    from iot_master   ");
+//            sql.append("    where direction = '"+direction+"'   ");
+//            sql.append("       ");
+//            sql.append("    group by direction,group_tadig,MY_TADIG,COUNTRY_NAME,OPERATOR_NAME,agreement_id,plmn_group_id   ");
+//            sql.append("    order by direction,group_tadig asc   ");
+            
+                            
+              sql.append("      select direction,group_tadig,MY_TADIG,COUNTRY_NAME,OPERATOR_NAME,agreement_id,plmn_group_id,sum(CALL_TADIG),sum(charge_local),sum(net)   ");
+              sql.append("                from (select mas.group_tadig ,mas2.direction,mas2.MY_TADIG,  ");
+              sql.append("                            mas2.COUNTRY_NAME,mas2.OPERATOR_NAME,mas2.YEAR_TADIG,mas2.MONTH_TADIG,  ");
+              sql.append("                            mas2.agreement_id,mas2.plmn_group_id,mas2.call_tadig,(mas2.charge_local + (mas2.charge_local/25)*(mas2.days_of_month-25)) as charge_local,  ");
+              sql.append("                            (mas2.net + (mas2.net/25)*(mas2.days_of_month-25)) as net  ");
+              sql.append("                      from (  select group_tadig,direction,my_tadig,country_name,max(year_tadig) as recent_year_tadig,max(month_tadig) as recent_month_tadig from iot_master   ");
+              sql.append("                              group by group_tadig,direction,my_tadig,country_name   ");
+              sql.append("                              order by group_tadig  ");
+              sql.append("                           )  mas   ");
+              sql.append("                     left join (  ");
+              sql.append("                                      select direction,group_tadig,MY_TADIG,COUNTRY_NAME,OPERATOR_NAME,YEAR_TADIG,  ");
+              sql.append("                                             MONTH_TADIG,agreement_id,plmn_group_id,operator_id,sum(CALL_TADIG) as call_tadig,sum(charge_local) as charge_local,sum(net)  as net ,  ");
+              sql.append("                                             to_number(TO_CHAR(LAST_DAY(to_date(YEAR_TADIG||MONTH_TADIG,'yyyymm')), 'DD')) as days_of_month  ");
+              sql.append("                                      from iot_master     ");
+              sql.append("                                      where  AGREEMENT_ID is not null  ");
+              sql.append("                                      group by direction,group_tadig,MY_TADIG,COUNTRY_NAME,OPERATOR_NAME,agreement_id,plmn_group_id,YEAR_TADIG,MONTH_TADIG,operator_id  ");
+              sql.append("                                      order by direction,group_tadig,my_tadig,YEAR_TADIG,MONTH_TADIG asc   ");
+
+              sql.append("                               ) mas2 on mas2.GROUP_TADIG = mas.GROUP_TADIG and mas2.direction = mas.direction  ");
+              sql.append("                                          and mas2.my_tadig = mas.my_tadig   and mas2.country_name = mas.country_name  ");
+              sql.append("                                          and mas2.year_tadig = mas.recent_year_tadig and mas2.month_tadig = mas.recent_month_tadig  ");
+              sql.append("                      where mas2.DIRECTION='"+direction+"' and mas2.AGREEMENT_ID is not null and mas2.operator_id=1  ");
+
+              sql.append("                      UNION  ");
+
+              sql.append("                      select mas.group_tadig ,mas2.direction,mas2.MY_TADIG,  ");
+              sql.append("                            mas2.COUNTRY_NAME,mas2.OPERATOR_NAME,mas2.YEAR_TADIG,mas2.MONTH_TADIG,  ");
+              sql.append("                            mas2.agreement_id,mas2.plmn_group_id,mas2.call_tadig,mas2.charge_local,mas2.net  ");
+              sql.append("                      from (  select group_tadig,direction,my_tadig,country_name,max(year_tadig) as recent_year_tadig,max(month_tadig) as recent_month_tadig from iot_master   ");
+              sql.append("                              group by group_tadig,direction,my_tadig,country_name   ");
+              sql.append("                              order by group_tadig  ");
+              sql.append("                           )  mas   ");
+              sql.append("                      left join (  ");
+              sql.append("                                      select direction,group_tadig,MY_TADIG,COUNTRY_NAME,OPERATOR_NAME,YEAR_TADIG,  ");
+              sql.append("                                             MONTH_TADIG,agreement_id,plmn_group_id,operator_id,sum(CALL_TADIG) as call_tadig,sum(charge_local) as charge_local,sum(net)  as net   ");
+              sql.append("                                      from iot_master     ");
+              sql.append("                                      where  AGREEMENT_ID is not null  ");
+              sql.append("                                      group by direction,group_tadig,MY_TADIG,COUNTRY_NAME,OPERATOR_NAME,agreement_id,plmn_group_id,YEAR_TADIG,MONTH_TADIG,operator_id  ");
+              sql.append("                                      order by direction,group_tadig,my_tadig,YEAR_TADIG,MONTH_TADIG asc   ");
+
+              sql.append("                                ) mas2 on mas2.GROUP_TADIG = mas.GROUP_TADIG and mas2.direction = mas.direction  ");
+              sql.append("                                          and mas2.my_tadig = mas.my_tadig   and mas2.country_name = mas.country_name  ");
+              sql.append("                                          and ( mas2.year_tadig != mas.recent_year_tadig or mas2.month_tadig != mas.recent_month_tadig)  ");
+              sql.append("                      where mas2.DIRECTION='"+direction+"' and mas2.AGREEMENT_ID is not null and mas2.operator_id=1  ");
+              sql.append("      )   ");
+              sql.append("      group by direction,group_tadig,MY_TADIG,COUNTRY_NAME,OPERATOR_NAME,agreement_id,plmn_group_id  ");
+              sql.append("      order by direction,group_tadig asc  ");
             
             
             stmt = getPrmAppConnection().prepareStatement(sql.toString());

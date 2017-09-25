@@ -137,8 +137,9 @@ public class AccrueBusiness {
                         }else if(direction.equals("OUTBOUND")){
                                 ib_commitment_amt =   agreement.getObCommitmentAmt()==null?0d:agreement.getObCommitmentAmt().doubleValue();//____4
                         }
+                        System.out.println(" Before ib_commitment_amt :"+ib_commitment_amt);
                         if(agreement.getIbCurrencyCd()!=null&&!agreement.getIbCurrencyCd().equals("THB")){
-
+                            
                             double sdrTHB=0;
                             double sdrOther=0;
                             double sdrRateResult =0;
@@ -151,17 +152,22 @@ public class AccrueBusiness {
                                             sdrOther = sdrRate.getSdrRate()==null?0d:sdrRate.getSdrRate().doubleValue();
                                  }
                             }
+                            System.out.println(" THB :"+sdrTHB+"/"+sdrOther);
                             sdrRateResult = sdrTHB/sdrOther ;//____3
                             ib_commitment_amt = sdrRateResult*ib_commitment_amt;
+                            System.out.println(" sdrRateResult :"+sdrRateResult);
                         }else{
 
                         }
                         if(monthDiffCurrent==0){
                             monthDiffCurrent = 1 ;
                         }
+                        
+                        System.out.println("monthDiffExpire :"+monthDiffExpire);
+                        System.out.println("monthDiffCurrent :"+monthDiffCurrent);
                         ib_commitment_amt = (ib_commitment_amt/monthDiffExpire)*monthDiffCurrent;
                         
-                        
+                        System.out.println("ib_commitment_amt :"+ib_commitment_amt);
                         double  sumTadig = THACA_callTadig + THACT_callTadig + THAMY_callTadig;
                         double  percen_THACA_callTadig=(THACA_callTadig/sumTadig)*100;
                         double  percen_THACT_callTadig=(THACT_callTadig/sumTadig)*100;
