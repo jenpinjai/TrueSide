@@ -25,7 +25,7 @@ public class ContentRevenueDAO {
 
     Logger log = LogUtills.getLogger(ContentRevenueDAO.class);
 
-    public int migratePostPaidContentRevenueToSumContentRevenue(Connection con, ContentCycleControl cycle, Date reportDate, Date reportedDate, Date oldestReportDate) throws Exception {
+    public int migrateContentRevenueToSumContentRevenue(Connection con, ContentCycleControl cycle, Date reportDate, Date reportedDate, Date oldestReportDate) throws Exception {
 
         int result = 0;
         String sql = null;
@@ -54,7 +54,6 @@ public class ContentRevenueDAO {
 
             result = prepareSt.executeUpdate();
 
-            prepareSt.close();
             return result;
         } catch (Exception ex) {
             log.error("Error sql:" + sql);
@@ -64,7 +63,7 @@ public class ContentRevenueDAO {
 
     }
 
-      public int updateFlagPostPaidContentRevenue(Connection con, ContentCycleControl cycle, Date reportDate, Date reportedDate, Date oldestReportDate) throws Exception {
+      public int updateFlagContentRevenue(Connection con, ContentCycleControl cycle, Date reportDate, Date reportedDate, Date oldestReportDate) throws Exception {
 
         int result = 0;
         String sql = null;
@@ -92,7 +91,6 @@ public class ContentRevenueDAO {
 
             result = prepareSt.executeUpdate();
 
-            prepareSt.close();
             return result;
         } catch (Exception ex) {
             log.error("Error sql:" + sql);
@@ -149,112 +147,8 @@ public class ContentRevenueDAO {
                     System.out.println();
                 
             }
-            resultSet.close();
+            
            
-        } catch (Exception ex) {
-            log.error("Error sql:" + sql);
-            log.error(ex.getMessage());
-            throw ex;
-        }
-
-    }
-    
-    public int migratePrepaidContentRevenueToSumContentRevenue(Connection con, ContentCycleControl cycle) throws Exception {
-
-        int result = 0;
-        String sql = null;
-        try {
-            SimpleDateFormat yyyymmddhhmmssFormat = new SimpleDateFormat("yyyyMMddHHmmss",Locale.US);
-            Date sysDate = new Date();
-            sql = ReadSqlUtils.getSQLString(ConstantPaths.CONTENT_REVENUE_SQL, "insertPrepaidSumContentRevenue");
-            sql = sql.replace("$tableName", cycle.getTableName());
-            sql = sql.replace("$sysdatetime", "'"+yyyymmddhhmmssFormat.format(sysDate)+"'");
-            PreparedStatement prepareSt = con.prepareStatement(sql);
-            SimpleDateFormat yyyymmddParamFormat = new SimpleDateFormat("yyyyMMdd", Locale.US);
-            SimpleDateFormat yyyymmParamFormat = new SimpleDateFormat("yyyyMM", Locale.US);
-
-            String startDateParam = yyyymmddParamFormat.format(cycle.getStartDate());
-            String endDateParam = yyyymmddParamFormat.format(cycle.getEndDate());
-   
-
-            int index = 1;
-            prepareSt.setString(index++, startDateParam);
-            prepareSt.setString(index++, endDateParam);
-
-
-            result = prepareSt.executeUpdate();
-
-            prepareSt.close();
-            return result;
-        } catch (Exception ex) {
-            log.error("Error sql:" + sql);
-            log.error(ex.getMessage());
-            throw ex;
-        }
-
-    }
-    
-    public int updateFlagPrepaidContentRevenue(Connection con, ContentCycleControl cycle) throws Exception {
-
-        int result = 0;
-        String sql = null;
-        try {
-            SimpleDateFormat yyyymmddhhmmssFormat = new SimpleDateFormat("yyyyMMddHHmmss",Locale.US);
-            Date sysDate = new Date();
-            sql = ReadSqlUtils.getSQLString(ConstantPaths.CONTENT_REVENUE_SQL, "updatePrepaidContentRevenue");
-            sql = sql.replace("$tableName", cycle.getTableName());
-            PreparedStatement prepareSt = con.prepareStatement(sql);
-            SimpleDateFormat yyyymmddParamFormat = new SimpleDateFormat("yyyyMMdd", Locale.US);
-            SimpleDateFormat yyyymmParamFormat = new SimpleDateFormat("yyyyMM", Locale.US);
-
-            String startDateParam = yyyymmddParamFormat.format(cycle.getStartDate());
-            String endDateParam = yyyymmddParamFormat.format(cycle.getEndDate());
-   
-
-            int index = 1;
-            prepareSt.setString(index++, startDateParam);
-            prepareSt.setString(index++, endDateParam);
-
-
-            result = prepareSt.executeUpdate();
-
-            prepareSt.close();
-            return result;
-        } catch (Exception ex) {
-            log.error("Error sql:" + sql);
-            log.error(ex.getMessage());
-            throw ex;
-        }
-
-    }
-    
-      public int migrateAdjustmentContentRevenueToSumContentRevenue(Connection con, ContentCycleControl cycle) throws Exception {
-
-        int result = 0;
-        String sql = null;
-        try {
-            SimpleDateFormat yyyymmddhhmmssFormat = new SimpleDateFormat("yyyyMMddHHmmss",Locale.US);
-            Date sysDate = new Date();
-            sql = ReadSqlUtils.getSQLString(ConstantPaths.CONTENT_REVENUE_SQL, "insertAdjustmentSumContentRevenue");
-            sql = sql.replace("$tableName", cycle.getTableName());
-            sql = sql.replace("$sysdatetime", "'"+yyyymmddhhmmssFormat.format(sysDate)+"'");
-            PreparedStatement prepareSt = con.prepareStatement(sql);
-            SimpleDateFormat yyyymmddParamFormat = new SimpleDateFormat("yyyyMMdd", Locale.US);
-            SimpleDateFormat yyyymmParamFormat = new SimpleDateFormat("yyyyMM", Locale.US);
-
-            String startDateParam = yyyymmddParamFormat.format(cycle.getStartDate());
-            String endDateParam = yyyymmddParamFormat.format(cycle.getEndDate());
-   
-
-            int index = 1;
-            prepareSt.setString(index++, startDateParam);
-            prepareSt.setString(index++, endDateParam);
-
-
-            result = prepareSt.executeUpdate();
-
-            prepareSt.close();
-            return result;
         } catch (Exception ex) {
             log.error("Error sql:" + sql);
             log.error(ex.getMessage());

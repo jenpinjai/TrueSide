@@ -73,7 +73,7 @@ public class ContentCycleControlDAO {
                     ccc =  new ContentCycleControl();
                     ccc.setTableName(rs.getString("table_name"));  
                     ccc.setStartDate(sqlDateOutputFormat.parse(rs.getString("start_date")));
-                    ccc.setEndDate(sqlDateOutputFormat.parse(rs.getString("end_date")));
+                    ccc.setEndDate(rs.getDate("end_date"));
                     
                     break;
                     
