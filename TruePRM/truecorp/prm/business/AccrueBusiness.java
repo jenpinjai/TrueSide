@@ -130,7 +130,7 @@ public class AccrueBusiness {
                         int dayDiffCurrent  =  cal3.get(Calendar.DAY_OF_MONTH) - cal1.get(Calendar.DAY_OF_MONTH);
 
                         int monthDiffExpire =  yearDiffExpire*12 +  cal2.get(Calendar.MONTH) - cal1.get(Calendar.MONTH) + (dayDiffExpire/25);//____1
-                        int monthDiffCurrent =  yearDiffCurrent*12 +  cal3.get(Calendar.MONTH) - cal1.get(Calendar.MONTH) ;//____2
+                        int monthDiffCurrent =  yearDiffCurrent*12 +  cal3.get(Calendar.MONTH) - cal1.get(Calendar.MONTH)+ (dayDiffCurrent/25) ;//____2
                         double ib_commitment_amt =0;
                         if(direction.equals("INBOUND")){
                                 ib_commitment_amt =   agreement.getIbCommitmentAmt()==null?0d:agreement.getIbCommitmentAmt().doubleValue();//____4

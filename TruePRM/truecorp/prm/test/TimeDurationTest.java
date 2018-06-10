@@ -6,8 +6,12 @@
 package truecorp.prm.test;
 
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
@@ -20,10 +24,11 @@ public class TimeDurationTest {
     private  int count=0;
     public static void main(String[] args) throws Exception{
         
-    double test = 78.32;
-    
-    System.out.println(String.format("%013.2f", test));
-        
+   
+    String  test = "5/8/9";
+
+    System.out.println(test.split("/").length);
+
     }
     public static void printSubString(List list,int head,int tail){
     

@@ -1,0 +1,32 @@
+	      select 
+                                nai.EFFECTIVE_DATE, 
+                                nai.EXPIRATION_DATE, 
+                                                    nai.ACCOUNT_ID, 
+                                                    nai.LINK_SEQ_NO, 
+                                                    to_char(nai.SYS_CREATION_DATE,'YYYYMMDD'), 
+                                                    to_char(nai.SYS_UPDATE_DATE,'YYYYMMDD'), 
+                                                    nai.LINK_TYPE, 
+                                                    to_char(nai.EFFECTIVE_DATE,'YYYYMMDD'), 
+                                                    to_char(nai.EXPIRATION_DATE,'YYYYMMDD'), 
+                                                    nai.FIRST_NAME, 
+                                                    nai.LAST_NAME, 
+                                                    nai.NAME_TITLE, 
+                                                    nai.NAME_TITLE_REF, 
+                                                    nai.ADR_CITY, 
+                                                    nai.ADR_CITY_REF, 
+                                                    nai.ADR_SUBURB, 
+                                                    nai.ADR_SUBURB_REF, 
+                                                    nai.ADR_KHWANG, 
+                                                    nai.ADR_KHWANG_REF, 
+                                                    nai.ADR_STREET_NAME, 
+                                                    nai.ADR_FLAT, 
+                                                    nai.ADR_FLOOR, 
+                                                    nai.BUILDING_NAME,  
+                                                    nai.ADR_SOI, 
+                                                    nai.ADR_MOO, 
+                                                    nai.ADR_HOUSE_NO, 
+                                                    nai.ADR_ZIP, 
+                                                    nai.LANGUAGE_ID   
+                      from NAME_ADDRESS_INFO nai     
+                      where nai.LINK_TYPE ='"+linkType+"' and nai.ACCOUNT_ID='"+accountId+"' and nai.EXPIRATION_DATE is null 
+                      order by nai.ACCOUNT_ID  
