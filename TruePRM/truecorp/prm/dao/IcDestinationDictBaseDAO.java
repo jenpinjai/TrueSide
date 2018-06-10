@@ -6,10 +6,6 @@ import java.util.ArrayList;
 import java.util.List;
 import org.apache.log4j.Logger;
 import truecorp.prm.core.dao.SystemBaseDao;
-import static truecorp.prm.core.dao.SystemBaseDao.getPrmConnection;
-import truecorp.prm.model.Country;
-import truecorp.prm.model.RateCodePack;
-import static truecorp.prm.process.ProcessPRMData.logWriter;
 import truecorp.prm.table.*;
 
 
@@ -42,8 +38,6 @@ public class IcDestinationDictBaseDAO extends SystemBaseDao{
         } catch (SQLException ex) {
             ex.printStackTrace();
             log.error("INSERT IcDestinationDict FAIL:" + icDestinationDict);
-            try{ logWriter.write("Insert IcDestinationDict fail:"+icDestinationDict.getText()+"\t "+icDestinationDict.getSequenceNo()+"\r\n"); } catch(Exception ex2){}
-           
             log.error(ex.toString());
         } catch (Exception ex) {
             ex.printStackTrace();
@@ -138,7 +132,7 @@ public class IcDestinationDictBaseDAO extends SystemBaseDao{
         return null;
     }
 
-    public List<IcDestinationDict> findAll() throws SQLException {
+    public List findAll() throws SQLException {
         PreparedStatement stmt = null;
         ResultSet rs = null;
         String SQL_STATEMENT ="Select * from IC_DESTINATION_DICT";
@@ -157,7 +151,7 @@ public class IcDestinationDictBaseDAO extends SystemBaseDao{
         return null;
     }
 
-    public List<IcDestinationDict> findByWhereCondisions(String whereConditions) throws SQLException {
+    public List findByWhereCondisions(String whereConditions) throws SQLException {
         PreparedStatement stmt = null;
         ResultSet rs = null;
         String SQL_STATEMENT ="Select * from IC_DESTINATION_DICT where " + whereConditions;
@@ -175,32 +169,8 @@ public class IcDestinationDictBaseDAO extends SystemBaseDao{
         }
         return null;
     }
-    public List<String> getStringCountry(String prmCd) throws SQLException {
-        PreparedStatement stmt = null;
-        ResultSet rs = null;
-        String SQL_STATEMENT = "select substr(TEXT,9) as TEXT from ic_destination_dict where substr(TEXT,1,2)=? and substr(TEXT,3,2)= ' T' ";
-        try {
-            stmt = getPrmConnection().prepareStatement(SQL_STATEMENT);
-            stmt.setString(1, prmCd );
-            rs = stmt.executeQuery();
-            List<String>  addressList = new ArrayList<String>();
-            while (rs.next()){
-                
-                addressList.add(rs.getString("TEXT").trim());
-                
-            }
-            return addressList;
-        } catch (SQLException ex) {
-            ex.printStackTrace();
-        } catch (Exception ex) {
-            ex.printStackTrace();
-        } finally {
-            stmt.close();
-            rs.close();
-        }
-        return null;
-    }
-    public List<IcDestinationDict> findBySequenceNo( java.math.BigDecimal sequenceNo) throws SQLException {
+    
+    public List findBySequenceNo( java.math.BigDecimal sequenceNo) throws SQLException {
         PreparedStatement stmt = null;
         ResultSet rs = null;
         String SQL_STATEMENT = "Select * from IC_DESTINATION_DICT where SEQUENCE_NO = ? order by SEQUENCE_NO";
@@ -219,7 +189,7 @@ public class IcDestinationDictBaseDAO extends SystemBaseDao{
         }
         return null;
     }
-    public List<IcDestinationDict> findByLanguageCode( String languageCode) throws SQLException {
+    public List findByLanguageCode( String languageCode) throws SQLException {
         PreparedStatement stmt = null;
         ResultSet rs = null;
         String SQL_STATEMENT = "Select * from IC_DESTINATION_DICT where LANGUAGE_CODE = ? order by LANGUAGE_CODE";
@@ -238,7 +208,7 @@ public class IcDestinationDictBaseDAO extends SystemBaseDao{
         }
         return null;
     }
-    public List<IcDestinationDict> findBySysCreationDate( java.sql.Date sysCreationDate) throws SQLException {
+    public List findBySysCreationDate( java.sql.Date sysCreationDate) throws SQLException {
         PreparedStatement stmt = null;
         ResultSet rs = null;
         String SQL_STATEMENT = "Select * from IC_DESTINATION_DICT where SYS_CREATION_DATE = ? order by SYS_CREATION_DATE";
@@ -257,7 +227,7 @@ public class IcDestinationDictBaseDAO extends SystemBaseDao{
         }
         return null;
     }
-    public List<IcDestinationDict> findBySysUpdateDate( java.sql.Date sysUpdateDate) throws SQLException {
+    public List findBySysUpdateDate( java.sql.Date sysUpdateDate) throws SQLException {
         PreparedStatement stmt = null;
         ResultSet rs = null;
         String SQL_STATEMENT = "Select * from IC_DESTINATION_DICT where SYS_UPDATE_DATE = ? order by SYS_UPDATE_DATE";
@@ -276,7 +246,7 @@ public class IcDestinationDictBaseDAO extends SystemBaseDao{
         }
         return null;
     }
-    public List<IcDestinationDict> findByOperatorId( java.math.BigDecimal operatorId) throws SQLException {
+    public List findByOperatorId( java.math.BigDecimal operatorId) throws SQLException {
         PreparedStatement stmt = null;
         ResultSet rs = null;
         String SQL_STATEMENT = "Select * from IC_DESTINATION_DICT where OPERATOR_ID = ? order by OPERATOR_ID";
@@ -295,7 +265,7 @@ public class IcDestinationDictBaseDAO extends SystemBaseDao{
         }
         return null;
     }
-    public List<IcDestinationDict> findByApplicationId( String applicationId) throws SQLException {
+    public List findByApplicationId( String applicationId) throws SQLException {
         PreparedStatement stmt = null;
         ResultSet rs = null;
         String SQL_STATEMENT = "Select * from IC_DESTINATION_DICT where APPLICATION_ID = ? order by APPLICATION_ID";
@@ -314,7 +284,7 @@ public class IcDestinationDictBaseDAO extends SystemBaseDao{
         }
         return null;
     }
-    public List<IcDestinationDict> findByDlServiceCode( String dlServiceCode) throws SQLException {
+    public List findByDlServiceCode( String dlServiceCode) throws SQLException {
         PreparedStatement stmt = null;
         ResultSet rs = null;
         String SQL_STATEMENT = "Select * from IC_DESTINATION_DICT where DL_SERVICE_CODE = ? order by DL_SERVICE_CODE";
@@ -333,7 +303,7 @@ public class IcDestinationDictBaseDAO extends SystemBaseDao{
         }
         return null;
     }
-    public List<IcDestinationDict> findByDlUpdateStamp( java.math.BigDecimal dlUpdateStamp) throws SQLException {
+    public List findByDlUpdateStamp( java.math.BigDecimal dlUpdateStamp) throws SQLException {
         PreparedStatement stmt = null;
         ResultSet rs = null;
         String SQL_STATEMENT = "Select * from IC_DESTINATION_DICT where DL_UPDATE_STAMP = ? order by DL_UPDATE_STAMP";
@@ -352,7 +322,7 @@ public class IcDestinationDictBaseDAO extends SystemBaseDao{
         }
         return null;
     }
-    public List<IcDestinationDict> findByText( String text) throws SQLException {
+    public List findByText( String text) throws SQLException {
         PreparedStatement stmt = null;
         ResultSet rs = null;
         String SQL_STATEMENT = "Select * from IC_DESTINATION_DICT where TEXT = ? order by TEXT";
@@ -461,8 +431,8 @@ public class IcDestinationDictBaseDAO extends SystemBaseDao{
 
 */
 
-    public List<IcDestinationDict> fetchAll(ResultSet rs) throws SQLException{
-        List<IcDestinationDict> list = new ArrayList<IcDestinationDict>();
+    public List fetchAll(ResultSet rs) throws SQLException{
+        List list = new ArrayList();
         while (rs.next()){
             IcDestinationDict icDestinationDict = new IcDestinationDict();
             icDestinationDict.setSequenceNo(rs.getBigDecimal("SEQUENCE_NO"));
@@ -506,100 +476,5 @@ public class IcDestinationDictBaseDAO extends SystemBaseDao{
         populateParent(icDestinationDict);
         populateChild(icDestinationDict);
     }
-    
-    public int getMaxSequenceNo() throws SQLException {
-        PreparedStatement stmt = null;
-        String SQL_STATEMENT ="select max(sequence_no) as sequence_no from ic_destination_dict ";
-	
-        try {
-            stmt = getPrmConnection().prepareStatement(SQL_STATEMENT);
-            ResultSet   resultSet = stmt.executeQuery();
-            log.info("getMaxSequenceNo SUCCESS");
-            resultSet.next();
-            return resultSet.getInt("sequence_no");
-        } catch (SQLException ex) {
-            ex.printStackTrace();
-            log.error(ex.toString());
-        } catch (Exception ex) {
-            ex.printStackTrace();
-            log.error(ex.toString());
-        } finally {
-            stmt.close();
-        }
-        return -1;
-    }
-    public int deleteAllBy(String prmCd) throws SQLException {
-        Statement stmt = null;
-        String SQL_STATEMENT ="delete ic_destination_dict where substr(TEXT,1,2)='"+prmCd+"' and substr(TEXT,3,2)= ' T' ";
-        try {
-            stmt = getPrmConnection().createStatement();
-            int status = stmt.executeUpdate(SQL_STATEMENT);
-            log.info("DELETE ic_destination_dict SUCCESS");
-            return status;
-        } catch (SQLException ex) {
-            ex.printStackTrace();
-            log.error("DELETE ic_destination_dict FAIL:");
-            log.error(ex.toString());
-        } catch (Exception ex) {
-            ex.printStackTrace();
-            log.error("DELETE ic_destination_dict FAIL:");
-            log.error(ex.toString());
-        } finally {
-            stmt.close();
-        }
-        return -1;
-    }
-    public int getCountCounties(String prmCd) throws SQLException {
-        PreparedStatement stmt = null;
-        String SQL_STATEMENT ="select count(rownum) as count from ic_rate_code_rates where rate_class_set_cd like '%"+prmCd+"' ";
-	
-        try {
-            stmt = getPrmConnection().prepareStatement(SQL_STATEMENT);
-            ResultSet   resultSet = stmt.executeQuery();
-            log.info("getCountRates SUCCESS");
-            resultSet.next();
-            return resultSet.getInt("COUNT");
-        } catch (SQLException ex) {
-            ex.printStackTrace();
-            log.error(ex.toString());
-        } catch (Exception ex) {
-            ex.printStackTrace();
-            log.error(ex.toString());
-        } finally {
-            stmt.close();
-        }
-        return -1;
-    }
-    public List<Country> getCountryByPrmCd( String prmCd) throws SQLException {
-        PreparedStatement stmt = null;
-        ResultSet rs = null;
-        StringBuilder sql = new StringBuilder();
-        
-        sql.append(" select substr(TEXT,9) as TEXT from ic_destination_dict where substr(TEXT,1,2)='"+prmCd+"'  order by sequence_no asc   ");
-        
-        
-        try {
-            stmt = getPrmConnection().prepareStatement(sql.toString());
-            //stmt.setString(1, prmCd );
-            rs = stmt.executeQuery();
-            List<Country>  countryList = new ArrayList<Country>();
-            while (rs.next()){
-                Country  country = new Country();
-                
-                
-                country.setName(rs.getString("TEXT"));
-                countryList.add(country);
-                
-            }
-            return countryList;
-        } catch (SQLException ex) {
-            ex.printStackTrace();
-        } catch (Exception ex) {
-            ex.printStackTrace();
-        } finally {
-            stmt.close();
-            rs.close();
-        }
-        return null;
-    }
+
 }

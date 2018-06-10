@@ -5,13 +5,10 @@ import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 import org.apache.log4j.Logger;
-import truecorp.prm.core.dao.SystemBaseDao;
-import static truecorp.prm.core.dao.SystemBaseDao.getPrmConnection;
-import static truecorp.prm.process.ProcessPRMData.logWriter;
 import truecorp.prm.table.*;
 
 
-public class IcRateCodeBaseDAO extends SystemBaseDao{
+public class IcRateCodeBaseDAO {
 
     private static Logger log = Logger.getLogger(IcRateCodeBaseDAO.class);
 
@@ -19,12 +16,12 @@ public class IcRateCodeBaseDAO extends SystemBaseDao{
     public IcRateCodeBaseDAO() {
     }
 
-    public int insert( IcRateCode icRateCode) throws SQLException {
+    public int insert( IcRateCode icRateCode, Connection conn) throws SQLException {
         PreparedStatement stmt = null;
-        String SQL_STATEMENT ="Insert into IC_RATE_CODE(RATE_CD_SEQ, EFFECTIVE_DATE, SYS_CREATION_DATE, SYS_UPDATE_DATE, OPERATOR_ID, APPLICATION_ID, DL_SERVICE_CODE, DL_UPDATE_STAMP, RATE_CD, DESCRIPTION_SEQ, EXPIRATION_DATE) ";
+        String SQL_STATEMENT ="Insert into [IC_RATE_CODE](RATE_CD_SEQ, EFFECTIVE_DATE, SYS_CREATION_DATE, SYS_UPDATE_DATE, OPERATOR_ID, APPLICATION_ID, DL_SERVICE_CODE, DL_UPDATE_STAMP, RATE_CD, DESCRIPTION_SEQ, EXPIRATION_DATE) ";
 	SQL_STATEMENT += "values ( ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
         try {
-            stmt = getPrmConnection().prepareStatement(SQL_STATEMENT);
+            stmt = conn.prepareStatement(SQL_STATEMENT);
             stmt.setBigDecimal( 1, icRateCode.getRateCdSeq());
             stmt.setDate( 2, icRateCode.getEffectiveDate());
             stmt.setDate( 3, icRateCode.getSysCreationDate());
@@ -42,8 +39,6 @@ public class IcRateCodeBaseDAO extends SystemBaseDao{
         } catch (SQLException ex) {
             ex.printStackTrace();
             log.error("INSERT IcRateCode FAIL:" + icRateCode);
-            try{ logWriter.write("Insert IcRateCode fail:"+icRateCode.getRateCd()+"\r\n"); } catch(Exception ex2){}
-            System.out.println("INSERT IcRateCode FAIL:" + icRateCode);
             log.error(ex.toString());
         } catch (Exception ex) {
             ex.printStackTrace();
@@ -54,12 +49,12 @@ public class IcRateCodeBaseDAO extends SystemBaseDao{
         }
         return -1;
     }
-    public int update( IcRateCode icRateCode) throws SQLException {
+    public int update( IcRateCode icRateCode, Connection conn) throws SQLException {
         PreparedStatement stmt = null;
-        String SQL_STATEMENT ="Update IC_RATE_CODE set SYS_CREATION_DATE = ?  , SYS_UPDATE_DATE = ?  , OPERATOR_ID = ?  , APPLICATION_ID = ?  , DL_SERVICE_CODE = ?  , DL_UPDATE_STAMP = ?  , RATE_CD = ?  , DESCRIPTION_SEQ = ?  , EXPIRATION_DATE = ?  ";
+        String SQL_STATEMENT ="Update [IC_RATE_CODE] set SYS_CREATION_DATE = ?  , SYS_UPDATE_DATE = ?  , OPERATOR_ID = ?  , APPLICATION_ID = ?  , DL_SERVICE_CODE = ?  , DL_UPDATE_STAMP = ?  , RATE_CD = ?  , DESCRIPTION_SEQ = ?  , EXPIRATION_DATE = ?  ";
 	    SQL_STATEMENT += "where RATE_CD_SEQ = ?  and EFFECTIVE_DATE = ? ";
         try {
-            stmt = getPrmConnection().prepareStatement(SQL_STATEMENT);
+            stmt = conn.prepareStatement(SQL_STATEMENT);
             stmt.setDate( 1, icRateCode.getSysCreationDate());
             stmt.setDate( 2, icRateCode.getSysUpdateDate());
             stmt.setBigDecimal( 3, icRateCode.getOperatorId());
@@ -88,11 +83,11 @@ public class IcRateCodeBaseDAO extends SystemBaseDao{
         return -1;
     }    
     
-    public int delete( IcRateCode icRateCode) throws SQLException {
+    public int delete( IcRateCode icRateCode, Connection conn) throws SQLException {
         PreparedStatement stmt = null;
-        String SQL_STATEMENT ="Delete from IC_RATE_CODE where RATE_CD_SEQ = ?  and EFFECTIVE_DATE = ? ";
+        String SQL_STATEMENT ="Delete from [IC_RATE_CODE] where RATE_CD_SEQ = ?  and EFFECTIVE_DATE = ? ";
         try {
-            stmt = getPrmConnection().prepareStatement(SQL_STATEMENT);
+            stmt = conn.prepareStatement(SQL_STATEMENT);
             stmt.setBigDecimal( 1, icRateCode.getRateCdSeq());
             stmt.setDate( 2, icRateCode.getEffectiveDate());
             int status = stmt.executeUpdate();
@@ -114,17 +109,17 @@ public class IcRateCodeBaseDAO extends SystemBaseDao{
 
 
 
-    public IcRateCode findByPK( IcRateCodePK icRateCodePK) throws SQLException {
-        return findByPK( icRateCodePK.getRateCdSeq(),icRateCodePK.getEffectiveDate());   
+    public IcRateCode findByPK( IcRateCodePK icRateCodePK, Connection conn) throws SQLException {
+        return findByPK( icRateCodePK.getRateCdSeq(),icRateCodePK.getEffectiveDate(), conn);   
     }
 
 
-    public IcRateCode findByPK( java.math.BigDecimal rateCdSeq,java.sql.Date effectiveDate) throws SQLException {
+    public IcRateCode findByPK( java.math.BigDecimal rateCdSeq,java.sql.Date effectiveDate, Connection conn) throws SQLException {
         PreparedStatement stmt = null;
         ResultSet rs = null;
-        String SQL_STATEMENT ="Select * from IC_RATE_CODE where RATE_CD_SEQ = ?  and EFFECTIVE_DATE = ? ";
+        String SQL_STATEMENT ="Select * from [IC_RATE_CODE] where RATE_CD_SEQ = ?  and EFFECTIVE_DATE = ? ";
         try {
-            stmt = getPrmConnection().prepareStatement(SQL_STATEMENT);
+            stmt = conn.prepareStatement(SQL_STATEMENT);
             stmt.setBigDecimal(1, rateCdSeq );
             stmt.setDate(2, effectiveDate );
             rs = stmt.executeQuery();
@@ -140,12 +135,12 @@ public class IcRateCodeBaseDAO extends SystemBaseDao{
         return null;
     }
 
-    public List findAll() throws SQLException {
+    public List findAll(Connection conn) throws SQLException {
         PreparedStatement stmt = null;
         ResultSet rs = null;
-        String SQL_STATEMENT ="Select * from IC_RATE_CODE";
+        String SQL_STATEMENT ="Select * from [IC_RATE_CODE]";
         try {
-            stmt = getPrmConnection().prepareStatement(SQL_STATEMENT);
+            stmt = conn.prepareStatement(SQL_STATEMENT);
             rs = stmt.executeQuery();
             return fetchAll(rs);
         } catch (SQLException ex) {
@@ -159,12 +154,12 @@ public class IcRateCodeBaseDAO extends SystemBaseDao{
         return null;
     }
 
-    public List findByWhereCondisions(String whereConditions) throws SQLException {
+    public List findByWhereCondisions(String whereConditions, Connection conn) throws SQLException {
         PreparedStatement stmt = null;
         ResultSet rs = null;
-        String SQL_STATEMENT ="Select * from IC_RATE_CODE where " + whereConditions;
+        String SQL_STATEMENT ="Select * from [IC_RATE_CODE] where " + whereConditions;
         try {
-            stmt = getPrmConnection().prepareStatement(SQL_STATEMENT);
+            stmt = conn.prepareStatement(SQL_STATEMENT);
             rs = stmt.executeQuery();
             return fetchAll(rs);
         } catch (SQLException ex) {
@@ -178,12 +173,12 @@ public class IcRateCodeBaseDAO extends SystemBaseDao{
         return null;
     }
     
-    public List findByRateCdSeq( java.math.BigDecimal rateCdSeq) throws SQLException {
+    public List findByRateCdSeq( java.math.BigDecimal rateCdSeq, Connection conn) throws SQLException {
         PreparedStatement stmt = null;
         ResultSet rs = null;
-        String SQL_STATEMENT = "Select * from IC_RATE_CODE where RATE_CD_SEQ = ? order by RATE_CD_SEQ";
+        String SQL_STATEMENT = "Select * from [IC_RATE_CODE] where RATE_CD_SEQ = ? order by RATE_CD_SEQ";
         try {
-            stmt = getPrmConnection().prepareStatement(SQL_STATEMENT);
+            stmt = conn.prepareStatement(SQL_STATEMENT);
             stmt.setBigDecimal(1, rateCdSeq );
             rs = stmt.executeQuery();
             return fetchAll(rs);
@@ -197,12 +192,12 @@ public class IcRateCodeBaseDAO extends SystemBaseDao{
         }
         return null;
     }
-    public List findByEffectiveDate( java.sql.Date effectiveDate) throws SQLException {
+    public List findByEffectiveDate( java.sql.Date effectiveDate, Connection conn) throws SQLException {
         PreparedStatement stmt = null;
         ResultSet rs = null;
-        String SQL_STATEMENT = "Select * from IC_RATE_CODE where EFFECTIVE_DATE = ? order by EFFECTIVE_DATE";
+        String SQL_STATEMENT = "Select * from [IC_RATE_CODE] where EFFECTIVE_DATE = ? order by EFFECTIVE_DATE";
         try {
-            stmt = getPrmConnection().prepareStatement(SQL_STATEMENT);
+            stmt = conn.prepareStatement(SQL_STATEMENT);
             stmt.setDate(1, effectiveDate );
             rs = stmt.executeQuery();
             return fetchAll(rs);
@@ -216,12 +211,12 @@ public class IcRateCodeBaseDAO extends SystemBaseDao{
         }
         return null;
     }
-    public List findBySysCreationDate( java.sql.Date sysCreationDate) throws SQLException {
+    public List findBySysCreationDate( java.sql.Date sysCreationDate, Connection conn) throws SQLException {
         PreparedStatement stmt = null;
         ResultSet rs = null;
-        String SQL_STATEMENT = "Select * from IC_RATE_CODE where SYS_CREATION_DATE = ? order by SYS_CREATION_DATE";
+        String SQL_STATEMENT = "Select * from [IC_RATE_CODE] where SYS_CREATION_DATE = ? order by SYS_CREATION_DATE";
         try {
-            stmt = getPrmConnection().prepareStatement(SQL_STATEMENT);
+            stmt = conn.prepareStatement(SQL_STATEMENT);
             stmt.setDate(1, sysCreationDate );
             rs = stmt.executeQuery();
             return fetchAll(rs);
@@ -235,12 +230,12 @@ public class IcRateCodeBaseDAO extends SystemBaseDao{
         }
         return null;
     }
-    public List findBySysUpdateDate( java.sql.Date sysUpdateDate) throws SQLException {
+    public List findBySysUpdateDate( java.sql.Date sysUpdateDate, Connection conn) throws SQLException {
         PreparedStatement stmt = null;
         ResultSet rs = null;
-        String SQL_STATEMENT = "Select * from IC_RATE_CODE where SYS_UPDATE_DATE = ? order by SYS_UPDATE_DATE";
+        String SQL_STATEMENT = "Select * from [IC_RATE_CODE] where SYS_UPDATE_DATE = ? order by SYS_UPDATE_DATE";
         try {
-            stmt = getPrmConnection().prepareStatement(SQL_STATEMENT);
+            stmt = conn.prepareStatement(SQL_STATEMENT);
             stmt.setDate(1, sysUpdateDate );
             rs = stmt.executeQuery();
             return fetchAll(rs);
@@ -254,12 +249,12 @@ public class IcRateCodeBaseDAO extends SystemBaseDao{
         }
         return null;
     }
-    public List findByOperatorId( java.math.BigDecimal operatorId) throws SQLException {
+    public List findByOperatorId( java.math.BigDecimal operatorId, Connection conn) throws SQLException {
         PreparedStatement stmt = null;
         ResultSet rs = null;
-        String SQL_STATEMENT = "Select * from IC_RATE_CODE where OPERATOR_ID = ? order by OPERATOR_ID";
+        String SQL_STATEMENT = "Select * from [IC_RATE_CODE] where OPERATOR_ID = ? order by OPERATOR_ID";
         try {
-            stmt = getPrmConnection().prepareStatement(SQL_STATEMENT);
+            stmt = conn.prepareStatement(SQL_STATEMENT);
             stmt.setBigDecimal(1, operatorId );
             rs = stmt.executeQuery();
             return fetchAll(rs);
@@ -273,12 +268,12 @@ public class IcRateCodeBaseDAO extends SystemBaseDao{
         }
         return null;
     }
-    public List findByApplicationId( String applicationId) throws SQLException {
+    public List findByApplicationId( String applicationId, Connection conn) throws SQLException {
         PreparedStatement stmt = null;
         ResultSet rs = null;
-        String SQL_STATEMENT = "Select * from IC_RATE_CODE where APPLICATION_ID = ? order by APPLICATION_ID";
+        String SQL_STATEMENT = "Select * from [IC_RATE_CODE] where APPLICATION_ID = ? order by APPLICATION_ID";
         try {
-            stmt = getPrmConnection().prepareStatement(SQL_STATEMENT);
+            stmt = conn.prepareStatement(SQL_STATEMENT);
             stmt.setString(1, applicationId );
             rs = stmt.executeQuery();
             return fetchAll(rs);
@@ -292,12 +287,12 @@ public class IcRateCodeBaseDAO extends SystemBaseDao{
         }
         return null;
     }
-    public List findByDlServiceCode( String dlServiceCode) throws SQLException {
+    public List findByDlServiceCode( String dlServiceCode, Connection conn) throws SQLException {
         PreparedStatement stmt = null;
         ResultSet rs = null;
-        String SQL_STATEMENT = "Select * from IC_RATE_CODE where DL_SERVICE_CODE = ? order by DL_SERVICE_CODE";
+        String SQL_STATEMENT = "Select * from [IC_RATE_CODE] where DL_SERVICE_CODE = ? order by DL_SERVICE_CODE";
         try {
-            stmt = getPrmConnection().prepareStatement(SQL_STATEMENT);
+            stmt = conn.prepareStatement(SQL_STATEMENT);
             stmt.setString(1, dlServiceCode );
             rs = stmt.executeQuery();
             return fetchAll(rs);
@@ -311,12 +306,12 @@ public class IcRateCodeBaseDAO extends SystemBaseDao{
         }
         return null;
     }
-    public List findByDlUpdateStamp( java.math.BigDecimal dlUpdateStamp) throws SQLException {
+    public List findByDlUpdateStamp( java.math.BigDecimal dlUpdateStamp, Connection conn) throws SQLException {
         PreparedStatement stmt = null;
         ResultSet rs = null;
-        String SQL_STATEMENT = "Select * from IC_RATE_CODE where DL_UPDATE_STAMP = ? order by DL_UPDATE_STAMP";
+        String SQL_STATEMENT = "Select * from [IC_RATE_CODE] where DL_UPDATE_STAMP = ? order by DL_UPDATE_STAMP";
         try {
-            stmt = getPrmConnection().prepareStatement(SQL_STATEMENT);
+            stmt = conn.prepareStatement(SQL_STATEMENT);
             stmt.setBigDecimal(1, dlUpdateStamp );
             rs = stmt.executeQuery();
             return fetchAll(rs);
@@ -330,12 +325,12 @@ public class IcRateCodeBaseDAO extends SystemBaseDao{
         }
         return null;
     }
-    public List findByRateCd( String rateCd) throws SQLException {
+    public List findByRateCd( String rateCd, Connection conn) throws SQLException {
         PreparedStatement stmt = null;
         ResultSet rs = null;
-        String SQL_STATEMENT = "Select * from IC_RATE_CODE where RATE_CD = ? order by RATE_CD";
+        String SQL_STATEMENT = "Select * from [IC_RATE_CODE] where RATE_CD = ? order by RATE_CD";
         try {
-            stmt = getPrmConnection().prepareStatement(SQL_STATEMENT);
+            stmt = conn.prepareStatement(SQL_STATEMENT);
             stmt.setString(1, rateCd );
             rs = stmt.executeQuery();
             return fetchAll(rs);
@@ -349,12 +344,12 @@ public class IcRateCodeBaseDAO extends SystemBaseDao{
         }
         return null;
     }
-    public List findByDescriptionSeq( java.math.BigDecimal descriptionSeq) throws SQLException {
+    public List findByDescriptionSeq( java.math.BigDecimal descriptionSeq, Connection conn) throws SQLException {
         PreparedStatement stmt = null;
         ResultSet rs = null;
-        String SQL_STATEMENT = "Select * from IC_RATE_CODE where DESCRIPTION_SEQ = ? order by DESCRIPTION_SEQ";
+        String SQL_STATEMENT = "Select * from [IC_RATE_CODE] where DESCRIPTION_SEQ = ? order by DESCRIPTION_SEQ";
         try {
-            stmt = getPrmConnection().prepareStatement(SQL_STATEMENT);
+            stmt = conn.prepareStatement(SQL_STATEMENT);
             stmt.setBigDecimal(1, descriptionSeq );
             rs = stmt.executeQuery();
             return fetchAll(rs);
@@ -368,12 +363,12 @@ public class IcRateCodeBaseDAO extends SystemBaseDao{
         }
         return null;
     }
-    public List findByExpirationDate( java.sql.Date expirationDate) throws SQLException {
+    public List findByExpirationDate( java.sql.Date expirationDate, Connection conn) throws SQLException {
         PreparedStatement stmt = null;
         ResultSet rs = null;
-        String SQL_STATEMENT = "Select * from IC_RATE_CODE where EXPIRATION_DATE = ? order by EXPIRATION_DATE";
+        String SQL_STATEMENT = "Select * from [IC_RATE_CODE] where EXPIRATION_DATE = ? order by EXPIRATION_DATE";
         try {
-            stmt = getPrmConnection().prepareStatement(SQL_STATEMENT);
+            stmt = conn.prepareStatement(SQL_STATEMENT);
             stmt.setDate(1, expirationDate );
             rs = stmt.executeQuery();
             return fetchAll(rs);
@@ -390,7 +385,7 @@ public class IcRateCodeBaseDAO extends SystemBaseDao{
 
 /*    
 
-    public List findByCriteriaOR( IcRateCode criteria) throws SQLException {
+    public List findByCriteriaOR( IcRateCode criteria, Connection conn) throws SQLException {
         PreparedStatement stmt = null;
         ResultSet rs = null;
         String SQL_STATEMENT = "";
@@ -449,7 +444,7 @@ public class IcRateCodeBaseDAO extends SystemBaseDao{
             return new ArrayList();
 
         try {
-            stmt = getPrmConnection().prepareStatement(SQL_STATEMENT);
+            stmt = conn.prepareStatement(SQL_STATEMENT);
             int index = 1;
             if (criteria.getBigDecimal() != null) 
                 stmt.setString(index++, criteria.getBigDecimal() );
@@ -490,7 +485,7 @@ public class IcRateCodeBaseDAO extends SystemBaseDao{
 */
 
     public List fetchAll(ResultSet rs) throws SQLException{
-        List<IcRateCode> list = new ArrayList<IcRateCode>();
+        List list = new ArrayList();
         while (rs.next()){
             IcRateCode icRateCode = new IcRateCode();
             icRateCode.setRateCdSeq(rs.getBigDecimal("RATE_CD_SEQ"));
@@ -531,59 +526,15 @@ public class IcRateCodeBaseDAO extends SystemBaseDao{
 
 	
 
-    public void populateParent(IcRateCode icRateCode) throws SQLException {
+    public void populateParent(IcRateCode icRateCode, Connection conn) throws SQLException {
     }
 
-    public void populateChild(IcRateCode icRateCode) throws SQLException {
+    public void populateChild(IcRateCode icRateCode, Connection conn) throws SQLException {
     }
 
-    public void populateAll(IcRateCode icRateCode) throws SQLException {
-        populateParent(icRateCode);
-        populateChild(icRateCode);
-    }
-    
-    
-    public int getMaxRateCdSeq(  ) throws SQLException {
-        PreparedStatement stmt = null;
-        String SQL_STATEMENT ="select max(rate_cd_seq)as rate_cd_seq from ic_rate_code_rates";
-	
-        try {
-            stmt = getPrmConnection().prepareStatement(SQL_STATEMENT);
-            ResultSet   resultSet = stmt.executeQuery();
-            log.info("get getMaxRateCdSeq SUCCESS");
-            resultSet.next();
-            return resultSet.getInt("rate_cd_seq");
-        } catch (SQLException ex) {
-            ex.printStackTrace();
-            log.error(ex.toString());
-        } catch (Exception ex) {
-            ex.printStackTrace();
-            log.error(ex.toString());
-        } finally {
-            stmt.close();
-        }
-        return -1;
-    }
-    public int deleteAllBy(String serviceType,String prmCd) throws SQLException {
-        Statement stmt = null;
-        String SQL_STATEMENT ="delete ic_rate_code where substr(RATE_CD,1,3)= '"+serviceType+"' and substr(RATE_CD,4,2)='"+prmCd+"' ";
-        try {
-            stmt = getPrmConnection().createStatement();
-            int status = stmt.executeUpdate(SQL_STATEMENT);
-            log.info("DELETE IcRateCode SUCCESS");
-            return status;
-        } catch (SQLException ex) {
-            ex.printStackTrace();
-            log.error("DELETE IcRateCode FAIL:");
-            log.error(ex.toString());
-        } catch (Exception ex) {
-            ex.printStackTrace();
-            log.error("DELETE IcRateCode FAIL:");
-            log.error(ex.toString());
-        } finally {
-            stmt.close();
-        }
-        return -1;
+    public void populateAll(IcRateCode icRateCode, Connection conn) throws SQLException {
+        populateParent(icRateCode, conn);
+        populateChild(icRateCode, conn);
     }
 
 }
