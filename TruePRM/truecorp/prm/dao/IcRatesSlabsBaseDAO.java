@@ -2,13 +2,18 @@
 package truecorp.prm.dao;
 
 import java.sql.*;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 import org.apache.log4j.Logger;
+import truecorp.prm.core.dao.SystemBaseDao;
+import static truecorp.prm.core.dao.SystemBaseDao.getPrmConnection;
+import static truecorp.prm.process.ProcessPRMData.logWriter;
 import truecorp.prm.table.IcRatesSlabs;
 import truecorp.prm.table.IcRatesSlabsPK;
 
-public class IcRatesSlabsBaseDAO {
+public class IcRatesSlabsBaseDAO extends SystemBaseDao{
 
     private static Logger log = Logger.getLogger(IcRatesSlabsBaseDAO.class);
 
@@ -16,12 +21,12 @@ public class IcRatesSlabsBaseDAO {
     public IcRatesSlabsBaseDAO() {
     }
 
-    public int insert( IcRatesSlabs icRatesSlabs, Connection conn) throws SQLException {
+    public int insert( IcRatesSlabs icRatesSlabs) throws SQLException {
         PreparedStatement stmt = null;
-        String SQL_STATEMENT ="Insert into [IC_RATES_SLABS](RATE_PLAN_CD, DESTINATION_CD, CHRG_PARAM_ID, SLAB_NUM, EFFECTIVE_DATE, SYS_CREATION_DATE, SYS_UPDATE_DATE, OPERATOR_ID, APPLICATION_ID, DL_SERVICE_CODE, DL_UPDATE_STAMP, FROM_SLAB, TO_SLAB, EXPIRATION_DATE) ";
+        String SQL_STATEMENT ="Insert into IC_RATES_SLABS(RATE_PLAN_CD, DESTINATION_CD, CHRG_PARAM_ID, SLAB_NUM, EFFECTIVE_DATE, SYS_CREATION_DATE, SYS_UPDATE_DATE, OPERATOR_ID, APPLICATION_ID, DL_SERVICE_CODE, DL_UPDATE_STAMP, FROM_SLAB, TO_SLAB, EXPIRATION_DATE) ";
 	SQL_STATEMENT += "values ( ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
         try {
-            stmt = conn.prepareStatement(SQL_STATEMENT);
+            stmt = getPrmConnection().prepareStatement(SQL_STATEMENT);
             stmt.setString( 1, icRatesSlabs.getRatePlanCd());
             stmt.setString( 2, icRatesSlabs.getDestinationCd());
             stmt.setBigDecimal( 3, icRatesSlabs.getChrgParamId());
@@ -42,6 +47,8 @@ public class IcRatesSlabsBaseDAO {
         } catch (SQLException ex) {
             ex.printStackTrace();
             log.error("INSERT IcRatesSlabs FAIL:" + icRatesSlabs);
+              try{ logWriter.write("Insert IcRatesSlabs fail:"+icRatesSlabs.getDestinationCd()+"\t "+icRatesSlabs.getRatePlanCd()+"\r\n"); } catch(Exception ex2){}
+           
             log.error(ex.toString());
         } catch (Exception ex) {
             ex.printStackTrace();
@@ -52,12 +59,12 @@ public class IcRatesSlabsBaseDAO {
         }
         return -1;
     }
-    public int update( IcRatesSlabs icRatesSlabs, Connection conn) throws SQLException {
+    public int update( IcRatesSlabs icRatesSlabs) throws SQLException {
         PreparedStatement stmt = null;
-        String SQL_STATEMENT ="Update [IC_RATES_SLABS] set SYS_CREATION_DATE = ?  , SYS_UPDATE_DATE = ?  , OPERATOR_ID = ?  , APPLICATION_ID = ?  , DL_SERVICE_CODE = ?  , DL_UPDATE_STAMP = ?  , FROM_SLAB = ?  , TO_SLAB = ?  , EXPIRATION_DATE = ?  ";
+        String SQL_STATEMENT ="Update IC_RATES_SLABS set SYS_CREATION_DATE = ?  , SYS_UPDATE_DATE = ?  , OPERATOR_ID = ?  , APPLICATION_ID = ?  , DL_SERVICE_CODE = ?  , DL_UPDATE_STAMP = ?  , FROM_SLAB = ?  , TO_SLAB = ?  , EXPIRATION_DATE = ?  ";
 	    SQL_STATEMENT += "where RATE_PLAN_CD = ?  and DESTINATION_CD = ?  and CHRG_PARAM_ID = ?  and SLAB_NUM = ?  and EFFECTIVE_DATE = ? ";
         try {
-            stmt = conn.prepareStatement(SQL_STATEMENT);
+            stmt = getPrmConnection().prepareStatement(SQL_STATEMENT);
             stmt.setDate( 1, icRatesSlabs.getSysCreationDate());
             stmt.setDate( 2, icRatesSlabs.getSysUpdateDate());
             stmt.setBigDecimal( 3, icRatesSlabs.getOperatorId());
@@ -88,12 +95,34 @@ public class IcRatesSlabsBaseDAO {
         }
         return -1;
     }    
-    
-    public int delete( IcRatesSlabs icRatesSlabs, Connection conn) throws SQLException {
-        PreparedStatement stmt = null;
-        String SQL_STATEMENT ="Delete from [IC_RATES_SLABS] where RATE_PLAN_CD = ?  and DESTINATION_CD = ?  and CHRG_PARAM_ID = ?  and SLAB_NUM = ?  and EFFECTIVE_DATE = ? ";
+    public int expireDestinationCd(String destinationCd,java.util.Date expireDate) throws SQLException {
+        Statement stmt = null;
+        String SQL_STATEMENT ="update IC_RATES_SLABS set EXPIRATION_DATE = TO_DATE('"+new SimpleDateFormat("dd-MM-yyyy HH:mm:ss",Locale.US).format(expireDate)+"', 'dd-mm-yyyy HH24:MI:SS') "
+                            + " where DESTINATION_CD ='"+destinationCd+"'  ";
         try {
-            stmt = conn.prepareStatement(SQL_STATEMENT);
+                
+             stmt=  getPrmConnection().createStatement();
+             int status = stmt.executeUpdate(SQL_STATEMENT);
+            log.info("UPDATE expireDestinationCd SUCCESS:" + destinationCd);
+            return status;
+        } catch (SQLException ex) {
+            ex.printStackTrace();
+            log.error("UPDATE expireDestinationCd FAIL:" + destinationCd);
+            log.error(ex.toString());
+        } catch (Exception ex) {
+            ex.printStackTrace();
+            log.error("UPDATE expireDestinationCd FAIL:" + destinationCd);
+            log.error(ex.toString());
+        } finally {
+            stmt.close();
+        }
+        return -1;
+    }
+    public int delete( IcRatesSlabs icRatesSlabs) throws SQLException {
+        PreparedStatement stmt = null;
+        String SQL_STATEMENT ="Delete from IC_RATES_SLABS where RATE_PLAN_CD = ?  and DESTINATION_CD = ?  and CHRG_PARAM_ID = ?  and SLAB_NUM = ?  and EFFECTIVE_DATE = ? ";
+        try {
+            stmt = getPrmConnection().prepareStatement(SQL_STATEMENT);
             stmt.setString( 1, icRatesSlabs.getRatePlanCd());
             stmt.setString( 2, icRatesSlabs.getDestinationCd());
             stmt.setBigDecimal( 3, icRatesSlabs.getChrgParamId());
@@ -118,17 +147,17 @@ public class IcRatesSlabsBaseDAO {
 
 
 
-    public IcRatesSlabs findByPK( IcRatesSlabsPK icRatesSlabsPK, Connection conn) throws SQLException {
-        return findByPK( icRatesSlabsPK.getRatePlanCd(),icRatesSlabsPK.getDestinationCd(),icRatesSlabsPK.getChrgParamId(),icRatesSlabsPK.getSlabNum(),icRatesSlabsPK.getEffectiveDate(), conn);   
+    public IcRatesSlabs findByPK( IcRatesSlabsPK icRatesSlabsPK) throws SQLException {
+        return findByPK( icRatesSlabsPK.getRatePlanCd(),icRatesSlabsPK.getDestinationCd(),icRatesSlabsPK.getChrgParamId(),icRatesSlabsPK.getSlabNum(),icRatesSlabsPK.getEffectiveDate());   
     }
 
 
-    public IcRatesSlabs findByPK( String ratePlanCd,String destinationCd,java.math.BigDecimal chrgParamId,java.math.BigDecimal slabNum,java.sql.Date effectiveDate, Connection conn) throws SQLException {
+    public IcRatesSlabs findByPK( String ratePlanCd,String destinationCd,java.math.BigDecimal chrgParamId,java.math.BigDecimal slabNum,java.sql.Date effectiveDate) throws SQLException {
         PreparedStatement stmt = null;
         ResultSet rs = null;
-        String SQL_STATEMENT ="Select * from [IC_RATES_SLABS] where RATE_PLAN_CD = ?  and DESTINATION_CD = ?  and CHRG_PARAM_ID = ?  and SLAB_NUM = ?  and EFFECTIVE_DATE = ? ";
+        String SQL_STATEMENT ="Select * from IC_RATES_SLABS where RATE_PLAN_CD = ?  and DESTINATION_CD = ?  and CHRG_PARAM_ID = ?  and SLAB_NUM = ?  and EFFECTIVE_DATE = ? ";
         try {
-            stmt = conn.prepareStatement(SQL_STATEMENT);
+            stmt = getPrmConnection().prepareStatement(SQL_STATEMENT);
             stmt.setString(1, ratePlanCd );
             stmt.setString(2, destinationCd );
             stmt.setBigDecimal(3, chrgParamId );
@@ -147,12 +176,12 @@ public class IcRatesSlabsBaseDAO {
         return null;
     }
 
-    public List findAll(Connection conn) throws SQLException {
+    public List findAll() throws SQLException {
         PreparedStatement stmt = null;
         ResultSet rs = null;
-        String SQL_STATEMENT ="Select * from [IC_RATES_SLABS]";
+        String SQL_STATEMENT ="Select * from IC_RATES_SLABS";
         try {
-            stmt = conn.prepareStatement(SQL_STATEMENT);
+            stmt = getPrmConnection().prepareStatement(SQL_STATEMENT);
             rs = stmt.executeQuery();
             return fetchAll(rs);
         } catch (SQLException ex) {
@@ -166,12 +195,12 @@ public class IcRatesSlabsBaseDAO {
         return null;
     }
 
-    public List findByWhereCondisions(String whereConditions, Connection conn) throws SQLException {
+    public List findByWhereCondisions(String whereConditions) throws SQLException {
         PreparedStatement stmt = null;
         ResultSet rs = null;
-        String SQL_STATEMENT ="Select * from [IC_RATES_SLABS] where " + whereConditions;
+        String SQL_STATEMENT ="Select * from IC_RATES_SLABS where " + whereConditions;
         try {
-            stmt = conn.prepareStatement(SQL_STATEMENT);
+            stmt = getPrmConnection().prepareStatement(SQL_STATEMENT);
             rs = stmt.executeQuery();
             return fetchAll(rs);
         } catch (SQLException ex) {
@@ -185,12 +214,12 @@ public class IcRatesSlabsBaseDAO {
         return null;
     }
     
-    public List findByRatePlanCd( String ratePlanCd, Connection conn) throws SQLException {
+    public List findByRatePlanCd( String ratePlanCd) throws SQLException {
         PreparedStatement stmt = null;
         ResultSet rs = null;
-        String SQL_STATEMENT = "Select * from [IC_RATES_SLABS] where RATE_PLAN_CD = ? order by RATE_PLAN_CD";
+        String SQL_STATEMENT = "Select * from IC_RATES_SLABS where RATE_PLAN_CD = ? order by RATE_PLAN_CD";
         try {
-            stmt = conn.prepareStatement(SQL_STATEMENT);
+            stmt = getPrmConnection().prepareStatement(SQL_STATEMENT);
             stmt.setString(1, ratePlanCd );
             rs = stmt.executeQuery();
             return fetchAll(rs);
@@ -204,12 +233,12 @@ public class IcRatesSlabsBaseDAO {
         }
         return null;
     }
-    public List findByDestinationCd( String destinationCd, Connection conn) throws SQLException {
+    public List findByDestinationCd( String destinationCd) throws SQLException {
         PreparedStatement stmt = null;
         ResultSet rs = null;
-        String SQL_STATEMENT = "Select * from [IC_RATES_SLABS] where DESTINATION_CD = ? order by DESTINATION_CD";
+        String SQL_STATEMENT = "Select * from IC_RATES_SLABS where DESTINATION_CD = ? order by DESTINATION_CD";
         try {
-            stmt = conn.prepareStatement(SQL_STATEMENT);
+            stmt = getPrmConnection().prepareStatement(SQL_STATEMENT);
             stmt.setString(1, destinationCd );
             rs = stmt.executeQuery();
             return fetchAll(rs);
@@ -223,12 +252,12 @@ public class IcRatesSlabsBaseDAO {
         }
         return null;
     }
-    public List findByChrgParamId( java.math.BigDecimal chrgParamId, Connection conn) throws SQLException {
+    public List findByChrgParamId( java.math.BigDecimal chrgParamId) throws SQLException {
         PreparedStatement stmt = null;
         ResultSet rs = null;
-        String SQL_STATEMENT = "Select * from [IC_RATES_SLABS] where CHRG_PARAM_ID = ? order by CHRG_PARAM_ID";
+        String SQL_STATEMENT = "Select * from IC_RATES_SLABS where CHRG_PARAM_ID = ? order by CHRG_PARAM_ID";
         try {
-            stmt = conn.prepareStatement(SQL_STATEMENT);
+            stmt = getPrmConnection().prepareStatement(SQL_STATEMENT);
             stmt.setBigDecimal(1, chrgParamId );
             rs = stmt.executeQuery();
             return fetchAll(rs);
@@ -242,12 +271,12 @@ public class IcRatesSlabsBaseDAO {
         }
         return null;
     }
-    public List findBySlabNum( java.math.BigDecimal slabNum, Connection conn) throws SQLException {
+    public List findBySlabNum( java.math.BigDecimal slabNum) throws SQLException {
         PreparedStatement stmt = null;
         ResultSet rs = null;
-        String SQL_STATEMENT = "Select * from [IC_RATES_SLABS] where SLAB_NUM = ? order by SLAB_NUM";
+        String SQL_STATEMENT = "Select * from IC_RATES_SLABS where SLAB_NUM = ? order by SLAB_NUM";
         try {
-            stmt = conn.prepareStatement(SQL_STATEMENT);
+            stmt = getPrmConnection().prepareStatement(SQL_STATEMENT);
             stmt.setBigDecimal(1, slabNum );
             rs = stmt.executeQuery();
             return fetchAll(rs);
@@ -261,12 +290,12 @@ public class IcRatesSlabsBaseDAO {
         }
         return null;
     }
-    public List findByEffectiveDate( java.sql.Date effectiveDate, Connection conn) throws SQLException {
+    public List findByEffectiveDate( java.sql.Date effectiveDate) throws SQLException {
         PreparedStatement stmt = null;
         ResultSet rs = null;
-        String SQL_STATEMENT = "Select * from [IC_RATES_SLABS] where EFFECTIVE_DATE = ? order by EFFECTIVE_DATE";
+        String SQL_STATEMENT = "Select * from IC_RATES_SLABS where EFFECTIVE_DATE = ? order by EFFECTIVE_DATE";
         try {
-            stmt = conn.prepareStatement(SQL_STATEMENT);
+            stmt = getPrmConnection().prepareStatement(SQL_STATEMENT);
             stmt.setDate(1, effectiveDate );
             rs = stmt.executeQuery();
             return fetchAll(rs);
@@ -280,12 +309,12 @@ public class IcRatesSlabsBaseDAO {
         }
         return null;
     }
-    public List findBySysCreationDate( java.sql.Date sysCreationDate, Connection conn) throws SQLException {
+    public List findBySysCreationDate( java.sql.Date sysCreationDate) throws SQLException {
         PreparedStatement stmt = null;
         ResultSet rs = null;
-        String SQL_STATEMENT = "Select * from [IC_RATES_SLABS] where SYS_CREATION_DATE = ? order by SYS_CREATION_DATE";
+        String SQL_STATEMENT = "Select * from IC_RATES_SLABS where SYS_CREATION_DATE = ? order by SYS_CREATION_DATE";
         try {
-            stmt = conn.prepareStatement(SQL_STATEMENT);
+            stmt = getPrmConnection().prepareStatement(SQL_STATEMENT);
             stmt.setDate(1, sysCreationDate );
             rs = stmt.executeQuery();
             return fetchAll(rs);
@@ -299,12 +328,12 @@ public class IcRatesSlabsBaseDAO {
         }
         return null;
     }
-    public List findBySysUpdateDate( java.sql.Date sysUpdateDate, Connection conn) throws SQLException {
+    public List findBySysUpdateDate( java.sql.Date sysUpdateDate) throws SQLException {
         PreparedStatement stmt = null;
         ResultSet rs = null;
-        String SQL_STATEMENT = "Select * from [IC_RATES_SLABS] where SYS_UPDATE_DATE = ? order by SYS_UPDATE_DATE";
+        String SQL_STATEMENT = "Select * from IC_RATES_SLABS where SYS_UPDATE_DATE = ? order by SYS_UPDATE_DATE";
         try {
-            stmt = conn.prepareStatement(SQL_STATEMENT);
+            stmt = getPrmConnection().prepareStatement(SQL_STATEMENT);
             stmt.setDate(1, sysUpdateDate );
             rs = stmt.executeQuery();
             return fetchAll(rs);
@@ -318,12 +347,12 @@ public class IcRatesSlabsBaseDAO {
         }
         return null;
     }
-    public List findByOperatorId( java.math.BigDecimal operatorId, Connection conn) throws SQLException {
+    public List findByOperatorId( java.math.BigDecimal operatorId) throws SQLException {
         PreparedStatement stmt = null;
         ResultSet rs = null;
-        String SQL_STATEMENT = "Select * from [IC_RATES_SLABS] where OPERATOR_ID = ? order by OPERATOR_ID";
+        String SQL_STATEMENT = "Select * from IC_RATES_SLABS where OPERATOR_ID = ? order by OPERATOR_ID";
         try {
-            stmt = conn.prepareStatement(SQL_STATEMENT);
+            stmt = getPrmConnection().prepareStatement(SQL_STATEMENT);
             stmt.setBigDecimal(1, operatorId );
             rs = stmt.executeQuery();
             return fetchAll(rs);
@@ -337,12 +366,12 @@ public class IcRatesSlabsBaseDAO {
         }
         return null;
     }
-    public List findByApplicationId( String applicationId, Connection conn) throws SQLException {
+    public List findByApplicationId( String applicationId) throws SQLException {
         PreparedStatement stmt = null;
         ResultSet rs = null;
-        String SQL_STATEMENT = "Select * from [IC_RATES_SLABS] where APPLICATION_ID = ? order by APPLICATION_ID";
+        String SQL_STATEMENT = "Select * from IC_RATES_SLABS where APPLICATION_ID = ? order by APPLICATION_ID";
         try {
-            stmt = conn.prepareStatement(SQL_STATEMENT);
+            stmt = getPrmConnection().prepareStatement(SQL_STATEMENT);
             stmt.setString(1, applicationId );
             rs = stmt.executeQuery();
             return fetchAll(rs);
@@ -356,12 +385,12 @@ public class IcRatesSlabsBaseDAO {
         }
         return null;
     }
-    public List findByDlServiceCode( String dlServiceCode, Connection conn) throws SQLException {
+    public List findByDlServiceCode( String dlServiceCode) throws SQLException {
         PreparedStatement stmt = null;
         ResultSet rs = null;
-        String SQL_STATEMENT = "Select * from [IC_RATES_SLABS] where DL_SERVICE_CODE = ? order by DL_SERVICE_CODE";
+        String SQL_STATEMENT = "Select * from IC_RATES_SLABS where DL_SERVICE_CODE = ? order by DL_SERVICE_CODE";
         try {
-            stmt = conn.prepareStatement(SQL_STATEMENT);
+            stmt = getPrmConnection().prepareStatement(SQL_STATEMENT);
             stmt.setString(1, dlServiceCode );
             rs = stmt.executeQuery();
             return fetchAll(rs);
@@ -375,12 +404,12 @@ public class IcRatesSlabsBaseDAO {
         }
         return null;
     }
-    public List findByDlUpdateStamp( java.math.BigDecimal dlUpdateStamp, Connection conn) throws SQLException {
+    public List findByDlUpdateStamp( java.math.BigDecimal dlUpdateStamp) throws SQLException {
         PreparedStatement stmt = null;
         ResultSet rs = null;
-        String SQL_STATEMENT = "Select * from [IC_RATES_SLABS] where DL_UPDATE_STAMP = ? order by DL_UPDATE_STAMP";
+        String SQL_STATEMENT = "Select * from IC_RATES_SLABS where DL_UPDATE_STAMP = ? order by DL_UPDATE_STAMP";
         try {
-            stmt = conn.prepareStatement(SQL_STATEMENT);
+            stmt = getPrmConnection().prepareStatement(SQL_STATEMENT);
             stmt.setBigDecimal(1, dlUpdateStamp );
             rs = stmt.executeQuery();
             return fetchAll(rs);
@@ -394,12 +423,12 @@ public class IcRatesSlabsBaseDAO {
         }
         return null;
     }
-    public List findByFromSlab( java.math.BigDecimal fromSlab, Connection conn) throws SQLException {
+    public List findByFromSlab( java.math.BigDecimal fromSlab) throws SQLException {
         PreparedStatement stmt = null;
         ResultSet rs = null;
-        String SQL_STATEMENT = "Select * from [IC_RATES_SLABS] where FROM_SLAB = ? order by FROM_SLAB";
+        String SQL_STATEMENT = "Select * from IC_RATES_SLABS where FROM_SLAB = ? order by FROM_SLAB";
         try {
-            stmt = conn.prepareStatement(SQL_STATEMENT);
+            stmt = getPrmConnection().prepareStatement(SQL_STATEMENT);
             stmt.setBigDecimal(1, fromSlab );
             rs = stmt.executeQuery();
             return fetchAll(rs);
@@ -413,12 +442,12 @@ public class IcRatesSlabsBaseDAO {
         }
         return null;
     }
-    public List findByToSlab( java.math.BigDecimal toSlab, Connection conn) throws SQLException {
+    public List findByToSlab( java.math.BigDecimal toSlab) throws SQLException {
         PreparedStatement stmt = null;
         ResultSet rs = null;
-        String SQL_STATEMENT = "Select * from [IC_RATES_SLABS] where TO_SLAB = ? order by TO_SLAB";
+        String SQL_STATEMENT = "Select * from IC_RATES_SLABS where TO_SLAB = ? order by TO_SLAB";
         try {
-            stmt = conn.prepareStatement(SQL_STATEMENT);
+            stmt = getPrmConnection().prepareStatement(SQL_STATEMENT);
             stmt.setBigDecimal(1, toSlab );
             rs = stmt.executeQuery();
             return fetchAll(rs);
@@ -432,12 +461,12 @@ public class IcRatesSlabsBaseDAO {
         }
         return null;
     }
-    public List findByExpirationDate( java.sql.Date expirationDate, Connection conn) throws SQLException {
+    public List findByExpirationDate( java.sql.Date expirationDate) throws SQLException {
         PreparedStatement stmt = null;
         ResultSet rs = null;
-        String SQL_STATEMENT = "Select * from [IC_RATES_SLABS] where EXPIRATION_DATE = ? order by EXPIRATION_DATE";
+        String SQL_STATEMENT = "Select * from IC_RATES_SLABS where EXPIRATION_DATE = ? order by EXPIRATION_DATE";
         try {
-            stmt = conn.prepareStatement(SQL_STATEMENT);
+            stmt = getPrmConnection().prepareStatement(SQL_STATEMENT);
             stmt.setDate(1, expirationDate );
             rs = stmt.executeQuery();
             return fetchAll(rs);
@@ -454,7 +483,7 @@ public class IcRatesSlabsBaseDAO {
 
 /*    
 
-    public List findByCriteriaOR( IcRatesSlabs criteria, Connection conn) throws SQLException {
+    public List findByCriteriaOR( IcRatesSlabs criteria) throws SQLException {
         PreparedStatement stmt = null;
         ResultSet rs = null;
         String SQL_STATEMENT = "";
@@ -525,7 +554,7 @@ public class IcRatesSlabsBaseDAO {
             return new ArrayList();
 
         try {
-            stmt = conn.prepareStatement(SQL_STATEMENT);
+            stmt = getPrmConnection().prepareStatement(SQL_STATEMENT);
             int index = 1;
             if (criteria.getString() != null) 
                 stmt.setString(index++, criteria.getString() );
@@ -571,8 +600,8 @@ public class IcRatesSlabsBaseDAO {
 
 */
 
-    public List fetchAll(ResultSet rs) throws SQLException{
-        List list = new ArrayList();
+    public List<IcRatesSlabs> fetchAll(ResultSet rs) throws SQLException{
+        List<IcRatesSlabs> list = new ArrayList<IcRatesSlabs>();
         while (rs.next()){
             IcRatesSlabs icRatesSlabs = new IcRatesSlabs();
             icRatesSlabs.setRatePlanCd(rs.getString("RATE_PLAN_CD"));
@@ -616,15 +645,36 @@ public class IcRatesSlabsBaseDAO {
         return null;
     }
 
-    public void populateParent(IcRatesSlabs icRatesSlabs, Connection conn) throws SQLException {
+    public void populateParent(IcRatesSlabs icRatesSlabs) throws SQLException {
     }
 
-    public void populateChild(IcRatesSlabs icRatesSlabs, Connection conn) throws SQLException {
+    public void populateChild(IcRatesSlabs icRatesSlabs) throws SQLException {
     }
 
-    public void populateAll(IcRatesSlabs icRatesSlabs, Connection conn) throws SQLException {
-        populateParent(icRatesSlabs, conn);
-        populateChild(icRatesSlabs, conn);
+    public void populateAll(IcRatesSlabs icRatesSlabs) throws SQLException {
+        populateParent(icRatesSlabs);
+        populateChild(icRatesSlabs);
+    }
+    public int deleteAllBy(String prmCd ,String ratePlanCode) throws SQLException {
+        Statement stmt = null;
+        String SQL_STATEMENT ="delete ic_rates_slabs where substr(DESTINATION_CD,1,2)= '"+prmCd+"' and RATE_PLAN_CD= '"+ratePlanCode+"'  ";
+        try {
+            stmt = getPrmConnection().createStatement();
+            int status = stmt.executeUpdate(SQL_STATEMENT);
+            log.info("DELETE ic_rates_slabs SUCCESS");
+            return status;
+        } catch (SQLException ex) {
+            ex.printStackTrace();
+            log.error("DELETE ic_rates_slabs FAIL");
+            log.error(ex.toString());
+        } catch (Exception ex) {
+            ex.printStackTrace();
+            log.error("DELETE ic_rates_slabs FAIL");
+            log.error(ex.toString());
+        } finally {
+            stmt.close();
+        }
+        return -1;
     }
 
 }

@@ -5,10 +5,12 @@ import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 import org.apache.log4j.Logger;
+import truecorp.prm.core.dao.SystemBaseDao;
+import static truecorp.prm.core.dao.SystemBaseDao.getPrmConnection;
 import truecorp.prm.table.TiticPartnerRef;
 import truecorp.prm.table.TiticPartnerRefPK;
 
-public class TiticPartnerRefBaseDAO {
+public class TiticPartnerRefBaseDAO extends SystemBaseDao {
 
     private static Logger log = Logger.getLogger(TiticPartnerRefBaseDAO.class);
 
@@ -16,12 +18,12 @@ public class TiticPartnerRefBaseDAO {
     public TiticPartnerRefBaseDAO() {
     }
 
-    public int insert( TiticPartnerRef titicPartnerRef, Connection conn) throws SQLException {
+    public int insert( TiticPartnerRef titicPartnerRef) throws SQLException {
         PreparedStatement stmt = null;
-        String SQL_STATEMENT ="Insert into [TITIC_PARTNER_REF](PRODUCT_CD, PARTNER_CD, PRM_CD, PARTNER_NAME, SYS_CREATION_DATE, SYS_UPDATE_DATE) ";
+        String SQL_STATEMENT ="Insert into TITIC_PARTNER_REF(PRODUCT_CD, PARTNER_CD, PRM_CD, PARTNER_NAME, SYS_CREATION_DATE, SYS_UPDATE_DATE) ";
 	SQL_STATEMENT += "values ( ?, ?, ?, ?, ?, ?)";
         try {
-            stmt = conn.prepareStatement(SQL_STATEMENT);
+            stmt = getPrmConnection().prepareStatement(SQL_STATEMENT);
             stmt.setString( 1, titicPartnerRef.getProductCd());
             stmt.setString( 2, titicPartnerRef.getPartnerCd());
             stmt.setString( 3, titicPartnerRef.getPrmCd());
@@ -44,12 +46,12 @@ public class TiticPartnerRefBaseDAO {
         }
         return -1;
     }
-    public int update( TiticPartnerRef titicPartnerRef, Connection conn) throws SQLException {
+    public int update( TiticPartnerRef titicPartnerRef) throws SQLException {
         PreparedStatement stmt = null;
-        String SQL_STATEMENT ="Update [TITIC_PARTNER_REF] set PARTNER_NAME = ?  , SYS_CREATION_DATE = ?  , SYS_UPDATE_DATE = ?  ";
+        String SQL_STATEMENT ="Update TITIC_PARTNER_REF set PARTNER_NAME = ?  , SYS_CREATION_DATE = ?  , SYS_UPDATE_DATE = ?  ";
 	    SQL_STATEMENT += "where PRODUCT_CD = ?  and PARTNER_CD = ?  and PRM_CD = ? ";
         try {
-            stmt = conn.prepareStatement(SQL_STATEMENT);
+            stmt = getPrmConnection().prepareStatement(SQL_STATEMENT);
             stmt.setString( 1, titicPartnerRef.getPartnerName());
             stmt.setDate( 2, titicPartnerRef.getSysCreationDate());
             stmt.setDate( 3, titicPartnerRef.getSysUpdateDate());
@@ -73,11 +75,11 @@ public class TiticPartnerRefBaseDAO {
         return -1;
     }    
     
-    public int delete( TiticPartnerRef titicPartnerRef, Connection conn) throws SQLException {
+    public int delete( TiticPartnerRef titicPartnerRef) throws SQLException {
         PreparedStatement stmt = null;
-        String SQL_STATEMENT ="Delete from [TITIC_PARTNER_REF] where PRODUCT_CD = ?  and PARTNER_CD = ?  and PRM_CD = ? ";
+        String SQL_STATEMENT ="Delete from TITIC_PARTNER_REF where PRODUCT_CD = ?  and PARTNER_CD = ?  and PRM_CD = ? ";
         try {
-            stmt = conn.prepareStatement(SQL_STATEMENT);
+            stmt = getPrmConnection().prepareStatement(SQL_STATEMENT);
             stmt.setString( 1, titicPartnerRef.getProductCd());
             stmt.setString( 2, titicPartnerRef.getPartnerCd());
             stmt.setString( 3, titicPartnerRef.getPrmCd());
@@ -100,17 +102,17 @@ public class TiticPartnerRefBaseDAO {
 
 
 
-    public TiticPartnerRef findByPK( TiticPartnerRefPK titicPartnerRefPK, Connection conn) throws SQLException {
-        return findByPK( titicPartnerRefPK.getProductCd(),titicPartnerRefPK.getPartnerCd(),titicPartnerRefPK.getPrmCd(), conn);   
+    public TiticPartnerRef findByPK( TiticPartnerRefPK titicPartnerRefPK) throws SQLException {
+        return findByPK( titicPartnerRefPK.getProductCd(),titicPartnerRefPK.getPartnerCd(),titicPartnerRefPK.getPrmCd());   
     }
 
 
-    public TiticPartnerRef findByPK( String productCd,String partnerCd,String prmCd, Connection conn) throws SQLException {
+    public TiticPartnerRef findByPK( String productCd,String partnerCd,String prmCd) throws SQLException {
         PreparedStatement stmt = null;
         ResultSet rs = null;
-        String SQL_STATEMENT ="Select * from [TITIC_PARTNER_REF] where PRODUCT_CD = ?  and PARTNER_CD = ?  and PRM_CD = ? ";
+        String SQL_STATEMENT ="Select * from TITIC_PARTNER_REF where PRODUCT_CD = ?  and PARTNER_CD = ?  and PRM_CD = ? ";
         try {
-            stmt = conn.prepareStatement(SQL_STATEMENT);
+            stmt = getPrmConnection().prepareStatement(SQL_STATEMENT);
             stmt.setString(1, productCd );
             stmt.setString(2, partnerCd );
             stmt.setString(3, prmCd );
@@ -127,12 +129,12 @@ public class TiticPartnerRefBaseDAO {
         return null;
     }
 
-    public List findAll(Connection conn) throws SQLException {
+    public List findAll() throws SQLException {
         PreparedStatement stmt = null;
         ResultSet rs = null;
-        String SQL_STATEMENT ="Select * from [TITIC_PARTNER_REF]";
+        String SQL_STATEMENT ="Select * from TITIC_PARTNER_REF";
         try {
-            stmt = conn.prepareStatement(SQL_STATEMENT);
+            stmt = getPrmConnection().prepareStatement(SQL_STATEMENT);
             rs = stmt.executeQuery();
             return fetchAll(rs);
         } catch (SQLException ex) {
@@ -145,13 +147,12 @@ public class TiticPartnerRefBaseDAO {
         }
         return null;
     }
-
-    public List findByWhereCondisions(String whereConditions, Connection conn) throws SQLException {
+    public List findByWhereCondisions(String whereConditions) throws SQLException {
         PreparedStatement stmt = null;
         ResultSet rs = null;
-        String SQL_STATEMENT ="Select * from [TITIC_PARTNER_REF] where " + whereConditions;
+        String SQL_STATEMENT ="Select * from TITIC_PARTNER_REF where " + whereConditions;
         try {
-            stmt = conn.prepareStatement(SQL_STATEMENT);
+            stmt = getPrmConnection().prepareStatement(SQL_STATEMENT);
             rs = stmt.executeQuery();
             return fetchAll(rs);
         } catch (SQLException ex) {
@@ -165,12 +166,12 @@ public class TiticPartnerRefBaseDAO {
         return null;
     }
     
-    public List findByProductCd( String productCd, Connection conn) throws SQLException {
+    public List findByProductCd( String productCd) throws SQLException {
         PreparedStatement stmt = null;
         ResultSet rs = null;
-        String SQL_STATEMENT = "Select * from [TITIC_PARTNER_REF] where PRODUCT_CD = ? order by PRODUCT_CD";
+        String SQL_STATEMENT = "Select * from TITIC_PARTNER_REF where PRODUCT_CD = ? order by PRODUCT_CD";
         try {
-            stmt = conn.prepareStatement(SQL_STATEMENT);
+            stmt = getPrmConnection().prepareStatement(SQL_STATEMENT);
             stmt.setString(1, productCd );
             rs = stmt.executeQuery();
             return fetchAll(rs);
@@ -184,12 +185,12 @@ public class TiticPartnerRefBaseDAO {
         }
         return null;
     }
-    public List findByPartnerCd( String partnerCd, Connection conn) throws SQLException {
+    public List findByPartnerCd( String partnerCd) throws SQLException {
         PreparedStatement stmt = null;
         ResultSet rs = null;
-        String SQL_STATEMENT = "Select * from [TITIC_PARTNER_REF] where PARTNER_CD = ? order by PARTNER_CD";
+        String SQL_STATEMENT = "Select * from TITIC_PARTNER_REF where PARTNER_CD = ? order by PARTNER_CD";
         try {
-            stmt = conn.prepareStatement(SQL_STATEMENT);
+            stmt = getPrmConnection().prepareStatement(SQL_STATEMENT);
             stmt.setString(1, partnerCd );
             rs = stmt.executeQuery();
             return fetchAll(rs);
@@ -203,12 +204,12 @@ public class TiticPartnerRefBaseDAO {
         }
         return null;
     }
-    public List findByPrmCd( String prmCd, Connection conn) throws SQLException {
+    public List findByPrmCd( String prmCd) throws SQLException {
         PreparedStatement stmt = null;
         ResultSet rs = null;
-        String SQL_STATEMENT = "Select * from [TITIC_PARTNER_REF] where PRM_CD = ? order by PRM_CD";
+        String SQL_STATEMENT = "Select * from TITIC_PARTNER_REF where PRM_CD = ? order by PRM_CD";
         try {
-            stmt = conn.prepareStatement(SQL_STATEMENT);
+            stmt = getPrmConnection().prepareStatement(SQL_STATEMENT);
             stmt.setString(1, prmCd );
             rs = stmt.executeQuery();
             return fetchAll(rs);
@@ -222,12 +223,12 @@ public class TiticPartnerRefBaseDAO {
         }
         return null;
     }
-    public List findByPartnerName( String partnerName, Connection conn) throws SQLException {
+    public List findByPartnerName( String partnerName) throws SQLException {
         PreparedStatement stmt = null;
         ResultSet rs = null;
-        String SQL_STATEMENT = "Select * from [TITIC_PARTNER_REF] where PARTNER_NAME = ? order by PARTNER_NAME";
+        String SQL_STATEMENT = "Select * from TITIC_PARTNER_REF where PARTNER_NAME = ? order by PARTNER_NAME";
         try {
-            stmt = conn.prepareStatement(SQL_STATEMENT);
+            stmt = getPrmConnection().prepareStatement(SQL_STATEMENT);
             stmt.setString(1, partnerName );
             rs = stmt.executeQuery();
             return fetchAll(rs);
@@ -241,12 +242,12 @@ public class TiticPartnerRefBaseDAO {
         }
         return null;
     }
-    public List findBySysCreationDate( java.sql.Date sysCreationDate, Connection conn) throws SQLException {
+    public List findBySysCreationDate( java.sql.Date sysCreationDate) throws SQLException {
         PreparedStatement stmt = null;
         ResultSet rs = null;
-        String SQL_STATEMENT = "Select * from [TITIC_PARTNER_REF] where SYS_CREATION_DATE = ? order by SYS_CREATION_DATE";
+        String SQL_STATEMENT = "Select * from TITIC_PARTNER_REF where SYS_CREATION_DATE = ? order by SYS_CREATION_DATE";
         try {
-            stmt = conn.prepareStatement(SQL_STATEMENT);
+            stmt = getPrmConnection().prepareStatement(SQL_STATEMENT);
             stmt.setDate(1, sysCreationDate );
             rs = stmt.executeQuery();
             return fetchAll(rs);
@@ -260,12 +261,12 @@ public class TiticPartnerRefBaseDAO {
         }
         return null;
     }
-    public List findBySysUpdateDate( java.sql.Date sysUpdateDate, Connection conn) throws SQLException {
+    public List findBySysUpdateDate( java.sql.Date sysUpdateDate) throws SQLException {
         PreparedStatement stmt = null;
         ResultSet rs = null;
-        String SQL_STATEMENT = "Select * from [TITIC_PARTNER_REF] where SYS_UPDATE_DATE = ? order by SYS_UPDATE_DATE";
+        String SQL_STATEMENT = "Select * from TITIC_PARTNER_REF where SYS_UPDATE_DATE = ? order by SYS_UPDATE_DATE";
         try {
-            stmt = conn.prepareStatement(SQL_STATEMENT);
+            stmt = getPrmConnection().prepareStatement(SQL_STATEMENT);
             stmt.setDate(1, sysUpdateDate );
             rs = stmt.executeQuery();
             return fetchAll(rs);
@@ -282,7 +283,7 @@ public class TiticPartnerRefBaseDAO {
 
 /*    
 
-    public List findByCriteriaOR( TiticPartnerRef criteria, Connection conn) throws SQLException {
+    public List findByCriteriaOR( TiticPartnerRef criteria) throws SQLException {
         PreparedStatement stmt = null;
         ResultSet rs = null;
         String SQL_STATEMENT = "";
@@ -321,7 +322,7 @@ public class TiticPartnerRefBaseDAO {
             return new ArrayList();
 
         try {
-            stmt = conn.prepareStatement(SQL_STATEMENT);
+            stmt = getPrmConnection().prepareStatement(SQL_STATEMENT);
             int index = 1;
             if (criteria.getString() != null) 
                 stmt.setString(index++, criteria.getString() );
@@ -351,8 +352,8 @@ public class TiticPartnerRefBaseDAO {
 
 */
 
-    public List fetchAll(ResultSet rs) throws SQLException{
-        List list = new ArrayList();
+    public List<TiticPartnerRef> fetchAll(ResultSet rs) throws SQLException{
+        List<TiticPartnerRef> list = new ArrayList<TiticPartnerRef>();
         while (rs.next()){
             TiticPartnerRef titicPartnerRef = new TiticPartnerRef();
             titicPartnerRef.setProductCd(rs.getString("PRODUCT_CD"));
@@ -381,15 +382,15 @@ public class TiticPartnerRefBaseDAO {
     }
 
 
-    public void populateParent(TiticPartnerRef titicPartnerRef, Connection conn) throws SQLException {
+    public void populateParent(TiticPartnerRef titicPartnerRef) throws SQLException {
     }
 
-    public void populateChild(TiticPartnerRef titicPartnerRef, Connection conn) throws SQLException {
+    public void populateChild(TiticPartnerRef titicPartnerRef) throws SQLException {
     }
 
-    public void populateAll(TiticPartnerRef titicPartnerRef, Connection conn) throws SQLException {
-        populateParent(titicPartnerRef, conn);
-        populateChild(titicPartnerRef, conn);
+    public void populateAll(TiticPartnerRef titicPartnerRef) throws SQLException {
+        populateParent(titicPartnerRef);
+        populateChild(titicPartnerRef);
     }
 
 }

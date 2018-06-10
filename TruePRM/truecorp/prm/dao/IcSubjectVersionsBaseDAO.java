@@ -2,14 +2,19 @@
 package truecorp.prm.dao;
 
 import java.sql.*;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 import org.apache.log4j.Logger;
+import truecorp.prm.core.dao.SystemBaseDao;
+import static truecorp.prm.core.dao.SystemBaseDao.getPrmConnection;
+import static truecorp.prm.process.ProcessPRMData.logWriter;
 import truecorp.prm.table.IcSubjectVersions;
 import truecorp.prm.table.IcSubjectVersionsPK;
 
 
-public class IcSubjectVersionsBaseDAO {
+public class IcSubjectVersionsBaseDAO extends SystemBaseDao{
 
     private static Logger log = Logger.getLogger(IcSubjectVersionsBaseDAO.class);
 
@@ -17,12 +22,12 @@ public class IcSubjectVersionsBaseDAO {
     public IcSubjectVersionsBaseDAO() {
     }
 
-    public int insert( IcSubjectVersions icSubjectVersions, Connection conn) throws SQLException {
+    public int insert( IcSubjectVersions icSubjectVersions) throws SQLException {
         PreparedStatement stmt = null;
-        String SQL_STATEMENT ="Insert into [IC_SUBJECT_VERSIONS](SUBJECT, CODE, EFFECTIVE_DATE, SYS_CREATION_DATE, SYS_UPDATE_DATE, OPERATOR_ID, APPLICATION_ID, DL_SERVICE_CODE, DL_UPDATE_STAMP, REMARK_SEQ_NO, EXPIRATION_DATE) ";
+        String SQL_STATEMENT ="Insert into IC_SUBJECT_VERSIONS(SUBJECT, CODE, EFFECTIVE_DATE, SYS_CREATION_DATE, SYS_UPDATE_DATE, OPERATOR_ID, APPLICATION_ID, DL_SERVICE_CODE, DL_UPDATE_STAMP, REMARK_SEQ_NO, EXPIRATION_DATE) ";
 	SQL_STATEMENT += "values ( ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
         try {
-            stmt = conn.prepareStatement(SQL_STATEMENT);
+            stmt = getPrmConnection().prepareStatement(SQL_STATEMENT);
             stmt.setString( 1, icSubjectVersions.getSubject());
             stmt.setString( 2, icSubjectVersions.getCode());
             stmt.setDate( 3, icSubjectVersions.getEffectiveDate());
@@ -39,10 +44,13 @@ public class IcSubjectVersionsBaseDAO {
             return status;
         } catch (SQLException ex) {
             ex.printStackTrace();
+            System.out.println("CODE ="+icSubjectVersions.getCode()+" ,Subject ="+icSubjectVersions.getSubject());
+            try{ logWriter.write("Insert IcSubjectVersions fail:"+icSubjectVersions.getCode()+"\t "+icSubjectVersions.getSubject()+"\r\n"); } catch(Exception ex2){}
             log.error("INSERT IcSubjectVersions FAIL:" + icSubjectVersions);
             log.error(ex.toString());
         } catch (Exception ex) {
             ex.printStackTrace();
+            System.out.println("CODE ="+icSubjectVersions.getCode()+" ,Subject ="+icSubjectVersions.getSubject());
             log.error("INSERT IcSubjectVersions FAIL:" + icSubjectVersions);
             log.error(ex.toString());
         } finally {
@@ -50,12 +58,12 @@ public class IcSubjectVersionsBaseDAO {
         }
         return -1;
     }
-    public int update( IcSubjectVersions icSubjectVersions, Connection conn) throws SQLException {
+    public int update( IcSubjectVersions icSubjectVersions) throws SQLException {
         PreparedStatement stmt = null;
-        String SQL_STATEMENT ="Update [IC_SUBJECT_VERSIONS] set SYS_CREATION_DATE = ?  , SYS_UPDATE_DATE = ?  , OPERATOR_ID = ?  , APPLICATION_ID = ?  , DL_SERVICE_CODE = ?  , DL_UPDATE_STAMP = ?  , REMARK_SEQ_NO = ?  , EXPIRATION_DATE = ?  ";
+        String SQL_STATEMENT ="Update IC_SUBJECT_VERSIONS set SYS_CREATION_DATE = ?  , SYS_UPDATE_DATE = ?  , OPERATOR_ID = ?  , APPLICATION_ID = ?  , DL_SERVICE_CODE = ?  , DL_UPDATE_STAMP = ?  , REMARK_SEQ_NO = ?  , EXPIRATION_DATE = ?  ";
 	    SQL_STATEMENT += "where SUBJECT = ?  and CODE = ?  and EFFECTIVE_DATE = ? ";
         try {
-            stmt = conn.prepareStatement(SQL_STATEMENT);
+            stmt = getPrmConnection().prepareStatement(SQL_STATEMENT);
             stmt.setDate( 1, icSubjectVersions.getSysCreationDate());
             stmt.setDate( 2, icSubjectVersions.getSysUpdateDate());
             stmt.setBigDecimal( 3, icSubjectVersions.getOperatorId());
@@ -83,12 +91,34 @@ public class IcSubjectVersionsBaseDAO {
         }
         return -1;
     }    
-    
-    public int delete( IcSubjectVersions icSubjectVersions, Connection conn) throws SQLException {
-        PreparedStatement stmt = null;
-        String SQL_STATEMENT ="Delete from [IC_SUBJECT_VERSIONS] where SUBJECT = ?  and CODE = ?  and EFFECTIVE_DATE = ? ";
+           public int expireDestinationCd(String destinationCd,java.util.Date expireDate) throws SQLException {
+        Statement stmt = null;
+        String SQL_STATEMENT ="update IC_SUBJECT_VERSIONS set EXPIRATION_DATE = TO_DATE('"+new SimpleDateFormat("dd-MM-yyyy HH:mm:ss",Locale.US).format(expireDate)+"', 'dd-mm-yyyy HH24:MI:SS') "
+                            + " where CODE ='"+destinationCd+"' and  SUBJECT='destination' ";
         try {
-            stmt = conn.prepareStatement(SQL_STATEMENT);
+                
+             stmt=  getPrmConnection().createStatement();
+             int status = stmt.executeUpdate(SQL_STATEMENT);
+            log.info("UPDATE expireDestinationCd SUCCESS:" + destinationCd);
+            return status;
+        } catch (SQLException ex) {
+            ex.printStackTrace();
+            log.error("UPDATE expireDestinationCd FAIL:" + destinationCd);
+            log.error(ex.toString());
+        } catch (Exception ex) {
+            ex.printStackTrace();
+            log.error("UPDATE expireDestinationCd FAIL:" + destinationCd);
+            log.error(ex.toString());
+        } finally {
+            stmt.close();
+        }
+        return -1;
+    }
+    public int delete( IcSubjectVersions icSubjectVersions) throws SQLException {
+        PreparedStatement stmt = null;
+        String SQL_STATEMENT ="Delete from IC_SUBJECT_VERSIONS where SUBJECT = ?  and CODE = ?  and EFFECTIVE_DATE = ? ";
+        try {
+            stmt = getPrmConnection().prepareStatement(SQL_STATEMENT);
             stmt.setString( 1, icSubjectVersions.getSubject());
             stmt.setString( 2, icSubjectVersions.getCode());
             stmt.setDate( 3, icSubjectVersions.getEffectiveDate());
@@ -111,17 +141,17 @@ public class IcSubjectVersionsBaseDAO {
 
 
 
-    public IcSubjectVersions findByPK( IcSubjectVersionsPK icSubjectVersionsPK, Connection conn) throws SQLException {
-        return findByPK( icSubjectVersionsPK.getSubject(),icSubjectVersionsPK.getCode(),icSubjectVersionsPK.getEffectiveDate(), conn);   
+    public IcSubjectVersions findByPK( IcSubjectVersionsPK icSubjectVersionsPK) throws SQLException {
+        return findByPK( icSubjectVersionsPK.getSubject(),icSubjectVersionsPK.getCode(),icSubjectVersionsPK.getEffectiveDate());   
     }
 
 
-    public IcSubjectVersions findByPK( String subject,String code,java.sql.Date effectiveDate, Connection conn) throws SQLException {
+    public IcSubjectVersions findByPK( String subject,String code,java.sql.Date effectiveDate) throws SQLException {
         PreparedStatement stmt = null;
         ResultSet rs = null;
-        String SQL_STATEMENT ="Select * from [IC_SUBJECT_VERSIONS] where SUBJECT = ?  and CODE = ?  and EFFECTIVE_DATE = ? ";
+        String SQL_STATEMENT ="Select * from IC_SUBJECT_VERSIONS where SUBJECT = ?  and CODE = ?  and EFFECTIVE_DATE = ? ";
         try {
-            stmt = conn.prepareStatement(SQL_STATEMENT);
+            stmt = getPrmConnection().prepareStatement(SQL_STATEMENT);
             stmt.setString(1, subject );
             stmt.setString(2, code );
             stmt.setDate(3, effectiveDate );
@@ -138,12 +168,12 @@ public class IcSubjectVersionsBaseDAO {
         return null;
     }
 
-    public List findAll(Connection conn) throws SQLException {
+    public List findAll() throws SQLException {
         PreparedStatement stmt = null;
         ResultSet rs = null;
-        String SQL_STATEMENT ="Select * from [IC_SUBJECT_VERSIONS]";
+        String SQL_STATEMENT ="Select * from IC_SUBJECT_VERSIONS";
         try {
-            stmt = conn.prepareStatement(SQL_STATEMENT);
+            stmt = getPrmConnection().prepareStatement(SQL_STATEMENT);
             rs = stmt.executeQuery();
             return fetchAll(rs);
         } catch (SQLException ex) {
@@ -157,12 +187,12 @@ public class IcSubjectVersionsBaseDAO {
         return null;
     }
 
-    public List findByWhereCondisions(String whereConditions, Connection conn) throws SQLException {
+    public List findByWhereCondisions(String whereConditions) throws SQLException {
         PreparedStatement stmt = null;
         ResultSet rs = null;
-        String SQL_STATEMENT ="Select * from [IC_SUBJECT_VERSIONS] where " + whereConditions;
+        String SQL_STATEMENT ="Select * from IC_SUBJECT_VERSIONS where " + whereConditions;
         try {
-            stmt = conn.prepareStatement(SQL_STATEMENT);
+            stmt = getPrmConnection().prepareStatement(SQL_STATEMENT);
             rs = stmt.executeQuery();
             return fetchAll(rs);
         } catch (SQLException ex) {
@@ -176,12 +206,12 @@ public class IcSubjectVersionsBaseDAO {
         return null;
     }
     
-    public List findBySubject( String subject, Connection conn) throws SQLException {
+    public List findBySubject( String subject) throws SQLException {
         PreparedStatement stmt = null;
         ResultSet rs = null;
-        String SQL_STATEMENT = "Select * from [IC_SUBJECT_VERSIONS] where SUBJECT = ? order by SUBJECT";
+        String SQL_STATEMENT = "Select * from IC_SUBJECT_VERSIONS where SUBJECT = ? order by SUBJECT";
         try {
-            stmt = conn.prepareStatement(SQL_STATEMENT);
+            stmt = getPrmConnection().prepareStatement(SQL_STATEMENT);
             stmt.setString(1, subject );
             rs = stmt.executeQuery();
             return fetchAll(rs);
@@ -195,12 +225,12 @@ public class IcSubjectVersionsBaseDAO {
         }
         return null;
     }
-    public List findByCode( String code, Connection conn) throws SQLException {
+    public List findByCode( String code) throws SQLException {
         PreparedStatement stmt = null;
         ResultSet rs = null;
-        String SQL_STATEMENT = "Select * from [IC_SUBJECT_VERSIONS] where CODE = ? order by CODE";
+        String SQL_STATEMENT = "Select * from IC_SUBJECT_VERSIONS where CODE = ? order by CODE";
         try {
-            stmt = conn.prepareStatement(SQL_STATEMENT);
+            stmt = getPrmConnection().prepareStatement(SQL_STATEMENT);
             stmt.setString(1, code );
             rs = stmt.executeQuery();
             return fetchAll(rs);
@@ -214,12 +244,12 @@ public class IcSubjectVersionsBaseDAO {
         }
         return null;
     }
-    public List findByEffectiveDate( java.sql.Date effectiveDate, Connection conn) throws SQLException {
+    public List findByEffectiveDate( java.sql.Date effectiveDate) throws SQLException {
         PreparedStatement stmt = null;
         ResultSet rs = null;
-        String SQL_STATEMENT = "Select * from [IC_SUBJECT_VERSIONS] where EFFECTIVE_DATE = ? order by EFFECTIVE_DATE";
+        String SQL_STATEMENT = "Select * from IC_SUBJECT_VERSIONS where EFFECTIVE_DATE = ? order by EFFECTIVE_DATE";
         try {
-            stmt = conn.prepareStatement(SQL_STATEMENT);
+            stmt = getPrmConnection().prepareStatement(SQL_STATEMENT);
             stmt.setDate(1, effectiveDate );
             rs = stmt.executeQuery();
             return fetchAll(rs);
@@ -233,12 +263,12 @@ public class IcSubjectVersionsBaseDAO {
         }
         return null;
     }
-    public List findBySysCreationDate( java.sql.Date sysCreationDate, Connection conn) throws SQLException {
+    public List findBySysCreationDate( java.sql.Date sysCreationDate) throws SQLException {
         PreparedStatement stmt = null;
         ResultSet rs = null;
-        String SQL_STATEMENT = "Select * from [IC_SUBJECT_VERSIONS] where SYS_CREATION_DATE = ? order by SYS_CREATION_DATE";
+        String SQL_STATEMENT = "Select * from IC_SUBJECT_VERSIONS where SYS_CREATION_DATE = ? order by SYS_CREATION_DATE";
         try {
-            stmt = conn.prepareStatement(SQL_STATEMENT);
+            stmt = getPrmConnection().prepareStatement(SQL_STATEMENT);
             stmt.setDate(1, sysCreationDate );
             rs = stmt.executeQuery();
             return fetchAll(rs);
@@ -252,12 +282,12 @@ public class IcSubjectVersionsBaseDAO {
         }
         return null;
     }
-    public List findBySysUpdateDate( java.sql.Date sysUpdateDate, Connection conn) throws SQLException {
+    public List findBySysUpdateDate( java.sql.Date sysUpdateDate) throws SQLException {
         PreparedStatement stmt = null;
         ResultSet rs = null;
-        String SQL_STATEMENT = "Select * from [IC_SUBJECT_VERSIONS] where SYS_UPDATE_DATE = ? order by SYS_UPDATE_DATE";
+        String SQL_STATEMENT = "Select * from IC_SUBJECT_VERSIONS where SYS_UPDATE_DATE = ? order by SYS_UPDATE_DATE";
         try {
-            stmt = conn.prepareStatement(SQL_STATEMENT);
+            stmt = getPrmConnection().prepareStatement(SQL_STATEMENT);
             stmt.setDate(1, sysUpdateDate );
             rs = stmt.executeQuery();
             return fetchAll(rs);
@@ -271,12 +301,12 @@ public class IcSubjectVersionsBaseDAO {
         }
         return null;
     }
-    public List findByOperatorId( java.math.BigDecimal operatorId, Connection conn) throws SQLException {
+    public List findByOperatorId( java.math.BigDecimal operatorId) throws SQLException {
         PreparedStatement stmt = null;
         ResultSet rs = null;
-        String SQL_STATEMENT = "Select * from [IC_SUBJECT_VERSIONS] where OPERATOR_ID = ? order by OPERATOR_ID";
+        String SQL_STATEMENT = "Select * from IC_SUBJECT_VERSIONS where OPERATOR_ID = ? order by OPERATOR_ID";
         try {
-            stmt = conn.prepareStatement(SQL_STATEMENT);
+            stmt = getPrmConnection().prepareStatement(SQL_STATEMENT);
             stmt.setBigDecimal(1, operatorId );
             rs = stmt.executeQuery();
             return fetchAll(rs);
@@ -290,12 +320,12 @@ public class IcSubjectVersionsBaseDAO {
         }
         return null;
     }
-    public List findByApplicationId( String applicationId, Connection conn) throws SQLException {
+    public List findByApplicationId( String applicationId) throws SQLException {
         PreparedStatement stmt = null;
         ResultSet rs = null;
-        String SQL_STATEMENT = "Select * from [IC_SUBJECT_VERSIONS] where APPLICATION_ID = ? order by APPLICATION_ID";
+        String SQL_STATEMENT = "Select * from IC_SUBJECT_VERSIONS where APPLICATION_ID = ? order by APPLICATION_ID";
         try {
-            stmt = conn.prepareStatement(SQL_STATEMENT);
+            stmt = getPrmConnection().prepareStatement(SQL_STATEMENT);
             stmt.setString(1, applicationId );
             rs = stmt.executeQuery();
             return fetchAll(rs);
@@ -309,12 +339,12 @@ public class IcSubjectVersionsBaseDAO {
         }
         return null;
     }
-    public List findByDlServiceCode( String dlServiceCode, Connection conn) throws SQLException {
+    public List findByDlServiceCode( String dlServiceCode) throws SQLException {
         PreparedStatement stmt = null;
         ResultSet rs = null;
-        String SQL_STATEMENT = "Select * from [IC_SUBJECT_VERSIONS] where DL_SERVICE_CODE = ? order by DL_SERVICE_CODE";
+        String SQL_STATEMENT = "Select * from IC_SUBJECT_VERSIONS where DL_SERVICE_CODE = ? order by DL_SERVICE_CODE";
         try {
-            stmt = conn.prepareStatement(SQL_STATEMENT);
+            stmt = getPrmConnection().prepareStatement(SQL_STATEMENT);
             stmt.setString(1, dlServiceCode );
             rs = stmt.executeQuery();
             return fetchAll(rs);
@@ -328,12 +358,12 @@ public class IcSubjectVersionsBaseDAO {
         }
         return null;
     }
-    public List findByDlUpdateStamp( java.math.BigDecimal dlUpdateStamp, Connection conn) throws SQLException {
+    public List findByDlUpdateStamp( java.math.BigDecimal dlUpdateStamp) throws SQLException {
         PreparedStatement stmt = null;
         ResultSet rs = null;
-        String SQL_STATEMENT = "Select * from [IC_SUBJECT_VERSIONS] where DL_UPDATE_STAMP = ? order by DL_UPDATE_STAMP";
+        String SQL_STATEMENT = "Select * from IC_SUBJECT_VERSIONS where DL_UPDATE_STAMP = ? order by DL_UPDATE_STAMP";
         try {
-            stmt = conn.prepareStatement(SQL_STATEMENT);
+            stmt = getPrmConnection().prepareStatement(SQL_STATEMENT);
             stmt.setBigDecimal(1, dlUpdateStamp );
             rs = stmt.executeQuery();
             return fetchAll(rs);
@@ -347,12 +377,12 @@ public class IcSubjectVersionsBaseDAO {
         }
         return null;
     }
-    public List findByRemarkSeqNo( java.math.BigDecimal remarkSeqNo, Connection conn) throws SQLException {
+    public List findByRemarkSeqNo( java.math.BigDecimal remarkSeqNo) throws SQLException {
         PreparedStatement stmt = null;
         ResultSet rs = null;
-        String SQL_STATEMENT = "Select * from [IC_SUBJECT_VERSIONS] where REMARK_SEQ_NO = ? order by REMARK_SEQ_NO";
+        String SQL_STATEMENT = "Select * from IC_SUBJECT_VERSIONS where REMARK_SEQ_NO = ? order by REMARK_SEQ_NO";
         try {
-            stmt = conn.prepareStatement(SQL_STATEMENT);
+            stmt = getPrmConnection().prepareStatement(SQL_STATEMENT);
             stmt.setBigDecimal(1, remarkSeqNo );
             rs = stmt.executeQuery();
             return fetchAll(rs);
@@ -366,12 +396,12 @@ public class IcSubjectVersionsBaseDAO {
         }
         return null;
     }
-    public List findByExpirationDate( java.sql.Date expirationDate, Connection conn) throws SQLException {
+    public List findByExpirationDate( java.sql.Date expirationDate) throws SQLException {
         PreparedStatement stmt = null;
         ResultSet rs = null;
-        String SQL_STATEMENT = "Select * from [IC_SUBJECT_VERSIONS] where EXPIRATION_DATE = ? order by EXPIRATION_DATE";
+        String SQL_STATEMENT = "Select * from IC_SUBJECT_VERSIONS where EXPIRATION_DATE = ? order by EXPIRATION_DATE";
         try {
-            stmt = conn.prepareStatement(SQL_STATEMENT);
+            stmt = getPrmConnection().prepareStatement(SQL_STATEMENT);
             stmt.setDate(1, expirationDate );
             rs = stmt.executeQuery();
             return fetchAll(rs);
@@ -388,7 +418,7 @@ public class IcSubjectVersionsBaseDAO {
 
 /*    
 
-    public List findByCriteriaOR( IcSubjectVersions criteria, Connection conn) throws SQLException {
+    public List findByCriteriaOR( IcSubjectVersions criteria) throws SQLException {
         PreparedStatement stmt = null;
         ResultSet rs = null;
         String SQL_STATEMENT = "";
@@ -447,7 +477,7 @@ public class IcSubjectVersionsBaseDAO {
             return new ArrayList();
 
         try {
-            stmt = conn.prepareStatement(SQL_STATEMENT);
+            stmt = getPrmConnection().prepareStatement(SQL_STATEMENT);
             int index = 1;
             if (criteria.getString() != null) 
                 stmt.setString(index++, criteria.getString() );
@@ -487,8 +517,8 @@ public class IcSubjectVersionsBaseDAO {
 
 */
 
-    public List fetchAll(ResultSet rs) throws SQLException{
-        List list = new ArrayList();
+    public List<IcSubjectVersions> fetchAll(ResultSet rs) throws SQLException{
+        List<IcSubjectVersions> list = new ArrayList<IcSubjectVersions>();
         while (rs.next()){
             IcSubjectVersions icSubjectVersions = new IcSubjectVersions();
             icSubjectVersions.setSubject(rs.getString("SUBJECT"));
@@ -526,15 +556,57 @@ public class IcSubjectVersionsBaseDAO {
         return null;
     }
 	
-    public void populateParent(IcSubjectVersions icSubjectVersions, Connection conn) throws SQLException {
+    public void populateParent(IcSubjectVersions icSubjectVersions) throws SQLException {
     }
 
-    public void populateChild(IcSubjectVersions icSubjectVersions, Connection conn) throws SQLException {
+    public void populateChild(IcSubjectVersions icSubjectVersions) throws SQLException {
     }
 
-    public void populateAll(IcSubjectVersions icSubjectVersions, Connection conn) throws SQLException {
-        populateParent(icSubjectVersions, conn);
-        populateChild(icSubjectVersions, conn);
+    public void populateAll(IcSubjectVersions icSubjectVersions) throws SQLException {
+        populateParent(icSubjectVersions);
+        populateChild(icSubjectVersions);
+    }
+    public int deleteAllBy(String serviceType,String prmCd) throws SQLException {
+        Statement stmt = null;
+        String SQL_STATEMENT ="delete ic_subject_versions where SUBJECT = 'global rate' and (code like '"+serviceType+prmCd+"%' or code like '"+serviceType+prmCd+"%' ) ";
+        try {
+            stmt = getPrmConnection().createStatement();
+            int status = stmt.executeUpdate(SQL_STATEMENT);
+            log.info("DELETE IcSubjectVersions SUCCESS");
+            return status;
+        } catch (SQLException ex) {
+            ex.printStackTrace();
+            log.error("DELETE IcSubjectVersions FAIL");
+            log.error(ex.toString());
+        } catch (Exception ex) {
+            ex.printStackTrace();
+            log.error("DELETE IcSubjectVersions FAIL");
+            log.error(ex.toString());
+        } finally {
+            stmt.close();
+        }
+        return -1;
+    }
+    public int deleteAllDestinationBy(String prmCd) throws SQLException {
+        Statement stmt = null;
+        String SQL_STATEMENT ="delete ic_subject_versions where substr(CODE,1,2)= '"+prmCd+"' and SUBJECT = 'destination' ";
+        try {
+            stmt = getPrmConnection().createStatement();
+            int status = stmt.executeUpdate(SQL_STATEMENT);
+            log.info("DELETE IcSubjectVersions SUCCESS");
+            return status;
+        } catch (SQLException ex) {
+            ex.printStackTrace();
+            log.error("DELETE IcSubjectVersions FAIL");
+            log.error(ex.toString());
+        } catch (Exception ex) {
+            ex.printStackTrace();
+            log.error("DELETE IcSubjectVersions FAIL");
+            log.error(ex.toString());
+        } finally {
+            stmt.close();
+        }
+        return -1;
     }
 
 }
